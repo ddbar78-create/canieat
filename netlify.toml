@@ -1,0 +1,8 @@
+# Netlify publicerar mappen public/ som den är. Ingen byggprocess behövs än.
+[build]
+  publish = "public"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

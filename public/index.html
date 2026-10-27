@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3046A6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kan jag äta?">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>Kan jag äta det?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one narrow app column, segmented tabs on top, a traffic-light verdict card as the focal point */
+:root{
+  --bg:#F3F6F5; --surface:#FFFFFF; --ink:#16201C; --muted:#5A6A63; --line:#D9E2DE;
+  --accent:#3046A6; --accent-ink:#FFFFFF; --accent-soft:#E6EAFA;
+  --ok:#1D7745; --ok-soft:#E3F3E9; --warn:#9A5C00; --warn-soft:#FDF0D8; --bad:#BC2F26; --bad-soft:#FBE5E2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111614; --surface:#1A201D; --ink:#E5ECE8; --muted:#94A49D; --line:#2D3633;
+  --accent:#8B9BFF; --accent-ink:#0E1430; --accent-soft:#232A4A;
+  --ok:#5BD08F; --ok-soft:#173023; --warn:#F2B451; --warn-soft:#352812; --bad:#FF7B6E; --bad-soft:#3A1C19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111614; --surface:#1A201D; --ink:#E5ECE8; --muted:#94A49D; --line:#2D3633;
+  --accent:#8B9BFF; --accent-ink:#0E1430; --accent-soft:#232A4A;
+  --ok:#5BD08F; --ok-soft:#173023; --warn:#F2B451; --warn-soft:#352812; --bad:#FF7B6E; --bad-soft:#3A1C19; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:2rem;font-weight:800;line-height:1.1}
+h2{font-size:1.25rem;font-weight:600}
+h3{font-size:1rem;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.label{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted)}
+
+header{display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.8125rem;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.chip.allergi{border-color:var(--bad);color:var(--bad)}
+.chip.intolerans{border-color:var(--warn);color:var(--warn)}
+.chip.example{border-style:dashed;color:var(--muted)}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.tabs button{font:inherit;font-weight:700;font-size:.9375rem;border:0;background:transparent;color:var(--muted);padding:10px 4px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+
+section.view{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+label.field{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:.9375rem}
+input[type=text],textarea{font:inherit;font-weight:400;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+textarea{min-height:130px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,label.btn:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-weight:700;border-radius:10px;padding:11px 16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.grow{flex:1 1 auto;justify-content:center}
+.linkbtn{font:inherit;background:none;border:0;color:var(--accent);text-decoration:underline;cursor:pointer;padding:0}
+
+/* Verdict */
+.verdict{border-radius:14px;padding:18px;display:flex;gap:14px;align-items:flex-start;border:2px solid}
+.verdict .lamp{flex:0 0 auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.4rem}
+.verdict .txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.verdict h2{font-size:1.4rem}
+.v-red{background:var(--bad-soft);border-color:var(--bad)} .v-red .lamp{background:var(--bad);color:var(--surface)} .v-red h2{color:var(--bad)}
+.v-amber{background:var(--warn-soft);border-color:var(--warn)} .v-amber .lamp{background:var(--warn);color:var(--surface)} .v-amber h2{color:var(--warn)}
+.v-green{background:var(--ok-soft);border-color:var(--ok)} .v-green .lamp{background:var(--ok);color:var(--surface)} .v-green h2{color:var(--ok)}
+
+.hits{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.hits li{display:grid;grid-template-columns:10px 1fr;gap:10px;align-items:baseline}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;transform:translateY(1px)}
+.dot.red{background:var(--bad)} .dot.amber{background:var(--warn)} .dot.green{background:var(--ok)}
+.ingr{line-height:1.7;overflow-wrap:anywhere}
+mark{border-radius:4px;padding:0 3px;color:inherit;font-weight:700}
+mark.red{background:var(--bad-soft);box-shadow:inset 0 -2px 0 var(--bad)}
+mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
+
+.ai{border-left:3px solid var(--accent);padding-left:12px;display:flex;flex-direction:column;gap:10px}
+.ai ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.ai .alt{display:flex;flex-direction:column}
+.answer{white-space:pre-wrap}
+
+/* Profile */
+.alg{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding-block:10px;border-top:1px solid var(--line)}
+.alg:first-of-type{border-top:0}
+.alg .name{min-width:0}
+.alg .name small{display:block;color:var(--muted);font-size:.8125rem}
+.seg{display:inline-grid;grid-template-columns:repeat(3,auto);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;font-size:.8125rem;font-weight:700;border:0;background:var(--surface);color:var(--muted);padding:7px 9px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on[data-v="av"]{background:var(--bg);color:var(--ink)}
+.seg button.on[data-v="intolerans"]{background:var(--warn-soft);color:var(--warn)}
+.seg button.on[data-v="allergi"]{background:var(--bad-soft);color:var(--bad)}
+
+.custom{display:flex;flex-wrap:wrap;gap:6px}
+.custom .chip{display:inline-flex;gap:6px;align-items:center}
+.custom .chip button{font:inherit;border:0;background:none;color:var(--muted);cursor:pointer;padding:0 2px}
+
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.hist li button{font:inherit;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;color:var(--ink);cursor:pointer}
+.hist li:first-child button{border-top:0}
+.hist time{font-size:.8125rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.results{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.results li button{font:inherit;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;color:var(--ink);cursor:pointer}
+.results li:first-child button{border-top:0}
+.results img,.results .ph{width:44px;height:44px;object-fit:contain;border-radius:8px;background:var(--bg)}
+.results small{display:block;color:var(--muted)}
+.offbox{display:flex;flex-direction:column;gap:8px;background:var(--accent-soft);border-radius:10px;padding:12px}
+.offbox a.btn{text-decoration:none;align-self:flex-start}
+.offbox ol{margin:0;padding-left:20px;font-size:.875rem}
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:16px;border:1px solid var(--line)}
+.qrbox canvas{width:240px;max-width:100%;height:auto;image-rendering:pixelated}
+.qrbox p{color:#16201C;margin:0;text-align:center}
+.codebox{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.75rem;word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:96px;overflow:auto;width:100%}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:.9375rem}
+.check input{margin-top:4px}
+.scanner{position:fixed;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.scanner video{width:100%;max-width:520px;border-radius:12px}
+.scanner p{color:#fff;margin:0;text-align:center}
+.note{font-size:.8125rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.badge{font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spinner{animation:none}}
+@media (max-width:420px){.alg{grid-template-columns:1fr}.seg{justify-self:start}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Kan jag äta det?</h1>
+    <div class="chips" id="profileChips" aria-label="Din allergiprofil"></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-kolla" aria-selected="true" data-view="kolla">Kolla</button>
+    <button role="tab" id="tab-fraga" aria-selected="false" data-view="fraga">Fråga</button>
+    <button role="tab" id="tab-profil" aria-selected="false" data-view="profil">Min profil</button>
+  </nav>
+
+  <!-- KOLLA -->
+  <section class="view" id="view-kolla">
+    <div class="panel" id="searchPanel" hidden>
+      <h3>Sök produkt</h3>
+      <p class="small muted">Söker i Open Food Facts, en öppen databas där många svenska produkter finns. Du kan skriva namn eller streckkodens siffror.</p>
+      <div class="row">
+        <input type="text" id="searchInput" placeholder="t.ex. Marabou mjölkchoklad eller 7310511210504" style="flex:1 1 220px" inputmode="search">
+        <button class="btn primary" id="searchBtn">Sök</button>
+      </div>
+      <div class="row" id="scanRow">
+        <button class="btn grow" id="scanBtn" hidden>Skanna streckkod</button>
+        <label class="btn grow" id="barcodePhotoBtn" style="justify-content:center">
+          <span>Fota streckkoden</span>
+          <input type="file" id="barcodePhoto" accept="image/*" capture="environment" hidden>
+        </label>
+      </div>
+      <p class="small muted" id="searchStatus" hidden></p>
+      <div id="offAdd" class="offbox" hidden></div>
+      <ul class="results" id="searchResults"></ul>
+    </div>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3>Ingredienslista</h3>
+        <span class="badge" id="exampleBadge">Exempel</span>
+      </div>
+      <label class="field">Produkt (valfritt)
+        <input type="text" id="prodName" placeholder="t.ex. Chokladkakor 200 g">
+      </label>
+      <label class="field">Klistra in eller skriv av ingredienserna
+        <textarea id="ingredients" placeholder="Vetemjöl, socker, …"></textarea>
+      </label>
+      <div class="row">
+        <label class="btn" id="photoBtn">
+          <span>Fota listan</span>
+          <input type="file" class="photoIn" id="photo" accept="image/*" capture="environment" hidden>
+        </label>
+        <label class="btn" id="pickBtn">
+          <span>Välj bild</span>
+          <input type="file" class="photoIn" id="pick" accept="image/*" hidden>
+        </label>
+        <button class="btn primary grow" id="checkBtn">Kolla mot min profil</button>
+      </div>
+      <p class="small muted" id="photoStatus" hidden></p>
+    </div>
+
+    <div id="result" class="panel" hidden></div>
+
+    <div class="panel" id="histPanel" hidden>
+      <h3>Senast kollat</h3>
+      <ul class="hist" id="hist"></ul>
+    </div>
+  </section>
+
+  <!-- FRÅGA -->
+  <section class="view" id="view-fraga" hidden>
+    <div class="panel">
+      <h3>Fråga om en rätt eller situation</h3>
+      <p class="small muted">Till exempel restaurangbesök, recept eller vad man kan byta ut. Svaret utgår från din profil.</p>
+      <label class="field">Din fråga
+        <textarea id="question" style="min-height:90px">Jag ska äta på en thairestaurang ikväll. Vad bör jag undvika och vad kan jag fråga personalen?</textarea>
+      </label>
+      <button class="btn primary" id="askBtn">Fråga</button>
+      <div id="answerBox" class="ai" hidden><p class="answer" id="answer"></p></div>
+      <p class="small muted" id="askUnavailable" hidden>Frågor kräver att du öppnar sidan i Claude och tillåter att den använder Claude.</p>
+    </div>
+  </section>
+
+  <!-- PROFIL -->
+  <section class="view" id="view-profil" hidden>
+    <div class="panel">
+      <div>
+        <h3>EU:s 14 allergener</h3>
+        <p class="small muted">Enligt bilaga II i förordning (EU) nr 1169/2011. Välj <b>Allergi</b> om allt ska undvikas, eller <b>Intolerans</b> om små mängder brukar gå bra.</p>
+      </div>
+      <div id="algList"></div>
+    </div>
+    <div class="panel" id="movePanel" hidden>
+      <div>
+        <h3>Flytta till en annan enhet</h3>
+        <p class="small muted">Profil och nyckel sparas på varje enhet för sig. Visa en kod här och skanna den med den andra enheten, så följer allergier och nyckel med.</p>
+      </div>
+      <div class="row">
+        <button class="btn grow" id="moveShow">Visa kod för att skicka</button>
+        <button class="btn grow" id="moveScan">Skanna kod för att ta emot</button>
+      </div>
+      <div id="moveOut" hidden>
+        <label class="check"><input type="checkbox" id="moveIncludeKey" checked> <span>Ta med API-nyckeln. Visa bara koden för dina egna enheter.</span></label>
+        <div class="qrbox" id="moveQrBox">
+          <canvas id="moveQr" aria-label="QR-kod med din profil"></canvas>
+          <p class="small">Skanna med <b>Skanna kod för att ta emot</b> på den andra enheten.</p>
+        </div>
+        <p class="small muted">Eller kopiera koden och klistra in den på den andra enheten:</p>
+        <div class="codebox" id="moveCode"></div>
+        <div class="row"><button class="btn" id="moveCopy">Kopiera koden</button><button class="btn" id="moveHide">Dölj</button></div>
+      </div>
+      <div id="moveIn" hidden>
+        <div class="row">
+          <label class="btn grow" style="justify-content:center"><span>Fota koden</span><input type="file" id="moveQrPhoto" accept="image/*" capture="environment" hidden></label>
+        </div>
+        <label class="field">Eller klistra in koden
+          <textarea id="movePaste" style="min-height:70px" placeholder="KJAD1:…"></textarea>
+        </label>
+        <button class="btn" id="movePasteBtn">Läs in koden</button>
+      </div>
+      <p class="small" id="moveStatus" hidden></p>
+      <div id="moveConfirm" class="offbox" hidden></div>
+    </div>
+    <div class="panel" id="aiPanel" hidden>
+      <div>
+        <h3>AI-funktioner (valfritt)</h3>
+        <p class="small muted">Utanför Claude behöver fotoläsning av ingredienslistor, dubbelkoll och frågor en egen Claude API-nyckel. Skapa en på console.anthropic.com. Varje anrop kostar några ören på ditt konto. Nyckeln sparas bara i den här webbläsaren, så använd det här bara på din egen telefon.</p>
+      </div>
+      <p class="small" id="aiKeyState"></p>
+      <div class="row">
+        <input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off" style="flex:1 1 220px">
+        <button class="btn" id="aiKeySave">Spara</button>
+        <button class="btn" id="aiKeyRemove" hidden>Ta bort</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Egna ingredienser att undvika</h3>
+      <div class="custom" id="customList"></div>
+      <div class="row">
+        <input type="text" id="customInput" placeholder="t.ex. ärtprotein, kiwi" style="flex:1 1 200px">
+        <button class="btn" id="customAdd">Lägg till</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="scanner" id="scanner" hidden>
+    <video id="scanVideo" playsinline muted></video>
+    <p id="scanText">Rikta kameran mot streckkoden</p>
+    <button class="btn" id="scanClose">Avbryt</button>
+  </div>
+
+  <p class="note">Appen letar först efter allergener och deras synonymer i en ordlista, och sedan dubbelkollar Claude hela listan. Båda kan missa saker. Läs alltid förpackningen, och följ råd från läkare eller dietist vid svår allergi.</p>
+</div>
+
+<script>
+/* ---------- Data: allergener och synonymer ---------- */
+// mode "edge": ordet måste vara termen, börja med den eller sluta med den (för korta termer). Annars räcker att ordet innehåller termen.
+const ALLERGENS = [
+ {id:"gluten",name:"Gluten",sub:"vete, råg, korn, dinkel …",
+  terms:["vete","dinkel","spelt","kamut","emmer","enkorn","durum","semolina","bulgur","couscous","seitan","mannagryn","gluten","ströbröd","graham","panko","farina","matzo","frikeh","triticale","wheat","barley","rye","spelt","semolina","couscous",{t:"råg",edge:1},{t:"korn",edge:1},{t:"malt",edge:1}],
+  excl:["bovete","glutenfri","majskorn","pepparkorn","senapskorn","maltodextrin","maltitol","maltos","fänkål"],
+  maybe:[{t:"havre",why:"Havre kan vara förorenad med gluten om den inte är märkt glutenfri.",unless:/glutenfri\s+havre|havre\s*\(glutenfri/}]},
+ {id:"krafdjur",name:"Kräftdjur",sub:"räkor, krabba, hummer …",terms:["kräftdjur","hummer","krabb","kräft","langust","scampi","krill","shrimp","prawn","crab","lobster",{t:"räk",edge:1}],excl:["räkna"]},
+ {id:"agg",name:"Ägg",sub:"äggula, albumin, lysozym …",terms:["albumin","lysozym","ovomukoid","ovoglobulin","majonnäs","aioli","maräng","egg",{t:"ägg",edge:1}],excl:["pålägg","tillägg","laktalbumin","eggplant"]},
+ {id:"fisk",name:"Fisk",sub:"torsk, lax, ansjovis …",terms:["fisk","torsk","tonfisk","sill","strömming","makrill","ansjovis","sardin","kolja","rödspätta","gädda","abborre","surimi","worcestershire","röding","hälleflundra","fish","anchov","cod","salmon","tuna",{t:"lax",edge:1},{t:"sej",edge:1}],excl:["bläckfisk"]},
+ {id:"jordnot",name:"Jordnötter",sub:"jordnötsolja, arakid …",terms:["jordnöt","peanut","arakid"],excl:[]},
+ {id:"soja",name:"Soja",sub:"sojalecitin, tofu, miso …",terms:["soja","soy","tofu","edamame","tempeh","tamari","shoyu","yuba",{t:"miso",edge:1}],excl:[],
+  maybe:[{t:"lecitin",why:"Lecitin (E322) kommer ofta från soja om källan inte anges.",unless:/(solros|raps|ägg)lecitin|lecitin(er)?\s*\((solros|raps|ägg)/}]},
+ {id:"mjolk",name:"Mjölk",sub:"vassle, kasein, grädde, smör …",
+  terms:["mjölk","grädde","smör","vassle","kasein","laktos","laktalbumin","laktoglobulin","yoghurt","kvarg","kesella","mascarpone","ricotta","mozzarella","parmesan","cheddar","halloumi","gouda","brie","kefir","skyr","keso","ghee","mjölkprotein","whey","milk","butter","cream","cheese",{t:"ost",edge:1},{t:"crème",edge:1},{t:"creme",edge:1}],
+  excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","kakaosmör","jordnötssmör","sheasmör","mandelsmör","laktosfri","ostron","cocoa butter"]},
+ {id:"notter",name:"Nötter",sub:"mandel, hasselnöt, cashew …",terms:["mandel","hasselnöt","valnöt","cashew","pekan","paranöt","pistage","pistasch","macadamia","queenslandsnöt","marsipan","nougat","pralin","gianduja","frangipane","almond","hazelnut","walnut","cashew","pecan","pistachio",{t:"nöt",edge:1},{t:"nötter",edge:1}],excl:["jordnöt","muskotnöt","muskot","kokos"]},
+ {id:"selleri",name:"Selleri",sub:"rotselleri, sellerisalt …",terms:["selleri","celeriac","celery"],excl:[]},
+ {id:"senap",name:"Senap",sub:"senapsfrö, senapsmjöl …",terms:["senap","dijon","mustard"],excl:[]},
+ {id:"sesam",name:"Sesamfrön",sub:"sesamolja, tahini …",terms:["sesam","tahini","tahin","halva","gomasio","sesame"],excl:[]},
+ {id:"sulfit",name:"Svaveldioxid och sulfiter",sub:"E220–E228",terms:["svaveldioxid","sulfit","sulphit","e220","e221","e222","e223","e224","e225","e226","e227","e228"],excl:[]},
+ {id:"lupin",name:"Lupin",sub:"lupinmjöl …",terms:["lupin","lupine"],excl:[]},
+ {id:"blotdjur",name:"Blötdjur",sub:"musslor, bläckfisk, ostron …",terms:["blötdjur","mussl","ostron","bläckfisk","snäck","kalmar","snigl","escargot","calamar","oyster"],excl:[]},
+ {id:"laktos",name:"Laktos",sub:"intolerans mot mjölksocker",extra:1,
+  terms:["mjölk","grädde","vassle","laktos","yoghurt","kvarg","kesella","glass","whey","milk","cream"],
+  excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","laktosfri"],lactoseFree:1},
+];
+const TRACE_RE = /(kan innehålla|spår av|may contain|kan förekomma)/i;
+
+const EXAMPLE = {
+  name:"Chokladkakor (exempel)",
+  text:"Vetemjöl, socker, palmfett, mjölkchoklad 18 % (socker, kakaosmör, helmjölkspulver, kakaomassa, emulgeringsmedel (sojalecitin), vanillin), hasselnötter 6 %, glukossirap, ägg, vasslepulver, salt, bakpulver (natriumvätekarbonat). Kan innehålla spår av jordnötter och sesam."
+};
+const EXAMPLE_PROFILE = {levels:{mjolk:"allergi",notter:"allergi"},custom:[],example:true};
+
+/* ---------- Lagring (bara i den här webbläsaren) ---------- */
+const store = {
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+let profile = store.get("kjad.profile", null) || structuredClone(EXAMPLE_PROFILE);
+let history = store.get("kjad.history", []);
+function saveProfile(){profile.example=false;store.set("kjad.profile",profile);renderChips()}
+
+/* ---------- Matchning ---------- */
+function activeAllergens(){
+  const list = ALLERGENS.filter(a=>profile.levels[a.id]&&profile.levels[a.id]!=="av").map(a=>({...a,level:profile.levels[a.id]}));
+  for(const c of profile.custom) list.push({id:"c:"+c,name:c,terms:[c.toLowerCase()],excl:[],level:"allergi",custom:1});
+  return list;
+}
+function matchWord(w,a){
+  if(a.excl.some(e=>w.includes(e))) return null;
+  for(const term of a.terms){
+    const t = typeof term==="string"?term:term.t, edge = typeof term==="object"&&term.edge;
+    const hit = edge ? (w===t||w.startsWith(t)||w.endsWith(t)) : w.includes(t);
+    if(hit) return t;
+  }
+  return null;
+}
+function analyze(text){
+  // "E 220" och "E-220" räknas som e220 (samma längd, så positionerna stämmer)
+  const lower = text.toLowerCase().replace(/\be[\s-]+(\d{3})\b/g,m=>("e"+m.replace(/\D/g,"")).padEnd(m.length,"_"));
+  const tm = lower.search(TRACE_RE);
+  let traceStart=-1, traceEnd=-1;
+  if(tm>=0){traceStart=tm;const dot=lower.indexOf(".",tm);traceEnd=dot<0?lower.length:dot}
+  const words=[]; const re=/[a-z0-9åäöéèüæøç]+/gi; let m;
+  while((m=re.exec(lower))){let e=m.index+m[0].length;while(lower[e]==="_")e++;words.push({w:m[0],s:m.index,e});}
+  const findings=[]; const marks=[];
+  for(const a of activeAllergens()){
+    const lactoseFree = a.lactoseFree && /laktosfri/.test(lower);
+    let contains=[], traces=[];
+    for(const wd of words){
+      if(matchWord(wd.w,a)){
+        const inTrace = traceStart>=0 && wd.s>=traceStart && wd.s<traceEnd;
+        (inTrace?traces:contains).push(text.slice(wd.s,wd.e));
+        marks.push({s:wd.s,e:wd.e,a,inTrace});
+      }
+    }
+    // havre och liknande "kanske"
+    let maybe=[];
+    for(const mb of (a.maybe||[])){
+      if(lower.includes(mb.t) && !(mb.unless&&mb.unless.test(lower))){
+        maybe.push(mb);
+        for(const wd of words) if(wd.w.includes(mb.t)) marks.push({s:wd.s,e:wd.e,a,maybe:1});
+      }
+    }
+    if(lactoseFree && contains.length){findings.push({a,kind:"info",words:uniq(contains),msg:"Produkten är märkt laktosfri."});continue}
+    if(contains.length) findings.push({a,kind:a.level==="allergi"?"red":"amber",words:uniq(contains)});
+    if(traces.length) findings.push({a,kind:a.level==="allergi"?"amber":"info",words:uniq(traces),trace:1});
+    for(const mb of maybe) findings.push({a,kind:"amber",words:[mb.t],msg:mb.why});
+  }
+  const status = findings.some(f=>f.kind==="red")?"red":findings.some(f=>f.kind==="amber")?"amber":"green";
+  return {status,findings,marks};
+}
+const uniq = arr=>[...new Set(arr.map(x=>x.toLowerCase()))];
+
+/* ---------- Extra säkerhetskontroller ---------- */
+// 1) Produktnamnet: "Mellanmjölk" eller "Mjölkchoklad" ska ge utslag även om ingredienslistan är tom eller fel.
+// 2) Datakvalitet: ser listan ut som en näringsdeklaration eller är den väldigt kort blir beskedet aldrig grönt.
+function looksLikeBadIngredients(text){
+  const t=text.toLowerCase();
+  const nutrition=(t.match(/\b(kj|kcal|energi|näringsvärde|kolhydrater|varav|mättat fett|protein:|salt:)\b/g)||[]).length;
+  const core=t.replace(/(allergener enligt databasen|kan innehålla spår av)[^.]*\./g,"").trim();
+  return nutrition>=2 || core.length<12;
+}
+function addSafetyChecks(res,name,text){
+  if(name){
+    const byName=analyze(name);
+    for(const f of byName.findings){
+      if(f.kind==="info") continue;
+      if(res.findings.some(x=>x.a.id===f.a.id&&!x.trace&&x.kind!=="info")) continue;
+      res.findings.push({a:f.a,kind:f.kind,words:f.words,msg:"Produktnamnet ("+f.words.join(", ")+") tyder på att varan innehåller "+f.a.name.toLowerCase()+"."});
+    }
+  }
+  if(looksLikeBadIngredients(text)){
+    res.findings.push({a:{id:"_data",name:"Osäker ingredienslista",level:"allergi"},kind:"amber",words:[],msg:"Texten ser inte ut som en riktig ingredienslista. Läs förpackningen innan du äter."});
+  }
+  res.status=res.findings.some(f=>f.kind==="red")?"red":res.findings.some(f=>f.kind==="amber")?"amber":"green";
+}
+
+/* ---------- Rendering ---------- */
+const $ = id=>document.getElementById(id);
+const esc = s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function renderChips(){
+  const el=$("profileChips"); el.innerHTML="";
+  const act=activeAllergens();
+  if(!act.length){el.innerHTML='<span class="chip example">Ingen profil ännu. Gå till Min profil.</span>';return}
+  for(const a of act){
+    const c=document.createElement("span");
+    c.className="chip "+a.level+(profile.example?" example":"");
+    c.textContent=a.name+(a.level==="intolerans"?" (intolerans)":"");
+    el.append(c);
+  }
+  if(profile.example){const n=document.createElement("span");n.className="chip example";n.textContent="Exempelprofil";el.append(n)}
+}
+
+const VERDICT = {
+  red:{lamp:"✕",title:"Ät inte",lead:"Innehåller något från din profil."},
+  amber:{lamp:"!",title:"Var försiktig",lead:"Kan innehålla spår, eller något du bara tål i små mängder."},
+  green:{lamp:"✓",title:"Ser bra ut",lead:"Inga allergener från din profil hittades i texten."}
+};
+let lastCheck=null;
+
+function renderResult(name,text,res){
+  const v=VERDICT[res.status];
+  const el=$("result"); el.hidden=false;
+  // markera ord i texten
+  const marks=res.marks.sort((a,b)=>a.s-b.s); let html="",pos=0;
+  for(const mk of marks){ if(mk.s<pos) continue;
+    const cls = (!mk.inTrace && !mk.maybe && mk.a.level==="allergi")?"red":"amber";
+    html+=esc(text.slice(pos,mk.s))+'<mark class="'+cls+'" title="'+esc(mk.a.name)+'">'+esc(text.slice(mk.s,mk.e))+"</mark>"; pos=mk.e;}
+  html+=esc(text.slice(pos));
+  const items=res.findings.map(f=>{
+    const dot=f.kind==="red"?"red":f.kind==="amber"?"amber":"green";
+    let line="<b>"+esc(f.a.name)+"</b> ";
+    if(f.msg) line+="– "+esc(f.msg)+" ";
+    else if(f.trace) line+="– kan finnas spår ("+esc(f.words.join(", "))+")";
+    else line+="– finns i: "+esc(f.words.join(", "));
+    if(f.a.level==="intolerans" && f.kind!=="info" && !f.msg) line+=' <span class="muted small">(intolerans)</span>';
+    return '<li><span class="dot '+dot+'"></span><span>'+line+"</span></li>";
+  }).join("");
+  el.innerHTML=
+    '<div id="verdictBox"></div>'+
+    '<ul class="hits" id="hitList"'+(items?'':' hidden')+'>'+items+'</ul>'+
+    '<div id="aiCheck" class="ai" hidden></div>'+
+    '<div><p class="label">Ingredienser</p><p class="ingr">'+html+'</p></div>'+
+    '<div class="row" id="tipsRow"><button class="btn" id="tipsBtn">'+(res.status==="green"?"Tips för den här produkten":"Föreslå alternativ och tips")+'</button></div>'+
+    '<div id="tipsBox" class="ai" hidden></div>';
+  renderVerdict();
+  wireTips();
+}
+
+function renderVerdict(){
+  const c=lastCheck; const v=VERDICT[c.res.status];
+  const lead = c.res.aiRaised ? "Claude hittade något som ordlistan missade." : v.lead;
+  $("verdictBox").innerHTML='<div class="verdict v-'+c.res.status+'" role="status"><div class="lamp" aria-hidden="true">'+v.lamp+'</div><div class="txt"><h2>'+v.title+'</h2><p>'+lead+'</p>'+(c.name?'<p class="small muted">'+esc(c.name)+'</p>':'')+'</div></div>';
+}
+
+/* ---------- Claude dubbelkollar ingredienslistan ---------- */
+let aiSeq=0;
+function showAiCheckButton(){
+  const box=$("aiCheck"); if(!box||!sample) return;
+  box.hidden=false;
+  box.innerHTML='<div class="row" style="align-items:center;justify-content:space-between"><p class="small muted" style="flex:1 1 220px">Ordlistan kan missa ovanliga namn. Låt Claude läsa hela listan.</p><button class="btn" id="aiBtn">Dubbelkolla med Claude</button></div>';
+  $("aiBtn").onclick=()=>aiCheck();
+}
+async function aiCheck(){
+  const box=$("aiCheck"); if(!box||!sample) return;
+  const my=++aiSeq; const c=lastCheck;
+  const act=activeAllergens(); if(!act.length){box.hidden=true;return}
+  box.hidden=false;
+  box.innerHTML='<p class="muted small"><span class="spinner"></span> Claude dubbelkollar ingredienslistan…</p>';
+  const local=c.res.findings.map(f=>f.a.name+": "+f.words.join(", ")).join("; ")||"inga";
+  const prompt=`Du är expert på livsmedelsallergener och svensk/EU-märkning. Granska ingredienslistan nedan mot personens profil och hitta allergener som den automatiska ordlistan MISSADE. Tänk på dolda källor och ovanliga namn: E-nummer (t.ex. E322 lecitin, E1105 lysozym från ägg, E270/E325-E327 kan vara mjölkbaserade i vissa fall, E220–E228 sulfiter), "naturlig arom", kryddblandningar (kan innehålla selleri/senap), buljong, maltodextrin, stärkelser, engelska och andra språks namn, och sammansatta ingredienser.
+Profil (allergen och nivå): ${act.map(a=>a.name+" ("+a.level+")").join(", ")}.
+Ingredienser: ${c.text}
+Redan hittat av ordlistan: ${local}.
+Ta bara med allergener som finns i profilen och som INTE redan är hittade på samma ingrediens. Hitta inte på. "säker" = ingrediensen innehåller tydligt allergenen; "trolig" = brukar innehålla den; "möjlig" = kan innehålla den beroende på källa.
+Svara med ENDAST JSON: {"extra":[{"allergen":"namn exakt som i profilen","ingrediens":"ordet i listan","sakerhet":"säker|trolig|möjlig","forklaring":"en kort mening"}],"kommentar":"en kort mening, t.ex. om något i listan är oklart, annars tom sträng"}`;
+  try{
+    const d=await sample.json(prompt,{modelTier:"default"});
+    if(my!==aiSeq||c!==lastCheck) return;
+    const extra=(Array.isArray(d.extra)?d.extra:[]).map(x=>{
+      const a=act.find(a=>a.name.toLowerCase()===String(x.allergen||"").toLowerCase());
+      if(!a) return null;
+      const sure=String(x.sakerhet||"").toLowerCase();
+      const kind=(a.level==="allergi"&&(sure==="säker"||sure==="trolig"))?"red":"amber";
+      return {a,kind,ing:String(x.ingrediens||""),sure,why:String(x.forklaring||"")};
+    }).filter(Boolean);
+    let h='<p class="label">Claude dubbelkollade</p>';
+    if(extra.length){
+      const order={green:0,amber:1,red:2};
+      let st=c.res.status;
+      for(const x of extra) if(order[x.kind]>order[st]) st=x.kind;
+      if(st!==c.res.status){c.res.status=st;c.res.aiRaised=true;renderVerdict();updateHistoryStatus(c)}
+      const list=$("hitList"); list.hidden=false;
+      list.insertAdjacentHTML("beforeend",extra.map(x=>'<li><span class="dot '+x.kind+'"></span><span><b>'+esc(x.a.name)+'</b> – '+esc(x.ing)+' <span class="small muted">('+esc(x.sure)+', enligt Claude)</span><br><span class="small muted">'+esc(x.why)+'</span></span></li>').join(""));
+      h+='<p>Hittade '+extra.length+' sak'+(extra.length>1?'er':'')+' till som ordlistan missade. De står i listan ovan.</p>';
+    } else h+='<p>Hittade inget mer än ordlistan.</p>';
+    if(d.kommentar) h+='<p class="small muted">'+esc(String(d.kommentar))+'</p>';
+    box.innerHTML=h;
+  }catch(e){
+    if(my!==aiSeq) return;
+    if(["not_granted","sampling_disabled","capability_disabled","not_declared"].includes(e.code)){box.hidden=true;return}
+    box.innerHTML='<p class="small">'+esc(errCopy(e.code,e))+'</p><button class="btn" id="aiBtn">Försök igen</button>';
+    $("aiBtn").onclick=()=>aiCheck();
+  }
+}
+function updateHistoryStatus(c){
+  const h=history.find(h=>h.text===c.text); if(!h) return;
+  h.status=c.res.status; store.set("kjad.history",history); renderHistory();
+}
+
+function renderHistory(){
+  $("histPanel").hidden=!history.length; const ul=$("hist"); ul.innerHTML="";
+  history.forEach((h,i)=>{
+    const li=document.createElement("li"); const b=document.createElement("button");
+    b.innerHTML='<span class="dot '+h.status+'"></span><span>'+esc(h.name||h.text.slice(0,40)+"…")+'</span><time>'+new Date(h.at).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})+'</time>';
+    b.onclick=()=>{$("prodName").value=h.name||"";$("ingredients").value=h.text;$("exampleBadge").hidden=true;runCheck(false,true)};
+    li.append(b); ul.append(li);
+  });
+}
+
+function runCheck(save=true,auto=false){
+  const text=$("ingredients").value.trim(); const name=$("prodName").value.trim();
+  if(!text){$("result").hidden=false;$("result").innerHTML='<p>Skriv eller klistra in en ingredienslista först.</p>';return}
+  const res=analyze(text);
+  addSafetyChecks(res,name,text);
+  lastCheck={name,text,res};
+  renderResult(name,text,res);
+  aiSeq++;
+  if(auto && sample) aiCheck(); else showAiCheckButton();
+  if(save && $("exampleBadge").hidden){
+    history=[{name,text,status:res.status,at:Date.now()},...history.filter(h=>h.text!==text)].slice(0,12);
+    store.set("kjad.history",history); renderHistory();
+  }
+}
+
+/* ---------- Profil-vy ---------- */
+function renderProfile(){
+  const list=$("algList"); list.innerHTML="";
+  for(const a of ALLERGENS){
+    const row=document.createElement("div"); row.className="alg";
+    const cur=profile.levels[a.id]||"av";
+    row.innerHTML='<div class="name"><b>'+esc(a.name)+'</b><small>'+esc(a.sub)+'</small></div>';
+    const seg=document.createElement("div"); seg.className="seg"; seg.setAttribute("role","group"); seg.setAttribute("aria-label",a.name);
+    for(const [v,lbl] of [["av","Av"],["intolerans","Intolerans"],["allergi","Allergi"]]){
+      const b=document.createElement("button"); b.dataset.v=v; b.textContent=lbl; b.setAttribute("aria-pressed",cur===v);
+      if(cur===v) b.classList.add("on");
+      b.onclick=()=>{if(profile.example){profile.levels={};}profile.levels[a.id]=v;saveProfile();renderProfile();if(lastCheck) runCheck(false)};
+      seg.append(b);
+    }
+    row.append(seg); list.append(row);
+  }
+  const cl=$("customList"); cl.innerHTML="";
+  if(!profile.custom.length) cl.innerHTML='<span class="small muted">Inga egna ännu.</span>';
+  profile.custom.forEach((c,i)=>{const s=document.createElement("span");s.className="chip allergi";s.textContent=c;
+    const x=document.createElement("button");x.textContent="×";x.setAttribute("aria-label","Ta bort "+c);
+    x.onclick=()=>{profile.custom.splice(i,1);saveProfile();renderProfile()}; s.append(x); cl.append(s)});
+}
+$("customAdd").onclick=()=>{
+  const v=$("customInput").value.trim(); if(!v) return;
+  if(profile.example){profile.levels={};}
+  for(const p of v.split(",").map(s=>s.trim()).filter(Boolean)) if(!profile.custom.includes(p)) profile.custom.push(p);
+  $("customInput").value=""; saveProfile(); renderProfile();
+};
+$("customInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("customAdd").click()}});
+
+/* ---------- Flikar ---------- */
+const VIEWS=["kolla","fraga","profil"];
+function show(v){
+  for(const x of VIEWS){$("view-"+x).hidden=x!==v;$("tab-"+x).setAttribute("aria-selected",x===v)}
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>show(b.dataset.view));
+const startHash=(location.hash||"").slice(1); if(VIEWS.includes(startHash)) show(startHash);
+
+/* ---------- Claude: foto, tips, frågor ---------- */
+let sample=null;
+const profileText=()=>{const a=activeAllergens();return a.length?a.map(x=>x.name+" ("+x.level+")").join(", "):"ingen angiven"};
+const errCopy=(code,e)=>((e&&e.status&&e.message)?errCopyBase(code)+" (Anthropic: "+e.message+")":errCopyBase(code));
+const errCopyBase=code=>({not_granted:"Du har inte tillåtit sidan att använda Claude.",rate_limited:"För många frågor just nu. Vänta en stund och försök igen.",session_expired:"Logga in i Claude igen.",image_rejected:"Bilden gick inte att läsa. Prova en skarpare bild.",refused:"Claude kunde inte svara på det här.",invalid_json:"Svaret blev konstigt. Försök igen.",bad_key:"API-nyckeln fungerar inte. Kontrollera den under Min profil.",no_credit:"Ditt Claude API-konto saknar krediter. Fyll på på console.anthropic.com."}[code]||"Något gick fel. Försök igen.");
+
+function wireTips(){
+  const btn=$("tipsBtn"); if(!btn) return;
+  if(!sample){$("tipsRow").hidden=true;return}
+  btn.onclick=async()=>{
+    const box=$("tipsBox"); box.hidden=false; btn.disabled=true;
+    box.innerHTML='<p class="muted"><span class="spinner"></span> Tänker…</p>';
+    const c=lastCheck;
+    const found=c.res.findings.map(f=>f.a.name+": "+(f.msg||f.words.join(", "))+(f.trace?" (spår)":"")).join("; ")||"inga träffar";
+    const prompt=`Du hjälper en person i Sverige med matallergier. Profil: ${profileText()}.
+Produkt: ${c.name||"okänd"}. Ingredienser: ${c.text}
+Automatisk analys: ${found}. Bedömning: ${VERDICT[c.res.status].title}.
+Svara på svenska med ENDAST JSON i formen {"kort":"1-2 meningar om vad som är problemet eller att det verkar ok","alternativ":[{"namn":"typ av produkt eller ingrediens","varfor":"kort motivering"}],"tips":["kort praktiskt tips"]}. Ge 2-4 alternativ (produkttyper som går att hitta i svenska butiker, inga påhittade produktnamn) och 2-3 tips (t.ex. ersättning vid bakning, vad man ska läsa på förpackningen). Påminn inte om att läsa förpackningen, det gör appen redan.`;
+    try{
+      const d=await sample.json(prompt,{modelTier:"quick"});
+      let h="";
+      if(d.kort) h+="<p>"+esc(String(d.kort))+"</p>";
+      if(Array.isArray(d.alternativ)&&d.alternativ.length) h+='<div><p class="label">Alternativ</p><ul>'+d.alternativ.map(a=>'<li class="alt"><b>'+esc(String(a.namn||""))+'</b><span class="small muted">'+esc(String(a.varfor||""))+'</span></li>').join("")+"</ul></div>";
+      if(Array.isArray(d.tips)&&d.tips.length) h+='<div><p class="label">Tips</p><ul>'+d.tips.map(t=>"<li>"+esc(String(t))+"</li>").join("")+"</ul></div>";
+      box.innerHTML=h||"<p>Inga tips den här gången.</p>";
+    }catch(e){
+      if(e.code==="cancelled"){box.hidden=true}
+      else box.innerHTML='<p class="small">'+esc(errCopy(e.code,e))+'</p>';
+      if(["not_granted","sampling_disabled","capability_disabled","not_declared"].includes(e.code)) $("tipsRow").hidden=true;
+    }finally{btn.disabled=false}
+  };
+}
+
+// Gör om bilden till en lagom stor JPEG (fixar t.ex. iPhones HEIC-bilder och jättestora foton)
+async function toJpeg(file){
+  try{
+    const url=URL.createObjectURL(file);
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const max=1800, sc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    const c=document.createElement("canvas"); c.width=Math.round(img.naturalWidth*sc); c.height=Math.round(img.naturalHeight*sc);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+    const b=await new Promise(r=>c.toBlob(r,"image/jpeg",0.88));
+    return b||file;
+  }catch(e){return file}
+}
+const PHOTO_ERR={
+  not_granted:"Du behöver tillåta att sidan använder Claude för att läsa bilder. Ladda om sidan och välj Tillåt.",
+  images_unavailable:"Bildläsning fungerar inte i den här vyn. Öppna sidan i Claude-appen eller på claude.ai, eller skriv av listan.",
+  sampling_disabled:"Claude är inte tillgängligt för ditt konto just nu. Skriv av listan i rutan i stället.",
+  image_rejected:"Bilden gick inte att läsa. Ta en ny bild, eller skärmdumpa bilden och välj skärmdumpen."
+};
+document.querySelectorAll(".photoIn").forEach(inp=>inp.addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const st=$("photoStatus"); st.hidden=false;
+  if(!sample){st.textContent="Bildläsning kräver att sidan är öppen i Claude (appen eller claude.ai). Skriv av listan i rutan så länge.";e.target.value="";return}
+  st.innerHTML='<span class="spinner"></span> Läser av bilden… (kan ta upp till en halv minut)';
+  try{
+    const img=await toJpeg(f);
+    const d=await sample.json(`Bilden visar en livsmedelsförpackning. Läs av ingredienslistan ordagrant (behåll procentsatser och parenteser) och eventuell text om "kan innehålla spår av". Svara med ENDAST JSON: {"produkt":"produktnamn om det syns, annars null","ingredienser":"hela ingredienslistan","kanInnehalla":"text om spår, annars null","lasbar":true/false}`,{images:img,modelTier:"default"});
+    if(d.lasbar===false||!d.ingredienser){st.textContent="Jag kunde inte läsa ingredienslistan. Ta en närbild i bra ljus.";return}
+    let t=String(d.ingredienser).trim();
+    if(d.kanInnehalla) t+=(/[.]$/.test(t)?" ":". ")+String(d.kanInnehalla).trim();
+    $("ingredients").value=t; if(d.produkt) $("prodName").value=String(d.produkt);
+    $("exampleBadge").hidden=true;
+    st.textContent="Klart. Kontrollera att texten stämmer med förpackningen.";
+    runCheck(true,true);
+  }catch(err){st.textContent=PHOTO_ERR[err.code]||errCopy(err.code,err)}
+  finally{e.target.value=""}
+}));
+
+$("askBtn").onclick=async()=>{
+  if(!sample){$("askUnavailable").hidden=false;return}
+  const q=$("question").value.trim(); if(!q) return;
+  const box=$("answerBox"),out=$("answer"),btn=$("askBtn");
+  box.hidden=false; btn.disabled=true; out.innerHTML='<span class="muted"><span class="spinner"></span> Tänker…</span>';
+  try{
+    await sample(`Du hjälper en person i Sverige med matallergier och intoleranser. Profil: ${profileText()}. Svara på svenska, konkret och kort (max ca 150 ord), utan rubriker och utan markdown-formatering. Använd korta rader med bindestreck för listor. Ge praktiska råd, nämn dolda källor till allergenerna där det är relevant och vad man kan fråga personal om. Vid risk för allvarlig reaktion: påminn om att alltid ha sin adrenalinpenna/medicin med sig, men bara om det är relevant.\n\nFråga: ${q}`,
+      {onText:({text})=>{out.textContent=text}});
+  }catch(e){ if(e.code!=="cancelled") out.textContent=(e.text?e.text+"\n\n":"")+errCopy(e.code,e) }
+  finally{btn.disabled=false}
+};
+
+/* ---------- Sök i Open Food Facts (fungerar när filen öppnas direkt i webbläsaren) ---------- */
+const OFF_FIELDS="code,product_name,product_name_sv,brands,ingredients_text_sv,ingredients_text,allergens_tags,traces_tags,image_front_small_url";
+const TAG_SV={"en:gluten":"gluten","en:milk":"mjölk","en:eggs":"ägg","en:nuts":"nötter","en:peanuts":"jordnötter","en:soybeans":"soja","en:fish":"fisk","en:crustaceans":"kräftdjur","en:molluscs":"blötdjur","en:celery":"selleri","en:mustard":"senap","en:sesame-seeds":"sesam","en:sulphur-dioxide-and-sulphites":"sulfiter","en:lupin":"lupin"};
+const tagsSv=tags=>(tags||[]).map(t=>TAG_SV[t]||t.replace(/^[a-z]{2}:/,"").replace(/-/g," ")).filter(Boolean);
+// Länkar till Open Food Facts för att lägga till eller komplettera en vara
+const OFF_SV="https://world-sv.openfoodfacts.org";
+function showOffAdd(kind,code,name){
+  const box=$("offAdd"); box.hidden=false;
+  const c=code?encodeURIComponent(code):"";
+  let h="";
+  if(kind==="missing"){
+    h='<b>Varan finns inte i databasen än</b>'+
+      '<p class="small">Lägg till den så hittar appen den nästa gång, för dig och alla andra. Det tar ett par minuter.</p>'+
+      '<ol><li>Logga in eller skapa ett gratis konto hos Open Food Facts.</li><li>Fota framsidan och ingredienslistan.</li><li>Skriv av ingredienserna och bocka i allergener.</li></ol>'+
+      '<a class="btn primary" target="_blank" rel="noopener" href="'+OFF_SV+'/cgi/product.pl?type=search_or_add&action=process&code='+c+'">Lägg till '+esc(code)+' i Open Food Facts</a>'+
+      '<p class="small muted">Snabbast är deras gratisapp: skanna streckkoden och fota, så läser den av texten åt dig.</p>';
+  }else if(kind==="noingredients"){
+    h='<b>Ingredienserna saknas för '+esc(name||"varan")+'</b>'+
+      '<p class="small">Fyll i dem i Open Food Facts så fungerar kontrollen nästa gång. Skriv av listan i rutan nedan så länge.</p>'+
+      '<a class="btn primary" target="_blank" rel="noopener" href="'+OFF_SV+'/cgi/product.pl?type=edit&code='+c+'">Komplettera i Open Food Facts</a>';
+  }else if(kind==="nohits"){
+    h='<b>Hittade ingen vara med det namnet</b>'+
+      '<p class="small">Sök hellre på streckkodens siffror. Finns den inte då kan du lägga till den härifrån.</p>'+
+      '<a class="btn" target="_blank" rel="noopener" href="'+OFF_SV+'/contribute">Så bidrar du till Open Food Facts</a>';
+  }else if(kind==="found"){
+    h='<p class="small">Fel eller saknas något? <a target="_blank" rel="noopener" href="'+OFF_SV+'/cgi/product.pl?type=edit&code='+c+'">Rätta varan i Open Food Facts</a>.</p>';
+  }
+  box.innerHTML=h;
+  box.style.background = kind==="found" ? "transparent" : "";
+  box.style.padding = kind==="found" ? "0" : "";
+}
+// Prova flera adresser: den svenska först. Open Food Facts begränsar antalet sökningar per minut,
+// och ett blockerat svar syns i webbläsaren bara som "Failed to fetch".
+const OFF_HOSTS=["https://se.openfoodfacts.org","https://world.openfoodfacts.org"];
+const offCache=new Map();
+async function offGetAny(path){
+  if(offCache.has(path)) return offCache.get(path);
+  let last;
+  for(const h of OFF_HOSTS){
+    try{const d=await offGet(h+path); offCache.set(path,d); return d}catch(e){last=e}
+  }
+  throw last;
+}
+async function offGet(url){
+  const r=await fetch(url,{headers:{"Accept":"application/json"}});
+  if(!r.ok) throw new Error("http "+r.status);
+  return r.json();
+}
+function useProduct(p){
+  let t=(p.ingredients_text_sv||p.ingredients_text||"").trim();
+  const al=tagsSv(p.allergens_tags), tr=tagsSv(p.traces_tags);
+  if(al.length) t+=(t?(/[.]$/.test(t)?" ":". "):"")+"Allergener enligt databasen: "+al.join(", ")+".";
+  if(tr.length) t+=(t?" ":"")+"Kan innehålla spår av: "+tr.join(", ")+".";
+  const name=[p.product_name_sv||p.product_name,p.brands].filter(Boolean).join(" – ");
+  $("prodName").value=name; $("exampleBadge").hidden=true;
+  const st=$("searchStatus");
+  if(!t){$("ingredients").value="";st.hidden=true;$("result").hidden=true;showOffAdd("noingredients",p.code,name);return}
+  if(p.code) showOffAdd("found",p.code,name);
+  $("ingredients").value=t;
+  st.hidden=false; st.textContent="Hämtat från Open Food Facts. Datan läggs in av användare, så jämför med förpackningen.";
+  runCheck(true,true);
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+let searchBusy=false;
+async function searchProducts(q){
+  if(searchBusy||!String(q||"").trim()) return;
+  searchBusy=true; $("searchBtn").disabled=true;
+  try{ await searchInner(q) } finally { searchBusy=false; $("searchBtn").disabled=false }
+}
+async function searchInner(q){
+  const st=$("searchStatus"), ul=$("searchResults");
+  q=q.trim();
+  st.hidden=false; st.innerHTML='<span class="spinner"></span> Söker…'; ul.innerHTML=""; $("offAdd").hidden=true;
+  try{
+    if(/^\d{8,14}$/.test(q)){
+      const d=await offGetAny("/api/v2/product/"+q+".json?fields="+OFF_FIELDS);
+      if(d.status!==1||!d.product){st.hidden=true;showOffAdd("missing",q);return}
+      st.hidden=true; useProduct(d.product); return;
+    }
+    const d=await offGetAny("/cgi/search.pl?search_simple=1&action=process&json=1&page_size=12&lc=sv&cc=se&search_terms="+encodeURIComponent(q)+"&fields="+OFF_FIELDS);
+    const list=(d.products||[]).filter(p=>p.product_name||p.product_name_sv);
+    if(!list.length){st.hidden=true;showOffAdd("nohits");return}
+    st.textContent=list.length+" träffar. Välj produkten:";
+    for(const p of list){
+      const li=document.createElement("li"), b=document.createElement("button");
+      const img=p.image_front_small_url?'<img src="'+esc(p.image_front_small_url)+'" alt="" loading="lazy">':'<span class="ph"></span>';
+      b.innerHTML=img+'<span><b>'+esc(p.product_name_sv||p.product_name)+'</b><small>'+esc(p.brands||"")+(p.code?" · "+esc(p.code):"")+'</small></span>';
+      b.onclick=()=>{ul.innerHTML="";useProduct(p)};
+      li.append(b); ul.append(li);
+    }
+  }catch(e){
+    st.textContent=/^\d{8,14}$/.test(q)
+      ? "Databasen svarar inte just nu. Kontrollera att du är uppkopplad och försök igen om en stund."
+      : "Databasen tar inte emot fler namnsökningar just nu. Vänta en minut och försök igen. Streckkod fungerar under tiden: skanna eller skriv siffrorna.";
+  }
+}
+$("searchBtn").onclick=()=>searchProducts($("searchInput").value);
+$("searchInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchProducts($("searchInput").value)}});
+
+// Streckkodsläsning med ZXing (laddas först när den behövs; fungerar i Safari på iPhone)
+let zxPromise=null;
+function loadZXing(){
+  if(window.ZXing) return Promise.resolve(window.ZXing);
+  if(!zxPromise) zxPromise=new Promise((res,rej)=>{
+    const sc=document.createElement("script");
+    sc.src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js";
+    sc.onload=()=>window.ZXing?res(window.ZXing):rej(new Error("zxing"));
+    sc.onerror=()=>{zxPromise=null;rej(new Error("zxing"))};
+    document.head.append(sc);
+  });
+  return zxPromise;
+}
+function zxReader(Z,qr){
+  const hints=new Map();
+  hints.set(Z.DecodeHintType.POSSIBLE_FORMATS,qr?[Z.BarcodeFormat.QR_CODE]:[Z.BarcodeFormat.EAN_13,Z.BarcodeFormat.EAN_8,Z.BarcodeFormat.UPC_A,Z.BarcodeFormat.UPC_E]);
+  hints.set(Z.DecodeHintType.TRY_HARDER,true);
+  return new Z.BrowserMultiFormatReader(hints);
+}
+function gotBarcode(code){
+  stopScan(); $("searchInput").value=code; searchProducts(code);
+}
+// Bild på streckkoden -> siffror
+async function canvasFrom(file,maxSide,rotate){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const sc=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+    const w=Math.round(img.naturalWidth*sc), h=Math.round(img.naturalHeight*sc);
+    const c=document.createElement("canvas"); c.width=rotate?h:w; c.height=rotate?w:h;
+    const g=c.getContext("2d");
+    if(rotate){g.translate(h,0);g.rotate(Math.PI/2)}
+    g.drawImage(img,0,0,w,h);
+    return c.toDataURL("image/jpeg",0.92);
+  }finally{URL.revokeObjectURL(url)}
+}
+$("barcodePhoto").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const st=$("searchStatus"); st.hidden=false; st.innerHTML='<span class="spinner"></span> Läser streckkoden…';
+  try{
+    const Z=await loadZXing(); const reader=zxReader(Z);
+    let code=null;
+    for(const [side,rot] of [[1600,false],[1000,false],[1600,true],[2400,false]]){
+      try{const r=await reader.decodeFromImageUrl(await canvasFrom(f,side,rot)); code=r.getText(); break}catch(err){}
+    }
+    reader.reset&&reader.reset();
+    if(code) gotBarcode(code);
+    else st.textContent="Hittade ingen streckkod i bilden. Ta bilden rakt framifrån, nära och i bra ljus, eller skriv siffrorna.";
+  }catch(err){
+    st.textContent="Streckkodsläsaren gick inte att ladda. Kontrollera att du är uppkopplad, eller skriv siffrorna.";
+  }finally{e.target.value=""}
+});
+
+// Levande skanning: BarcodeDetector (Chrome/Android) eller ZXing (Safari/iPhone)
+let scanStream=null, scanLoop=0, zxLive=null;
+async function startScan(opt){
+  opt=opt&&opt.onCode?opt:{qr:false,onCode:gotBarcode,statusEl:$("searchStatus"),text:"Rikta kameran mot streckkoden",fail:"Kameran gick inte att starta. Tillåt kameran för sidan, eller använd Fota streckkoden."};
+  const st=opt.statusEl; $("scanText").textContent=opt.text;
+  let useNative="BarcodeDetector" in window;
+  if(useNative){try{const f=await BarcodeDetector.getSupportedFormats(); if(!f.includes(opt.qr?"qr_code":"ean_13")) useNative=false}catch(e){useNative=false}}
+  if(!useNative){
+    try{
+      const Z=await loadZXing(); zxLive=zxReader(Z,opt.qr);
+      $("scanner").hidden=false;
+      await zxLive.decodeFromConstraints({video:{facingMode:"environment"}},$("scanVideo"),(res)=>{ if(res){const t=res.getText(); stopScan(); opt.onCode(t)} });
+    }catch(e){
+      stopScan(); st.hidden=false; st.textContent=opt.fail;
+    }
+    return;
+  }
+  try{
+    const det=new BarcodeDetector({formats:opt.qr?["qr_code"]:["ean_13","ean_8","upc_a","upc_e"]});
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+    const v=$("scanVideo"); v.srcObject=scanStream; await v.play();
+    $("scanner").hidden=false;
+    const my=++scanLoop;
+    const tick=async()=>{
+      if(my!==scanLoop) return;
+      try{const codes=await det.detect(v); if(codes.length){const t=codes[0].rawValue; stopScan(); opt.onCode(t); return}}catch(e){}
+      setTimeout(tick,250);
+    };
+    tick();
+  }catch(e){
+    stopScan(); st.hidden=false; st.textContent=opt.fail;
+  }
+}
+function stopScan(){scanLoop++; if(zxLive){try{zxLive.reset()}catch(e){} zxLive=null} if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null} $("scanner").hidden=true}
+$("scanBtn").onclick=()=>startScan(); $("scanClose").onclick=stopScan;
+
+/* ---------- Claude API med egen nyckel (fristående läge, privat bruk) ---------- */
+const blobB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(b)});
+function parseJsonLoose(t){
+  try{return JSON.parse(t)}catch(e){}
+  const f=t.match(/```(?:json)?\s*([\s\S]*?)```/); if(f){try{return JSON.parse(f[1])}catch(e){}}
+  const a=t.search(/[\[{]/), b=Math.max(t.lastIndexOf("}"),t.lastIndexOf("]"));
+  if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1))}catch(e){}}
+  throw {code:"invalid_json",message:"no json",text:t};
+}
+function makeApiSample(key){
+  async function call(input,opts={}){
+    const content=[];
+    if(opts.images){
+      const list=opts.images instanceof Blob?[opts.images]:Array.from(opts.images);
+      for(const b of list){const j=await toJpeg(b);content.push({type:"image",source:{type:"base64",media_type:"image/jpeg",data:await blobB64(j)}})}
+    }
+    content.push({type:"text",text:typeof input==="string"?input:input.map(m=>m.content).join("\n\n")});
+    let r;
+    try{
+      r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:opts.signal,headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({model:opts.modelTier==="quick"?"claude-haiku-5-5":"claude-sonnet-5-5",max_tokens:2000,messages:[{role:"user",content}]})});
+    }catch(e){throw {code:e&&e.name==="AbortError"?"cancelled":"upstream_error",message:String(e)}}
+    if(!r.ok){
+      const body=await r.text().catch(()=>"");
+      let apiMsg=""; try{apiMsg=JSON.parse(body).error.message||""}catch(e){apiMsg=body.slice(0,200)}
+      const code=/credit|billing/i.test(apiMsg)?"no_credit":r.status===401||r.status===403?"bad_key":r.status===429?"rate_limited":"upstream_error";
+      throw {code,message:apiMsg,status:r.status};
+    }
+    const d=await r.json();
+    const text=(d.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("");
+    if(!text.trim()) throw {code:"empty_completion",message:"empty"};
+    if(opts.onText) opts.onText({text,delta:text});
+    return {text,truncated:d.stop_reason==="max_tokens"};
+  }
+  call.json=async(input,opts)=>{const {text}=await call(input+"\n\nSvara endast med giltig JSON, ingen annan text.",opts);return parseJsonLoose(text)};
+  call.limits=async()=>({maxPromptBytes:262144,images:{maxCount:5,maxInputBytes:20e6,mediaTypes:["image/jpeg","image/png","image/webp","image/gif"]}});
+  return call;
+}
+const standalone=!window.claude;
+function renderAiPanel(){
+  const k=store.get("kjad.apikey","");
+  $("aiKeyState").textContent=k?"Nyckel sparad (slutar på …"+k.slice(-4)+"). Fotoläsning, dubbelkoll och frågor är på.":"Ingen nyckel sparad. Sökning, streckkod och ordlistekontroll fungerar ändå.";
+  $("aiKeyRemove").hidden=!k;
+}
+function applyAi(){
+  const k=store.get("kjad.apikey","");
+  sample=k?makeApiSample(k):null;
+  for(const id of ["photoBtn","pickBtn"]) $(id).hidden=!sample;
+  $("askUnavailable").hidden=!!sample;
+  $("askUnavailable").textContent="Frågor kräver en Claude API-nyckel. Lägg in den under Min profil.";
+  if(lastCheck) runCheck(false);
+}
+$("aiKeySave").onclick=async()=>{
+  const v=$("aiKey").value.replace(/\s+/g,""); if(!v) return;
+  const st=$("aiKeyState");
+  if(/…|\.\.\./.test(v)||v.length<60){st.textContent="Det där ser ut som den förkortade nyckeln från listan i Console. Skapa en ny nyckel och kopiera hela direkt när den visas.";return}
+  if(!/^sk-ant-/.test(v)){st.textContent="En nyckel börjar med sk-ant-. Kontrollera att du kopierat rätt sak.";return}
+  st.innerHTML='<span class="spinner"></span> Testar nyckeln…'; $("aiKeySave").disabled=true;
+  try{
+    await makeApiSample(v)("Svara bara: ok",{modelTier:"quick"});
+    store.set("kjad.apikey",v); $("aiKey").value=""; renderAiPanel(); applyAi();
+    st.textContent="Nyckeln fungerar och är sparad. Fotoläsning, dubbelkoll och frågor är på.";
+  }catch(e){
+    st.textContent="Nyckeln sparades inte. "+errCopy(e.code,e);
+  }finally{$("aiKeySave").disabled=false}
+};
+$("aiKeyRemove").onclick=()=>{try{localStorage.removeItem("kjad.apikey")}catch(e){} renderAiPanel(); applyAi()};
+
+/* ---------- Flytta profil och nyckel till en annan enhet ---------- */
+const MOVE_PREFIX="KJAD1:";
+const b64enc=str=>btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64dec=str=>decodeURIComponent(escape(atob(str.replace(/-/g,"+").replace(/_/g,"/"))));
+function moveCode(withKey){
+  const data={v:1,p:{levels:profile.example?{}:profile.levels,custom:profile.custom}};
+  const k=store.get("kjad.apikey",""); if(withKey&&k) data.k=k;
+  return MOVE_PREFIX+b64enc(JSON.stringify(data));
+}
+let qrLibPromise=null;
+function loadQrLib(){
+  if(window.qrcode) return Promise.resolve(window.qrcode);
+  if(!qrLibPromise) qrLibPromise=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";sc.onload=()=>window.qrcode?res(window.qrcode):rej(new Error("qr"));sc.onerror=()=>{qrLibPromise=null;rej(new Error("qr"))};document.head.append(sc)});
+  return qrLibPromise;
+}
+async function renderMoveOut(){
+  const code=moveCode($("moveIncludeKey").checked);
+  $("moveCode").textContent=code;
+  const st=$("moveStatus");
+  try{
+    const qrcode=await loadQrLib();
+    const qr=qrcode(0,"M"); qr.addData(code); qr.make();
+    const n=qr.getModuleCount(), q=4, sz=8, c=$("moveQr");
+    c.width=c.height=(n+q*2)*sz; const g=c.getContext("2d");
+    g.fillStyle="#fff"; g.fillRect(0,0,c.width,c.height); g.fillStyle="#000";
+    for(let r=0;r<n;r++) for(let col=0;col<n;col++) if(qr.isDark(r,col)) g.fillRect((col+q)*sz,(r+q)*sz,sz,sz);
+    $("moveQrBox").hidden=false; st.hidden=true;
+  }catch(e){
+    $("moveQrBox").hidden=true; st.hidden=false; st.textContent="QR-koden gick inte att skapa utan uppkoppling. Använd koden nedan i stället.";
+  }
+}
+$("moveShow").onclick=()=>{
+  const hasKey=!!store.get("kjad.apikey","");
+  $("moveIncludeKey").checked=hasKey; $("moveIncludeKey").disabled=!hasKey;
+  $("moveIncludeKey").parentElement.hidden=!hasKey;
+  $("moveIn").hidden=true; $("moveConfirm").hidden=true; $("moveOut").hidden=false; renderMoveOut();
+};
+$("moveIncludeKey").onchange=renderMoveOut;
+$("moveHide").onclick=()=>{$("moveOut").hidden=true};
+$("moveCopy").onclick=async()=>{
+  const t=$("moveCode").textContent;
+  try{await navigator.clipboard.writeText(t); $("moveCopy").textContent="Kopierad"}catch(e){const r=document.createRange();r.selectNodeContents($("moveCode"));const s2=getSelection();s2.removeAllRanges();s2.addRange(r);$("moveCopy").textContent="Markerad – kopiera"}
+  setTimeout(()=>{$("moveCopy").textContent="Kopiera koden"},2500);
+};
+function receiveMove(text){
+  const st=$("moveStatus"), box=$("moveConfirm"); st.hidden=false;
+  let data=null;
+  try{
+    const t=String(text||"").trim();
+    if(!t.startsWith(MOVE_PREFIX)) throw 0;
+    data=JSON.parse(b64dec(t.slice(MOVE_PREFIX.length)));
+    if(!data||data.v!==1||!data.p) throw 0;
+  }catch(e){st.textContent="Det där är ingen kod från Kan jag äta det? Visa koden på den andra enheten igen.";box.hidden=true;return}
+  const levels=data.p.levels||{}, custom=Array.isArray(data.p.custom)?data.p.custom.map(String).slice(0,50):[];
+  const names=ALLERGENS.filter(a=>levels[a.id]&&levels[a.id]!=="av").map(a=>a.name+(levels[a.id]==="intolerans"?" (intolerans)":""));
+  st.hidden=true; box.hidden=false;
+  box.innerHTML='<b>Ta emot det här?</b>'+
+    '<p class="small">Allergier: '+esc(names.concat(custom).join(", ")||"inga")+'</p>'+
+    '<p class="small">API-nyckel: '+(data.k?"ja (slutar på …"+esc(String(data.k).slice(-4))+")":"nej")+'</p>'+
+    '<p class="small muted">Det ersätter profilen'+(data.k?" och nyckeln":"")+' på den här enheten.</p>'+
+    '<div class="row"><button class="btn primary" id="moveAccept">Ta emot</button><button class="btn" id="moveCancel">Avbryt</button></div>';
+  $("moveCancel").onclick=()=>{box.hidden=true};
+  $("moveAccept").onclick=()=>{
+    const clean={}; for(const a of ALLERGENS){const v=levels[a.id]; if(v==="allergi"||v==="intolerans") clean[a.id]=v}
+    profile={levels:clean,custom,example:false}; store.set("kjad.profile",profile);
+    if(data.k && /^sk-ant-/.test(String(data.k))) store.set("kjad.apikey",String(data.k));
+    renderChips(); renderProfile(); renderAiPanel(); applyAi();
+    box.hidden=true; $("moveIn").hidden=true; st.hidden=false;
+    st.textContent="Klart! Profilen"+(data.k?" och nyckeln":"")+" finns nu på den här enheten.";
+  };
+}
+$("moveScan").onclick=()=>{
+  $("moveOut").hidden=true; $("moveConfirm").hidden=true; $("moveIn").hidden=false;
+  if(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+    startScan({qr:true,onCode:receiveMove,statusEl:$("moveStatus"),text:"Rikta kameran mot QR-koden på den andra enheten",fail:"Kameran gick inte att starta. Fota koden eller klistra in den i stället."});
+  }
+};
+$("movePasteBtn").onclick=()=>receiveMove($("movePaste").value);
+$("moveQrPhoto").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const st=$("moveStatus"); st.hidden=false; st.innerHTML='<span class="spinner"></span> Läser koden…';
+  try{
+    const Z=await loadZXing(); const reader=zxReader(Z,true); let code=null;
+    for(const [side,rot] of [[1600,false],[1000,false],[2400,false]]){try{code=(await reader.decodeFromImageUrl(await canvasFrom(f,side,rot))).getText();break}catch(err){}}
+    if(code) receiveMove(code); else st.textContent="Hittade ingen kod i bilden. Fota skärmen rakt framifrån, eller klistra in koden.";
+  }catch(err){st.textContent="Kodläsaren gick inte att ladda. Klistra in koden i stället."}
+  finally{e.target.value=""}
+});
+
+/* ---------- Start ---------- */
+$("prodName").value=EXAMPLE.name; $("ingredients").value=EXAMPLE.text;
+$("ingredients").addEventListener("input",()=>{$("exampleBadge").hidden=true});
+$("prodName").addEventListener("input",()=>{$("exampleBadge").hidden=true});
+$("checkBtn").onclick=()=>runCheck(true,true);
+renderChips(); renderProfile(); renderHistory(); runCheck(false);
+
+// Sök visas när sidan körs som fristående fil/webbsida (inne i Claude blockeras nätet)
+if(standalone){
+  $("searchPanel").hidden=false; $("aiPanel").hidden=false; $("movePanel").hidden=false;
+  if(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) $("scanBtn").hidden=false;
+  renderAiPanel(); applyAi();
+  if("serviceWorker" in navigator && location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+}
+(async()=>{
+  if(standalone) return;
+  try{
+    sample = window.claude ? await window.claude.use("sample") : null;
+  }catch(e){sample=null}
+  if(!sample){$("askUnavailable").hidden=false;return}
+  const lim=await sample.limits().catch(()=>null);
+  if(lim && !lim.images){const st=$("photoStatus");st.hidden=false;st.textContent="Obs: bildläsning är inte tillgänglig i den här vyn. Du kan fortfarande skriva eller klistra in listan.";}
+  wireTips(); if(lastCheck){$("tipsRow").hidden=false; showAiCheckButton()}
+})();
+</script>
+
+</body>
+</html>
