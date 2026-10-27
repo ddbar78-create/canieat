@@ -15,6 +15,18 @@ En webbapp (PWA) som kollar matvaror mot en personlig allergiprofil. Den fungera
 | `src/kan-jag-ata-det.html` | Appens källkod (en fil). Samma fil körs också som sida i Claude. |
 | `tools/build.py` | Bygger `public/` från källan: lägger till manifest, ikoner och service worker. |
 | `public/` | Det som Netlify publicerar. |
+| `tools/build_db.py` | Bygger den svenska varudatabasen från Open Food Facts export. |
+| `public/data/` | Varudatabasen: sökindex, varor uppdelade på streckkod och status. Skrivs av GitHub Actions. |
+| `.github/workflows/se-db.yml` | Kör `build_db.py` varje måndag och sparar resultatet i repot. |
+
+## Varudatabasen
+
+Varje måndag hämtar GitHub Actions Open Food Facts CSV-export och plockar ut varor som säljs i Sverige.
+Appen söker först där och går bara ut till Open Food Facts API när en vara saknas.
+Det tar bort API:ets gräns på 10 sökningar per minut och gör sökningen snabb.
+Se `public/data/status.json` för senaste körning.
+
+Data från [Open Food Facts](https://world.openfoodfacts.org), licens [ODbL](https://opendatacommons.org/licenses/odbl/1-0/).
 
 ## Ändra appen
 

@@ -159,7 +159,8 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
   <section class="view" id="view-kolla">
     <div class="panel" id="searchPanel" hidden>
       <h3>Sök produkt</h3>
-      <p class="small muted">Söker i Open Food Facts, en öppen databas där många svenska produkter finns. Du kan skriva namn eller streckkodens siffror.</p>
+      <p class="small muted">Söker bland svenska varor från Open Food Facts, en öppen databas. Skriv namn eller streckkodens siffror.</p>
+      <p class="small muted" id="dbInfo" hidden></p>
       <div class="row">
         <input type="text" id="searchInput" placeholder="t.ex. Marabou mjölkchoklad eller 7310511210504" style="flex:1 1 220px" inputmode="search">
         <button class="btn primary" id="searchBtn">Sök</button>
@@ -732,37 +733,112 @@ function useProduct(p){
   if(!t){$("ingredients").value="";st.hidden=true;$("result").hidden=true;showOffAdd("noingredients",p.code,name);return}
   if(p.code) showOffAdd("found",p.code,name);
   $("ingredients").value=t;
-  st.hidden=false; st.textContent="Hämtat från Open Food Facts. Datan läggs in av användare, så jämför med förpackningen.";
+  st.hidden=false; st.textContent=p._local
+    ? "Från den svenska varudatabasen (Open Food Facts"+(localIdx?", uppdaterad "+localIdx.updated:"")+"). Datan läggs in av användare, så jämför med förpackningen."
+    : "Hämtat från Open Food Facts. Datan läggs in av användare, så jämför med förpackningen.";
   runCheck(true,true);
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
+/* ---------- Lokal svensk varudatabas (byggs varje vecka av GitHub Actions) ---------- */
+const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
+let localIdx=null, localIdxPromise=null;
+function loadLocalIndex(){
+  if(!standalone) return Promise.resolve(null);
+  if(!localIdxPromise) localIdxPromise=fetch("data/se-index.json")
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{
+      if(!d||!Array.isArray(d.items)) return null;
+      d.keys=d.items.map(it=>norm(it[1]+" "+it[2])); localIdx=d;
+      const info=$("dbInfo"); info.hidden=false;
+      info.textContent=d.n.toLocaleString("sv-SE")+" svenska varor, uppdaterad "+d.updated+". Data från Open Food Facts (licens ODbL).";
+      return d;
+    })
+    .catch(()=>{localIdxPromise=null;return null});
+  return localIdxPromise;
+}
+const shardCache=new Map();
+async function localProduct(code){
+  if(!standalone) return null;
+  const nn=code.slice(-2).padStart(2,"0");
+  if(!shardCache.has(nn)) shardCache.set(nn,fetch("data/p/"+nn+".json").then(r=>r.ok?r.json():{}).catch(()=>{shardCache.delete(nn);return {}}));
+  const r=(await shardCache.get(nn))[code];
+  return r?{code,product_name:r[0],brands:r[1],ingredients_text:r[2],allergens_tags:r[3]||[],traces_tags:r[4]||[],_local:true}:null;
+}
+function searchLocal(idx,q){
+  const toks=norm(q).split(" ").filter(Boolean); if(!toks.length) return [];
+  const hits=[];
+  for(let i=0;i<idx.items.length;i++){
+    const k=idx.keys[i];
+    if(toks.every(t=>k.includes(t))){
+      const it=idx.items[i], nm=norm(it[1]);
+      hits.push([(it[3]?0:100)+(nm.startsWith(toks[0])?0:10)+Math.min(nm.length,60)/100,it]);
+    }
+  }
+  hits.sort((a,b)=>a[0]-b[0]);
+  return hits.slice(0,25).map(h=>h[1]);
+}
+// Streckkod: lokal databas först, Open Food Facts om ingredienserna saknas lokalt
+async function getProduct(code){
+  const local=await localProduct(code);
+  if(local&&(local.ingredients_text||local.allergens_tags.length)) return local;
+  try{const d=await offGetAny("/api/v2/product/"+code+".json?fields="+OFF_FIELDS); if(d.status===1&&d.product) return d.product}
+  catch(e){if(!local) throw e}
+  return local;
+}
+function renderHits(list,q,online){
+  const ul=$("searchResults"), st=$("searchStatus");
+  for(const p of list){
+    const li=document.createElement("li"), b=document.createElement("button");
+    const img=p.image_front_small_url?'<img src="'+esc(p.image_front_small_url)+'" alt="" loading="lazy">':'<span class="ph"></span>';
+    const missing=p._local&&!p._hasIngr?" · ingredienser saknas":"";
+    b.innerHTML=img+'<span><b>'+esc(p.product_name_sv||p.product_name)+'</b><small>'+esc(p.brands||"")+(p.code?" · "+esc(p.code):"")+missing+'</small></span>';
+    b.onclick=async()=>{
+      ul.innerHTML="";
+      if(!p._local){useProduct(p);return}
+      st.hidden=false; st.innerHTML='<span class="spinner"></span> Hämtar varan…';
+      try{const full=await getProduct(p.code); st.hidden=true; useProduct(full||p)}
+      catch(e){st.textContent="Varan gick inte att hämta. Kontrollera att du är uppkopplad."}
+    };
+    li.append(b); ul.append(li);
+  }
+  if(!online){
+    const li=document.createElement("li"), b=document.createElement("button");
+    b.innerHTML='<span class="ph"></span><span><b>Hittar du inte varan?</b><small>Sök direkt i Open Food Facts</small></span>';
+    b.onclick=()=>searchProducts(q,true);
+    li.append(b); ul.append(li);
+  }
+}
+
 let searchBusy=false;
-async function searchProducts(q){
+async function searchProducts(q,online){
   if(searchBusy||!String(q||"").trim()) return;
   searchBusy=true; $("searchBtn").disabled=true;
-  try{ await searchInner(q) } finally { searchBusy=false; $("searchBtn").disabled=false }
+  try{ await searchInner(q,online) } finally { searchBusy=false; $("searchBtn").disabled=false }
 }
-async function searchInner(q){
+async function searchInner(q,online){
   const st=$("searchStatus"), ul=$("searchResults");
   q=q.trim();
   st.hidden=false; st.innerHTML='<span class="spinner"></span> Söker…'; ul.innerHTML=""; $("offAdd").hidden=true;
   try{
     if(/^\d{8,14}$/.test(q)){
-      const d=await offGetAny("/api/v2/product/"+q+".json?fields="+OFF_FIELDS);
-      if(d.status!==1||!d.product){st.hidden=true;showOffAdd("missing",q);return}
-      st.hidden=true; useProduct(d.product); return;
+      const p=await getProduct(q);
+      if(!p){st.hidden=true;showOffAdd("missing",q);return}
+      st.hidden=true; useProduct(p); return;
+    }
+    if(!online){
+      const idx=await loadLocalIndex();
+      const hits=idx?searchLocal(idx,q):[];
+      if(hits.length){
+        st.textContent=(hits.length===25?"Många":hits.length)+" träffar bland svenska varor. Välj produkten:";
+        renderHits(hits.map(it=>({code:it[0],product_name:it[1],brands:it[2],_hasIngr:it[3],_local:true})),q,false);
+        return;
+      }
     }
     const d=await offGetAny("/cgi/search.pl?search_simple=1&action=process&json=1&page_size=12&lc=sv&cc=se&search_terms="+encodeURIComponent(q)+"&fields="+OFF_FIELDS);
     const list=(d.products||[]).filter(p=>p.product_name||p.product_name_sv);
     if(!list.length){st.hidden=true;showOffAdd("nohits");return}
-    st.textContent=list.length+" träffar. Välj produkten:";
-    for(const p of list){
-      const li=document.createElement("li"), b=document.createElement("button");
-      const img=p.image_front_small_url?'<img src="'+esc(p.image_front_small_url)+'" alt="" loading="lazy">':'<span class="ph"></span>';
-      b.innerHTML=img+'<span><b>'+esc(p.product_name_sv||p.product_name)+'</b><small>'+esc(p.brands||"")+(p.code?" · "+esc(p.code):"")+'</small></span>';
-      b.onclick=()=>{ul.innerHTML="";useProduct(p)};
-      li.append(b); ul.append(li);
-    }
+    st.textContent=list.length+" träffar i Open Food Facts. Välj produkten:";
+    renderHits(list,q,true);
   }catch(e){
     st.textContent=/^\d{8,14}$/.test(q)
       ? "Databasen svarar inte just nu. Kontrollera att du är uppkopplad och försök igen om en stund."
@@ -1031,6 +1107,7 @@ if(standalone){
   if(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) $("scanBtn").hidden=false;
   renderAiPanel(); applyAi();
   if("serviceWorker" in navigator && location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+  setTimeout(()=>loadLocalIndex(),1500);
 }
 (async()=>{
   if(standalone) return;
