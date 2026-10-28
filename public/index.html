@@ -624,10 +624,12 @@ function detectLang(text){
   if(words.length<3) return "sv";
   const set=new Set(words), score={};
   for(const k in STOP) score[k]=STOP[k].reduce((n,w)=>n+(set.has(w)?1:0),0);
-  // tie-break: å/ä/ö i svenska ord, æ/ø i danska/norska
+  // Särdrag: æ/ø (danska/norska), ää/yy/öö (finska), å (svenska, sällan finska)
   if(/[æø]/.test(t)) score.dano+=2;
-  if(/[åäö]/.test(t)&&!/[æø]/.test(t)) score.sv+=1;
-  let best="sv"; for(const k in score) if(score[k]>score[best]) best=k;
+  score.fi+=words.filter(w=>/ää|yy|öö|aa$|uu$/.test(w)).length;
+  if(/å/.test(t)&&!/[æø]/.test(t)) score.sv+=1;
+  // Vid lika poäng väljs det andra språket. Svenska ord kontrolleras alltid ändå.
+  let best="sv"; for(const k in score) if(k!=="sv"&&score[k]>0&&score[k]>=score[best]&&(best==="sv"||score[k]>score[best])) best=k;
   return score[best]>0?best:"?";
 }
 function phraseRanges(lower,phrases){

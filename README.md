@@ -40,7 +40,8 @@ Data från [Open Food Facts](https://world.openfoodfacts.org), licens [ODbL](htt
 ## Ändra appen
 
 1. Redigera `src/kan-jag-ata-det.html`.
-2. Kör `python3 tools/build.py` (kräver Pillow).
-3. Committa och pusha. Netlify publicerar automatiskt.
+2. Kör `node tests/analyze.test.js` och kontrollera att alla fall är godkända.
+3. Kör `python3 tools/build.py` (kräver Pillow).
+4. Committa och pusha. Netlify publicerar automatiskt.
 
 Appen ersätter inte förpackningens märkning eller råd från läkare eller dietist.
