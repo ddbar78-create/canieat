@@ -21,7 +21,7 @@ Användning:
 
 Data från Open Food Facts, licens ODbL: https://world.openfoodfacts.org
 """
-import csv, gzip, io, json, os, shutil, sys, tempfile, time, urllib.request
+import csv, gzip, html, io, json, os, re, shutil, sys, tempfile, time, urllib.request
 from collections import Counter
 from datetime import datetime, timezone
 
@@ -35,7 +35,11 @@ MIN_PRODUCTS = int(os.environ.get("MIN_PRODUCTS", "100"))
 
 
 def clean(s, n):
-    return " ".join(str(s or "").split())[:n]
+    """Tar bort HTML-taggar (Open Food Facts markerar allergener med <span class="allergen">)
+    och understreck runt ord (_mjölk_), avkodar &amp; och liknande, och slår ihop blanksteg."""
+    t = html.unescape(re.sub(r"<[^>]*>", "", str(s or "")))
+    t = re.sub(r"(?<![\w])_+([^_]+?)_+(?![\w])", r"\1", t)
+    return " ".join(t.split())[:n]
 
 
 def tags(value):

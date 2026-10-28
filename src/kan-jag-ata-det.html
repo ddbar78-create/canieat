@@ -840,7 +840,8 @@ function renderHistory(){
 }
 
 function runCheck(save=true,auto=false){
-  const text=$("ingredients").value.trim(); const name=$("prodName").value.trim();
+  let text=$("ingredients").value.trim(); const name=$("prodName").value.trim();
+  if(/<[a-z\/!][^>]*>|&[a-z#0-9]+;|(^|\W)_[^_]+_(\W|$)/i.test(text)){text=cleanIngredients(text);$("ingredients").value=text}
   if(!text){$("result").hidden=false;$("result").innerHTML='<p>Skriv eller klistra in en ingredienslista först.</p>';return}
   const res=analyze(text,currentLang);
   addSafetyChecks(res,name,text);
@@ -1043,8 +1044,16 @@ async function offGet(url){
   return r.json();
 }
 let currentLang=null, translatedFrom=null;
+// Open Food Facts markerar ibland allergener med HTML (<span class="allergen">) eller _understreck_
+function cleanIngredients(t){
+  t=String(t||"");
+  if(/<[a-z\/!][^>]*>|&[a-z#0-9]+;/i.test(t)){
+    try{t=new DOMParser().parseFromString(t,"text/html").body.textContent||""}catch(e){t=t.replace(/<[^>]*>/g,"")}
+  }
+  return t.replace(/(^|[^\p{L}\d])_+([^_]+?)_+(?=$|[^\p{L}\d])/gu,"$1$2").replace(/\s+/g," ").trim();
+}
 function useProduct(p){
-  let t=(p.ingredients_text_sv||p.ingredients_text||"").trim();
+  let t=cleanIngredients(p.ingredients_text_sv||p.ingredients_text||"");
   currentLang=p.ingredients_text_sv?"sv":(p._lang||p.lang||null); translatedFrom=null;
   const al=tagsSv(p.allergens_tags), tr=tagsSv(p.traces_tags);
   if(al.length) t+=(t?(/[.]$/.test(t)?" ":". "):"")+"Allergener enligt databasen: "+al.join(", ")+".";
