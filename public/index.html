@@ -505,7 +505,7 @@ const ALLERGENS = [
  {id:"kokos",name:"Kokos",sub:"kokosmjölk, kokosolja …",group:"more",terms:["kokos","coconut"],excl:[]},
  {id:"majs",name:"Majs",sub:"majsstärkelse, polenta …",group:"more",terms:["majs","maize","polenta","popcorn","cornflakes",{t:"corn",edge:1}],excl:["peppercorn"]},
 ];
-const TRACE_RE = /(kan innehålla|spår av|may contain|kan förekomma)/i;
+const TRACE_RE = /(kan innehålla|spår av|may contain|may also contain|kan förekomma|kan inneholde|kan indeholde|spor af|spor av|voi sisältää|kann spuren|spuren von|peut contenir|traces? de|traces? of)/i;
 
 const EXAMPLE = {
   name:"Chokladkakor (exempel)",
@@ -522,6 +522,118 @@ let profile = store.get("kjad.profile", null) || structuredClone(EXAMPLE_PROFILE
 let history = store.get("kjad.history", []);
 function saveProfile(){profile.example=false;store.set("kjad.profile",profile);renderChips()}
 
+/* ---------- Språk: allergenord på engelska, danska/norska, finska, tyska och franska ----------
+   t = ord som räknas som träff, x = ord som inte ska räknas, p = fraser som inte ska räknas,
+   m = "kanske" (havre). {t:"..",edge:1} = början/slutet av ordet, {t:"..",exact:1} = hela ordet. */
+const FL={
+ en:{
+  gluten:{t:["wheat","barley","rye","spelt","malt","semolina","durum","couscous"],m:["oat","oats"],x:["maltodextrin","maltitol","maltose","buckwheat"]},
+  mjolk:{t:["milk","butter","cream","cheese","whey","casein","lactose","yoghurt","yogurt"],x:["butternut"],p:["coconut milk","cocoa butter","peanut butter","shea butter","oat milk","almond milk","soy milk","soya milk","rice milk","lactose-free","lactose free","cream of tartar","creamed coconut","coconut cream"]},
+  laktos:{t:["milk","cream","whey","lactose","yoghurt","yogurt"],p:["coconut milk","oat milk","almond milk","soy milk","soya milk","rice milk","lactose-free","lactose free","coconut cream","cream of tartar"]},
+  agg:{t:["egg","eggs","albumen","lysozyme","mayonnaise"],x:["eggplant"]},
+  fisk:{t:["fish","anchovy","anchovies","cod","salmon","tuna","mackerel","herring","sardine","pollock","haddock"],x:["shellfish","cuttlefish"]},
+  krafdjur:{t:["shrimp","prawn","crab","lobster","crayfish","krill","crustacean"]},
+  jordnot:{t:["peanut","groundnut","arachis"]},
+  notter:{t:["almond","hazelnut","walnut","cashew","pecan","pistachio","macadamia",{t:"nut",exact:1},{t:"nuts",exact:1}],x:["peanut","coconut","nutmeg","groundnut"]},
+  soja:{t:["soy","soya","soybean","soybeans","tofu","edamame"]},
+  selleri:{t:["celery","celeriac"]}, senap:{t:["mustard"]}, sesam:{t:["sesame","tahini","tahina"]},
+  sulfit:{t:["sulphite","sulfite","sulphites","sulfites","sulphur","sulfur","metabisulphite","metabisulfite"]},
+  lupin:{t:["lupin","lupine"]},
+  blotdjur:{t:["mussel","oyster","squid","clam","scallop","octopus","snail","mollusc","mollusk","cuttlefish"]},
+  artor:{t:[{t:"pea",exact:1},{t:"peas",exact:1}]}, linser:{t:["lentil"]}, kikartor:{t:["chickpea","garbanzo","besan"]},
+  bovete:{t:["buckwheat"]}, kiwi:{t:["kiwi"]}, kokos:{t:["coconut"]}, majs:{t:["maize","corn","cornflour","cornstarch","polenta"],x:["peppercorn"]}
+ },
+ dano:{
+  gluten:{t:["hvede","hvete",{t:"rug",edge:1},{t:"byg",edge:1},"spelt","malt","semulje","durum"],m:["havre"],x:["maltodextrin","boghvede","bokhvete"]},
+  mjolk:{t:["mælk","melk","fløde","fløte","smør","valle","myse","kasein","laktose","yoghurt","skyr","rømme","kefir",{t:"ost",edge:1}],x:["kokosmælk","kokosmelk","havremælk","havremelk","kakaosmør","jordnøddesmør","peanøttsmør","laktosefri","mælkesyre","melkesyre","østers"]},
+  laktos:{t:["mælk","melk","fløde","fløte","valle","myse","laktose","yoghurt"],x:["kokosmælk","kokosmelk","havremælk","havremelk","laktosefri","mælkesyre","melkesyre"]},
+  agg:{t:[{t:"æg",edge:1},{t:"egg",edge:1},"æggeblomme","eggeplomme","albumin","lysozym"],x:["pålæg","pålegg","tillegg","tillæg"]},
+  fisk:{t:["fisk","ansjos","torsk","laks","makrel","sild","tunfisk","sardin",{t:"sei",edge:1}],x:["blæksprutte","blekksprut","fiskesauce"]},
+  krafdjur:{t:["rejer","reker","krabbe","hummer","krebs","skalldyr","krill","scampi"]},
+  jordnot:{t:["jordnød","jordnøtt","peanøtt","peanut","arakis"]},
+  notter:{t:["mandel","hasselnød","hasselnøtt","valnød","valnøtt","cashew","pekan","pistacie","pistasj","macadamia","paranød","paranøtt","marcipan","marsipan","nougat",{t:"nød",edge:1},{t:"nødder",edge:1},{t:"nøtt",edge:1},{t:"nøtter",edge:1}],x:["jordnød","jordnøtt","peanøtt","muskatnød","muskatnøtt","kokosnød","kokosnøtt"]},
+  soja:{t:["soja","soya","tofu","edamame"]}, selleri:{t:["selleri"]}, senap:{t:["sennep"]}, sesam:{t:["sesam","tahin"]},
+  sulfit:{t:["sulfit","svovldioxid","svoveldioksid","disulfit"]}, lupin:{t:["lupin"]},
+  blotdjur:{t:["musling","blåskjell","østers","blæksprutte","blekksprut","snegle","skjell","bløddyr","bløtdyr"]},
+  artor:{t:["ærter","erter","ærteprotein","erteprotein"],x:["kikærter","kikerter"]}, linser:{t:[{t:"linser",edge:1}]}, kikartor:{t:["kikærter","kikerter"]},
+  bovete:{t:["boghvede","bokhvete"]}, kiwi:{t:["kiwi"]}, kokos:{t:["kokos"]}, majs:{t:["majs",{t:"mais",edge:1}]}
+ },
+ fi:{
+  gluten:{t:["vehnä","ruis","rukii","ohra","speltti","mallas","maltaa","gluteeni","durum","mannasuurimo"],m:["kaura"],x:["tattari"]},
+  mjolk:{t:["maito","maidon","kerma","juusto","hera","kaseiini","laktoosi","jogurtti","piimä","rahka","maitorasva",{t:"voi",exact:1},"voita"],p:["voi sisältää"],x:["kookosmaito","kauramaito","mantelimaito","soijamaito","laktoositon","maitohappo","kaakaovoi","maapähkinävoi"]},
+  laktos:{t:["maito","maidon","kerma","hera","laktoosi","jogurtti"],x:["kookosmaito","kauramaito","mantelimaito","soijamaito","laktoositon","maitohappo"]},
+  agg:{t:["kananmuna","munankeltuai","munanvalkuai","munajauhe","lysotsyymi",{t:"muna",edge:1}],x:["munakoiso"]},
+  fisk:{t:[{t:"kala",edge:1},"turska","lohi","silakka","silli","makrilli","anjovis","sardiini","seiti"],x:["mustekala"]},
+  krafdjur:{t:["äyriäi","katkarapu","katkarav","rapu","ravu","hummeri","krilli"]},
+  jordnot:{t:["maapähkin"]},
+  notter:{t:["pähkin","manteli","cashew","pekaani","pistaasi","makadamia","marsipaani","nugaa"],x:["maapähkin","muskottipähkin","kookospähkin"]},
+  soja:{t:["soija","tofu"]}, selleri:{t:["selleri"]}, senap:{t:["sinappi"]}, sesam:{t:["seesami"]},
+  sulfit:{t:["sulfiitti","rikkidioksidi","disulfiitti"]}, lupin:{t:["lupiini"]},
+  blotdjur:{t:["nilviäi","simpuk","osteri","mustekala","kalmari","etana"]},
+  artor:{t:["herne"],x:["kikherne"]}, linser:{t:["linssi"]}, kikartor:{t:["kikherne"]},
+  bovete:{t:["tattari"]}, kiwi:{t:["kiwi"]}, kokos:{t:["kookos"]}, majs:{t:["maissi"]}
+ },
+ de:{
+  gluten:{t:["weizen","roggen","gerste","dinkel","malz","grieß","griess","gluten","emmer","kamut"],m:["hafer"],x:["buchweizen","maltodextrin"]},
+  mjolk:{t:["milch","sahne","butter","käse","molke","kasein","laktose","joghurt","rahm","quark","schmand"],x:["kokosmilch","hafermilch","mandelmilch","sojamilch","reismilch","kakaobutter","erdnussbutter","sheabutter","laktosefrei","milchsäure"]},
+  laktos:{t:["milch","sahne","molke","laktose","joghurt","rahm","quark"],x:["kokosmilch","hafermilch","mandelmilch","sojamilch","reismilch","laktosefrei","milchsäure"]},
+  agg:{t:[{t:"ei",exact:1},"eier","eigelb","eiklar","hühnerei","vollei","eipulver","lysozym"]},
+  fisk:{t:["fisch","sardelle","kabeljau","lachs","makrele","hering","seelachs","sardine"],x:["tintenfisch"]},
+  krafdjur:{t:["krebstier","garnele","krabbe","hummer","languste","shrimp","krill","scampi"]},
+  jordnot:{t:["erdnuss","erdnüsse"]},
+  notter:{t:["mandel","haselnuss","haselnüsse","walnuss","walnüsse","cashew","pekannuss","pistazie","macadamia","paranuss","marzipan","nougat","schalenfrüchte",{t:"nuss",edge:1},{t:"nüsse",edge:1}],x:["erdnuss","erdnüsse","muskatnuss","kokosnuss"]},
+  soja:{t:["soja","tofu"]}, selleri:{t:["sellerie"]}, senap:{t:["senf"]}, sesam:{t:["sesam"]},
+  sulfit:{t:["sulfit","schwefeldioxid","disulfit"]}, lupin:{t:["lupine","lupinen"]},
+  blotdjur:{t:["weichtier","muschel","auster","tintenfisch","kalmar","schnecke"]},
+  artor:{t:["erbse"],x:["kichererbse"]}, linser:{t:[{t:"linse",edge:1},{t:"linsen",edge:1}]}, kikartor:{t:["kichererbse"]},
+  bovete:{t:["buchweizen"]}, kiwi:{t:["kiwi"]}, kokos:{t:["kokos"]}, majs:{t:[{t:"mais",edge:1}]}
+ },
+ fr:{
+  gluten:{t:["blé","seigle","orge","épeautre","froment","malt","gluten","semoule","kamut"],m:["avoine"],x:["maltodextrine","maltitol","maltose"],p:["blé noir"]},
+  mjolk:{t:["lait","crème","creme","beurre","fromage","lactosérum","lactoserum","caséine","caseine","caséinate","lactose","yaourt","babeurre"],p:["lait de coco","crème de coco","beurre de cacao","beurre de cacahuète","beurre de cacahuete","sans lactose","lait d'avoine","lait d’avoine","lait d'amande","lait d’amande","lait de soja","lait de riz"]},
+  laktos:{t:["lait","crème","lactosérum","lactose","yaourt"],p:["lait de coco","crème de coco","sans lactose","lait d'avoine","lait d’avoine","lait d'amande","lait d’amande","lait de soja","lait de riz"]},
+  agg:{t:["œuf","oeuf","œufs","oeufs","albumine","lysozyme","mayonnaise"]},
+  fisk:{t:["poisson","anchois","cabillaud","saumon","thon","sardine","maquereau","hareng","colin","merlu"]},
+  krafdjur:{t:["crustacé","crustace","crevette","crabe","homard","langouste","écrevisse","langoustine"]},
+  jordnot:{t:["arachide","cacahuète","cacahuete"]},
+  notter:{t:["amande","noisette","noix","cajou","pécan","pistache","macadamia","praliné","massepain","nougat"],p:["noix de coco","noix de muscade"]},
+  soja:{t:["soja","tofu"]}, selleri:{t:["céleri","celeri"]}, senap:{t:["moutarde"]}, sesam:{t:["sésame"]},
+  sulfit:{t:["sulfite","sulfites","sulfureux","disulfite","bisulfite"]}, lupin:{t:["lupin"]},
+  blotdjur:{t:["mollusque",{t:"moule",edge:1},{t:"moules",edge:1},"huître","huitre","calmar","calamar","poulpe","seiche","escargot"]},
+  artor:{t:[{t:"pois",exact:1}],p:["pois chiche","pois chiches"]}, linser:{t:["lentille"]}, kikartor:{t:[{t:"chiche",edge:1}]},
+  bovete:{t:["sarrasin"]}, kiwi:{t:["kiwi"]}, kokos:{t:[{t:"coco",edge:1}]}, majs:{t:["maïs"]}
+ }
+};
+const LANG_NAMES={sv:"svenska",en:"engelska",dano:"danska eller norska",da:"danska",no:"norska",nb:"norska",nn:"norska",fi:"finska",de:"tyska",fr:"franska",nl:"nederländska",it:"italienska",es:"spanska",pl:"polska",et:"estniska",lt:"litauiska",lv:"lettiska",pt:"portugisiska"};
+const LANG_GROUP=l=>({da:"dano",no:"dano",nb:"dano",nn:"dano"})[l]||l;
+const STOP={
+ sv:["och","socker","salt","vatten","mjölk","vetemjöl","av","rapsolja","innehåller","spår","vegetabiliskt","surhetsreglerande","konserveringsmedel","arom","ägg","smör"],
+ en:["and","sugar","water","salt","wheat","flour","milk","contains","vegetable","oil","of","flavouring","flavoring","acidity","regulator","may"],
+ dano:["og","sukker","vand","vann","hvedemel","hvetemel","mælk","melk","indeholder","inneholder","kan","spor","af","av","olie","olje","salt"],
+ fi:["ja","sokeri","vesi","suola","maito","vehnäjauho","rypsiöljy","sisältää","voi","jauho","happamuudensäätöaine","aromi"],
+ de:["und","zucker","wasser","salz","weizenmehl","milch","enthält","pflanzliches","öl","kann","spuren","von","säuerungsmittel"],
+ fr:["et","sucre","eau","sel","farine","lait","de","blé","huile","peut","contenir","traces","arôme","du","des"],
+ nl:["en","suiker","water","zout","tarwebloem","melk","bevat","kan","sporen","van","boter","eieren","plantaardige","olie","bloem"],
+ it:["e","zucchero","acqua","sale","farina","latte","di","può","contenere","tracce","olio","uova","grano"],
+ es:["y","azúcar","agua","sal","harina","leche","de","puede","contener","trazas","aceite","huevo","trigo"],
+ pl:["cukier","woda","sól","mąka","mleko","może","zawierać","olej","i","pszenna","jaja"]
+};
+function detectLang(text){
+  const t=String(text||"").toLowerCase().replace(/(allergener enligt databasen|kan innehålla spår av):[^.]*\./g," ");
+  const words=t.match(/[a-zåäöæøüéèêëàâüûùôœçßíóúñïąęłńśźż']+/g)||[];
+  if(words.length<3) return "sv";
+  const set=new Set(words), score={};
+  for(const k in STOP) score[k]=STOP[k].reduce((n,w)=>n+(set.has(w)?1:0),0);
+  // tie-break: å/ä/ö i svenska ord, æ/ø i danska/norska
+  if(/[æø]/.test(t)) score.dano+=2;
+  if(/[åäö]/.test(t)&&!/[æø]/.test(t)) score.sv+=1;
+  let best="sv"; for(const k in score) if(score[k]>score[best]) best=k;
+  return score[best]>0?best:"?";
+}
+function phraseRanges(lower,phrases){
+  const out=[]; for(const ph of phrases||[]){let i=lower.indexOf(ph); while(i>=0){out.push([i,i+ph.length]); i=lower.indexOf(ph,i+1)}} return out;
+}
+
 /* ---------- Matchning ---------- */
 const traceStrict=id=>!!(profile.traces&&profile.traces[id]);
 function activeAllergens(){
@@ -532,25 +644,30 @@ function activeAllergens(){
 function matchWord(w,a){
   if(a.excl.some(e=>w.includes(e))) return null;
   for(const term of a.terms){
-    const t = typeof term==="string"?term:term.t, edge = typeof term==="object"&&term.edge;
-    const hit = edge ? (w===t||w.startsWith(t)||w.endsWith(t)) : w.includes(t);
+    const t = typeof term==="string"?term:term.t, edge = typeof term==="object"&&term.edge, exact = typeof term==="object"&&term.exact;
+    const hit = exact ? w===t : edge ? (w===t||w.startsWith(t)||w.endsWith(t)) : w.includes(t);
     if(hit) return t;
   }
   return null;
 }
-function analyze(text){
+function analyze(text,langHint){
   // "E 220" och "E-220" räknas som e220 (samma längd, så positionerna stämmer)
   const lower = text.toLowerCase().replace(/\be[\s-]+(\d{3})\b/g,m=>("e"+m.replace(/\D/g,"")).padEnd(m.length,"_"));
   const tm = lower.search(TRACE_RE);
   let traceStart=-1, traceEnd=-1;
   if(tm>=0){traceStart=tm;const dot=lower.indexOf(".",tm);traceEnd=dot<0?lower.length:dot}
-  const words=[]; const re=/[a-z0-9åäöéèüæøç]+/gi; let m;
+  const lang=LANG_GROUP(langHint||detectLang(text)), extra=FL[lang]||{};
+  const words=[]; const re=/[a-z0-9åäöæøüéèêëàâûùôœçßíóúñï]+/gi; let m;
   while((m=re.exec(lower))){let e=m.index+m[0].length;while(lower[e]==="_")e++;words.push({w:m[0],s:m.index,e});}
   const findings=[]; const marks=[];
-  for(const a of activeAllergens()){
-    const lactoseFree = a.lactoseFree && /laktosfri/.test(lower);
+  for(const base of activeAllergens()){
+    const fx=extra[base.id]||{};
+    const a=fx.t?{...base,terms:base.terms.concat(fx.t),excl:base.excl.concat(fx.x||[])}:base;
+    const skip=phraseRanges(lower,fx.p);
+    const lactoseFree = a.lactoseFree && /laktosfri|lactose[- ]free|laktosefri|laktoositon|laktosefrei|sans lactose/.test(lower);
     let contains=[], traces=[];
     for(const wd of words){
+      if(skip.some(([s0,e0])=>wd.s>=s0&&wd.e<=e0)) continue;
       if(matchWord(wd.w,a)){
         const inTrace = traceStart>=0 && wd.s>=traceStart && wd.s<traceEnd;
         (inTrace?traces:contains).push(text.slice(wd.s,wd.e));
@@ -559,6 +676,7 @@ function analyze(text){
     }
     // havre och liknande "kanske"
     let maybe=[];
+    for(const mt of (fx.m||[])) if(!(a.maybe||[]).some(x=>x.t===mt)) a.maybe=(a.maybe||[]).concat([{t:mt,why:"Havre kan vara förorenad med gluten om den inte är märkt glutenfri."}]);
     for(const mb of (a.maybe||[])){
       if(lower.includes(mb.t) && !(mb.unless&&mb.unless.test(lower))){
         maybe.push(mb);
@@ -571,7 +689,7 @@ function analyze(text){
     for(const mb of maybe) findings.push({a,kind:"amber",words:[mb.t],msg:mb.why});
   }
   const status = findings.some(f=>f.kind==="red")?"red":findings.some(f=>f.kind==="amber")?"amber":"green";
-  return {status,findings,marks};
+  return {status,findings,marks,lang};
 }
 const uniq = arr=>[...new Set(arr.map(x=>x.toLowerCase()))];
 
@@ -645,12 +763,17 @@ function renderResult(name,text,res){
     '<div id="verdictBox"></div>'+
     '<ul class="hits" id="hitList"'+(items?'':' hidden')+'>'+items+'</ul>'+
     '<div id="aiCheck" class="ai" hidden></div>'+
-    '<div><p class="label">Ingredienser</p><p class="ingr">'+html+'</p></div>'+
+    '<div><p class="label">Ingredienser'+(res.lang&&res.lang!=="sv"?' · på '+esc(LANG_NAMES[res.lang]||"okänt språk"):'')+'</p><p class="ingr">'+html+'</p>'+
+      (translatedFrom?'<p class="small muted">Översatt från '+esc(LANG_NAMES[translatedFrom]||"annat språk")+' av Claude. Jämför med förpackningen.</p>':'')+
+      (res.lang&&res.lang!=="sv"&&FL[res.lang]?'<p class="small muted">Listan är på '+esc(LANG_NAMES[res.lang])+'. Appen letar efter allergener även på det språket, men läs förpackningen.</p>':'')+
+      (res.lang&&res.lang!=="sv"&&sample?'<div class="row" style="margin-top:8px"><button class="btn" id="translateBtn">Översätt till svenska</button></div>':'')+
+      '</div>'+
     '<div class="row listbtns"><button class="btn grow" id="markSafe">Spara som säker</button><button class="btn grow" id="markAvoid">Undvik alltid</button></div>'+
     '<div class="row" id="tipsRow"><button class="btn" id="tipsBtn">'+(res.status==="green"?"Tips för den här produkten":"Föreslå alternativ och tips")+'</button></div>'+
     '<div id="tipsBox" class="ai" hidden></div>';
   renderVerdict();
   wireTips();
+  const tb=$("translateBtn"); if(tb) tb.onclick=translateIngredients;
   const ol=lastCheck&&lastCheck.onList;
   $("markSafe").textContent=ol==="safe"?"Sparad som säker (ta bort)":"Spara som säker";
   $("markAvoid").textContent=ol==="avoid"?"På undvik-listan (ta bort)":"Undvik alltid";
@@ -724,7 +847,7 @@ function renderHistory(){
   history.forEach((h,i)=>{
     const li=document.createElement("li"); const b=document.createElement("button");
     b.innerHTML='<span class="dot '+h.status+'"></span><span>'+esc(h.name||h.text.slice(0,40)+"…")+'</span><time>'+new Date(h.at).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})+'</time>';
-    b.onclick=()=>{$("prodName").value=h.name||"";$("ingredients").value=h.text;$("exampleBadge").hidden=true;currentCode=h.code||null;runCheck(false,true)};
+    b.onclick=()=>{$("prodName").value=h.name||"";$("ingredients").value=h.text;$("exampleBadge").hidden=true;currentCode=h.code||null;currentLang=h.lang||null;translatedFrom=null;runCheck(false,true)};
     li.append(b); ul.append(li);
   });
 }
@@ -732,19 +855,23 @@ function renderHistory(){
 function runCheck(save=true,auto=false){
   const text=$("ingredients").value.trim(); const name=$("prodName").value.trim();
   if(!text){$("result").hidden=false;$("result").innerHTML='<p>Skriv eller klistra in en ingredienslista först.</p>';return}
-  const res=analyze(text);
+  const res=analyze(text,currentLang);
   addSafetyChecks(res,name,text);
+  if(!FL[res.lang] && res.lang!=="sv" && text.length>25){
+    const ln=LANG_NAMES[res.lang]||"ett språk appen inte känner igen";
+    res.findings.push({a:{id:"_lang",name:"Ingredienslistan är på "+ln,level:"allergi"},kind:"amber",words:[],msg:"Appen kan missa allergener på det språket. Läs förpackningen"+(sample?", eller översätt till svenska nedan.":".")});
+  }
   const key=itemKey(currentCode,name,text), onList=listOf(key);
   if(onList==="avoid") res.findings.unshift({a:{id:"_avoid",name:"Din undvik-lista",level:"allergi"},kind:"red",words:[],msg:"Du har markerat varan som något du ska undvika."});
   const rc=recallFor(currentCode);
   if(rc) res.findings.unshift({a:{id:"_recall",name:"Återkallad vara",level:"allergi"},kind:"red",words:[],msg:rc.title+" (Livsmedelsverket, "+rc.date+")."});
   res.status=res.findings.some(f=>f.kind==="red")?"red":res.findings.some(f=>f.kind==="amber")?"amber":"green";
-  lastCheck={name,text,res,code:currentCode,onList};
+  lastCheck={name,text,res,code:currentCode,onList,lang:res.lang};
   renderResult(name,text,res);
   aiSeq++;
   if(auto && sample) aiCheck(); else showAiCheckButton();
   if(save && $("exampleBadge").hidden){
-    history=[{name,text,code:currentCode,status:res.status,at:Date.now()},...history.filter(h=>h.text!==text)].slice(0,12);
+    history=[{name,text,code:currentCode,lang:currentLang,status:res.status,at:Date.now()},...history.filter(h=>h.text!==text)].slice(0,12);
     store.set("kjad.history",history); renderHistory();
   }
 }
@@ -881,7 +1008,7 @@ $("askBtn").onclick=async()=>{
 };
 
 /* ---------- Sök i Open Food Facts (fungerar när filen öppnas direkt i webbläsaren) ---------- */
-const OFF_FIELDS="code,product_name,product_name_sv,brands,ingredients_text_sv,ingredients_text,allergens_tags,traces_tags,image_front_small_url";
+const OFF_FIELDS="code,product_name,product_name_sv,brands,ingredients_text_sv,ingredients_text,lang,allergens_tags,traces_tags,image_front_small_url";
 const TAG_SV={"en:gluten":"gluten","en:milk":"mjölk","en:eggs":"ägg","en:nuts":"nötter","en:peanuts":"jordnötter","en:soybeans":"soja","en:fish":"fisk","en:crustaceans":"kräftdjur","en:molluscs":"blötdjur","en:celery":"selleri","en:mustard":"senap","en:sesame-seeds":"sesam","en:sulphur-dioxide-and-sulphites":"sulfiter","en:lupin":"lupin"};
 const tagsSv=tags=>(tags||[]).map(t=>TAG_SV[t]||t.replace(/^[a-z]{2}:/,"").replace(/-/g," ")).filter(Boolean);
 // Länkar till Open Food Facts för att lägga till eller komplettera en vara
@@ -928,8 +1055,10 @@ async function offGet(url){
   if(!r.ok) throw new Error("http "+r.status);
   return r.json();
 }
+let currentLang=null, translatedFrom=null;
 function useProduct(p){
   let t=(p.ingredients_text_sv||p.ingredients_text||"").trim();
+  currentLang=p.ingredients_text_sv?"sv":(p._lang||p.lang||null); translatedFrom=null;
   const al=tagsSv(p.allergens_tags), tr=tagsSv(p.traces_tags);
   if(al.length) t+=(t?(/[.]$/.test(t)?" ":". "):"")+"Allergener enligt databasen: "+al.join(", ")+".";
   if(tr.length) t+=(t?" ":"")+"Kan innehålla spår av: "+tr.join(", ")+".";
@@ -968,7 +1097,7 @@ async function localProduct(code){
   const nn=code.slice(-2).padStart(2,"0");
   if(!shardCache.has(nn)) shardCache.set(nn,fetch("data/p/"+nn+".json").then(r=>r.ok?r.json():{}).catch(()=>{shardCache.delete(nn);return {}}));
   const r=(await shardCache.get(nn))[code];
-  return r?{code,product_name:r[0],brands:r[1],ingredients_text:r[2],allergens_tags:r[3]||[],traces_tags:r[4]||[],_local:true}:null;
+  return r?{code,product_name:r[0],brands:r[1],ingredients_text:r[2],allergens_tags:r[3]||[],traces_tags:r[4]||[],_lang:r[5]||"",_local:true}:null;
 }
 function searchLocal(idx,q){
   const toks=norm(q).split(" ").filter(Boolean); if(!toks.length) return [];
@@ -986,6 +1115,12 @@ function searchLocal(idx,q){
 // Streckkod: lokal databas först, Open Food Facts om ingredienserna saknas lokalt
 async function getProduct(code){
   const local=await localProduct(code);
+  if(local&&local.ingredients_text&&local._lang&&local._lang!=="sv"&&navigator.onLine){
+    try{
+      const d=await Promise.race([offGetAny("/api/v2/product/"+code+".json?fields="+OFF_FIELDS),new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),3500))]);
+      if(d.status===1&&d.product&&d.product.ingredients_text_sv) return d.product;
+    }catch(e){}
+  }
   if(local&&(local.ingredients_text||local.allergens_tags.length)) return local;
   try{const d=await offGetAny("/api/v2/product/"+code+".json?fields="+OFF_FIELDS); if(d.status===1&&d.product) return d.product}
   catch(e){if(!local) throw e}
@@ -1413,6 +1548,21 @@ function renderInfo(){
   renderRecalls();
 }
 
+/* ---------- Översätt ingredienslistan till svenska (Claude) ---------- */
+async function translateIngredients(){
+  const c=lastCheck, btn=$("translateBtn"); if(!c||!sample) return;
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Översätter…';
+  try{
+    const {text}=await sample(`Översätt den här ingredienslistan från ${LANG_NAMES[c.lang]||"originalspråket"} till svenska. Behåll ordningen, procentsatser, parenteser och E-nummer. Översätt allergener exakt (till exempel milk → mjölk, wheat → vete). Svara med ENDAST den översatta ingredienslistan, ingen annan text.\n\n${c.text}`,{modelTier:"default"});
+    const from=c.lang;
+    $("ingredients").value=text.trim(); currentLang="sv"; translatedFrom=from;
+    runCheck(false,true);
+  }catch(e){
+    btn.disabled=false; btn.textContent="Översätt till svenska";
+    const p=document.createElement("p"); p.className="small"; p.textContent=errCopy(e.code,e); btn.parentElement.after(p);
+  }
+}
+
 /* ---------- Mina varor: säkra och undvik ---------- */
 let lists=store.get("kjad.lists",{safe:[],avoid:[]});
 let listTab="safe", currentCode=null;
@@ -1437,7 +1587,7 @@ function renderLists(){
     const row=document.createElement("div"); row.className="item";
     row.innerHTML='<span class="dot '+(listTab==="safe"?"green":"red")+'"></span>';
     const o=document.createElement("button"); o.className="open"; o.textContent=x.name;
-    o.onclick=()=>{$("prodName").value=x.name;$("ingredients").value=x.text;$("exampleBadge").hidden=true;currentCode=x.code;runCheck(false,false);$("result").scrollIntoView({behavior:"smooth",block:"start"})};
+    o.onclick=()=>{$("prodName").value=x.name;$("ingredients").value=x.text;$("exampleBadge").hidden=true;currentCode=x.code;currentLang=null;translatedFrom=null;runCheck(false,false);$("result").scrollIntoView({behavior:"smooth",block:"start"})};
     const rm=document.createElement("button"); rm.className="rm"; rm.textContent="Ta bort"; rm.setAttribute("aria-label","Ta bort "+x.name);
     rm.onclick=()=>{lists[listTab]=lists[listTab].filter(y=>y.key!==x.key);store.set("kjad.lists",lists);renderLists()};
     row.append(o,rm); box.append(row);
@@ -1491,7 +1641,7 @@ async function checkRecallBanner(){
 /* ---------- Start ---------- */
 
 $("prodName").value=EXAMPLE.name; $("ingredients").value=EXAMPLE.text;
-$("ingredients").addEventListener("input",()=>{$("exampleBadge").hidden=true;currentCode=null});
+$("ingredients").addEventListener("input",()=>{$("exampleBadge").hidden=true;currentCode=null;currentLang=null;translatedFrom=null});
 $("prodName").addEventListener("input",()=>{$("exampleBadge").hidden=true});
 $("checkBtn").onclick=()=>runCheck(true,true);
 renderChips(); renderProfile(); renderHistory(); renderLists(); runCheck(false);

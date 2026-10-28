@@ -25,7 +25,7 @@ json.dump({"name":"Kan jag äta det?","short_name":"Kan jag äta?","lang":"sv","
   "background_color":"#F3F6F5","theme_color":"#3046A6",
   "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]},
   open(f"{out}/manifest.webmanifest","w",encoding="utf8"),ensure_ascii=False,indent=1)
-open(f"{out}/sw.js","w").write('''const C="kjad-v6";
+open(f"{out}/sw.js","w").write('''const C="kjad-v7";
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest","./icon-192.png"])));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{const u=new URL(e.request.url);if(e.request.method!=="GET"||u.origin!==location.origin)return;
