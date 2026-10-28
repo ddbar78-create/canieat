@@ -1,0 +1,28 @@
+{
+"v": 1,
+"updated": "2026-10-28",
+"source": "https://www.livsmedelsverket.se/rss/rss-aterkallanden",
+"status": {
+"ok": true,
+"feed_items": 2,
+"added": 2
+},
+"items": [
+{
+"title": "Coop återkallar fryst röd chili - kan innehålla kadmium",
+"link": "https://www.livsmedelsverket.se/om-oss/press/aterkallanden/coop-aterkallar-fryst-rod-chili---kan-innehalla-kadmium/",
+"desc": "Coop återkallar fryst röd chili 50 gram eftersom den kan innehålla kadmium.",
+"date": "2026-10-26",
+"eans": [],
+"eans_checked": true
+},
+{
+"title": "Arla återkallar proteinpudding då produkterna kan innehålla små glasfragment",
+"link": "https://www.livsmedelsverket.se/om-oss/press/aterkallanden/arla-aterkallar-proteinpudding-da-produkterna-kan-innehalla-sma-glasfragment/",
+"desc": "Arla återkallar Arla Protein Pudding. Orsaken till återkallelsen är att produkterna kan innehålla små glasfragment. Även om risken bedöms som mycket låg väljer Arla att återkalla produkterna som en försiktighetsåtgärd.",
+"date": "2026-10-23",
+"eans": [],
+"eans_checked": true
+}
+]
+}
