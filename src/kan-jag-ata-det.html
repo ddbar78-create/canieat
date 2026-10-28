@@ -640,7 +640,8 @@ function analyze(text,langHint){
   const tm = lower.search(TRACE_RE);
   let traceStart=-1, traceEnd=-1;
   if(tm>=0){traceStart=tm;const dot=lower.indexOf(".",tm);traceEnd=dot<0?lower.length:dot}
-  const lang=LANG_GROUP(langHint||detectLang(text)), extra=FL[lang]||{};
+  // Språket avgörs av texten själv; databasens språkkod används bara om texten inte räcker för att avgöra
+  const det=detectLang(text), lang=LANG_GROUP(det!=="?"?det:(langHint||"?")), extra=FL[lang]||{};
   const words=[]; const re=/[a-z0-9åäöæøüéèêëàâûùôœçßíóúñï]+/gi; let m;
   while((m=re.exec(lower))){let e=m.index+m[0].length;while(lower[e]==="_")e++;words.push({w:m[0],s:m.index,e});}
   const findings=[]; const marks=[];
