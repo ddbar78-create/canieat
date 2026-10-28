@@ -39,8 +39,8 @@ header{display:flex;flex-direction:column;gap:10px}
 .chip.intolerans{border-color:var(--warn);color:var(--warn)}
 .chip.example{border-style:dashed;color:var(--muted)}
 
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
-.tabs button{font:inherit;font-weight:700;font-size:.9375rem;border:0;background:transparent;color:var(--muted);padding:10px 4px;border-radius:9px;cursor:pointer}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.tabs button{font:inherit;font-weight:700;font-size:.875rem;border:0;background:transparent;color:var(--muted);padding:10px 2px;min-width:0;border-radius:9px;cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 
 section.view{display:flex;flex-direction:column;gap:16px}
@@ -85,6 +85,7 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
 .alg{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding-block:10px;border-top:1px solid var(--line)}
 .alg:first-of-type{border-top:0}
 .alg .name{min-width:0}
+.alg .trace{grid-column:1/-1;font-size:.8125rem;color:var(--muted)}
 .alg .name small{display:block;color:var(--muted);font-size:.8125rem}
 .seg{display:inline-grid;grid-template-columns:repeat(3,auto);border:1px solid var(--line);border-radius:9px;overflow:hidden}
 .seg button{font:inherit;font-size:.8125rem;font-weight:700;border:0;background:var(--surface);color:var(--muted);padding:7px 9px;cursor:pointer}
@@ -119,6 +120,57 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
 .scanner{position:fixed;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .scanner video{width:100%;max-width:520px;border-radius:12px}
 .scanner p{color:#fff;margin:0;text-align:center}
+/* Allergikort: alltid ljust och högkontrast, eftersom det visas för andra */
+.acard{background:#fff;color:#111;border:3px solid #BC2F26;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.acard h2{font-family:var(--display);font-size:1.75rem;line-height:1.15;color:#BC2F26}
+.acard p{margin:0;font-size:1.0625rem;line-height:1.45}
+.acard ul{margin:0;padding-left:22px;font-size:1.25rem;font-weight:700;line-height:1.5}
+.acard .warn{background:#FBE5E2;border-radius:8px;padding:8px 10px;font-weight:700}
+.acard.full{position:fixed;inset:0;z-index:60;border-radius:0;border-width:6px;overflow:auto;padding-top:max(24px,env(safe-area-inset-top,0px));padding-bottom:max(24px,env(safe-area-inset-bottom,0px));padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.acard.full h2{font-size:2.25rem}
+.acard.full ul{font-size:1.6rem}
+.acard .closefull{align-self:flex-end;font:inherit;font-weight:700;background:#111;color:#fff;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+.langs{display:flex;flex-wrap:wrap;gap:6px}
+.langs button{font:inherit;font-size:.875rem;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* Info */
+.emerg{border:2px solid var(--bad)}
+.emerg h3{color:var(--bad)}
+.call{display:flex;flex-wrap:wrap;gap:8px}
+.call a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:800;font-family:var(--display);font-size:1.5rem;padding:8px 16px;border-radius:12px;background:var(--bad);color:var(--surface)}
+.call a.calm{background:var(--accent-soft);color:var(--accent);font-size:1.125rem}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.info ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+details.alginfo{border-top:1px solid var(--line);padding-block:10px}
+details.alginfo:first-of-type{border-top:0}
+details.alginfo summary{cursor:pointer;font-weight:700;display:flex;gap:8px;align-items:center}
+details.alginfo summary .chip{font-size:.75rem;padding:1px 8px}
+details.alginfo .body{display:flex;flex-direction:column;gap:6px;padding-top:8px;font-size:.9375rem}
+.tablewrap{overflow-x:auto}
+table.et{border-collapse:collapse;width:100%;font-size:.875rem}
+table.et th,table.et td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.et th{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums}
+.recalls{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.recalls li{border-top:1px solid var(--line);padding-block:10px;display:flex;flex-direction:column;gap:4px}
+.recalls li:first-child{border-top:0}
+.recalls time{font-size:.8125rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.recalls a{color:var(--ink);font-weight:700}
+.recalls .hitchip{align-self:flex-start;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--bad-soft);color:var(--bad)}
+.banner{border:2px solid var(--bad);background:var(--bad-soft)}
+.banner a{color:var(--ink);font-weight:700}
+/* Mina varor */
+.lists{display:flex;flex-direction:column;gap:6px}
+.lists .item{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;border-top:1px solid var(--line);padding-block:8px}
+.lists .item:first-child{border-top:0}
+.lists .item button.open{font:inherit;text-align:left;background:none;border:0;color:var(--ink);cursor:pointer;padding:0;min-width:0;overflow-wrap:anywhere}
+.lists .item button.rm{font:inherit;background:none;border:0;color:var(--muted);cursor:pointer;padding:4px 8px}
+.seg2{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg2 button{font:inherit;font-size:.8125rem;font-weight:700;border:0;background:var(--surface);color:var(--muted);padding:7px 12px;cursor:pointer}
+.seg2 button+button{border-left:1px solid var(--line)}
+.seg2 button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.listbtns .on-safe{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.listbtns .on-avoid{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
 .note{font-size:.8125rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 .badge{font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
@@ -135,12 +187,15 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
 
   <nav class="tabs" role="tablist">
     <button role="tab" id="tab-kolla" aria-selected="true" data-view="kolla">Kolla</button>
+    <button role="tab" id="tab-kort" aria-selected="false" data-view="kort">Kort</button>
+    <button role="tab" id="tab-info" aria-selected="false" data-view="info">Info</button>
     <button role="tab" id="tab-fraga" aria-selected="false" data-view="fraga">Fråga</button>
-    <button role="tab" id="tab-profil" aria-selected="false" data-view="profil">Min profil</button>
+    <button role="tab" id="tab-profil" aria-selected="false" data-view="profil">Profil</button>
   </nav>
 
   <!-- KOLLA -->
   <section class="view" id="view-kolla">
+    <div class="panel banner" id="recallBanner" hidden></div>
     <div class="panel" id="searchPanel" hidden>
       <h3>Sök produkt</h3>
       <p class="small muted">Söker bland svenska varor från Open Food Facts, en öppen databas. Skriv namn eller streckkodens siffror.</p>
@@ -187,9 +242,122 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
 
     <div id="result" class="panel" hidden></div>
 
+    <div class="panel" id="listsPanel" hidden>
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3>Mina varor</h3>
+        <div class="seg2" role="group" aria-label="Lista">
+          <button id="listTabSafe" aria-pressed="true">Säkra</button>
+          <button id="listTabAvoid" aria-pressed="false">Undvik</button>
+        </div>
+      </div>
+      <div class="lists" id="listItems"></div>
+    </div>
+
     <div class="panel" id="histPanel" hidden>
       <h3>Senast kollat</h3>
       <ul class="hist" id="hist"></ul>
+    </div>
+  </section>
+
+  <!-- KORT -->
+  <section class="view" id="view-kort" hidden>
+    <div class="panel">
+      <div>
+        <h3>Allergikort</h3>
+        <p class="small muted">Visa kortet för personalen på restaurang, café eller utomlands. Det fylls i från din profil.</p>
+      </div>
+      <div class="langs" id="cardLangs" role="group" aria-label="Språk"></div>
+      <div id="cardBox"></div>
+      <div class="row">
+        <button class="btn primary grow" id="cardFull">Visa i helskärm</button>
+      </div>
+      <p class="small muted">Egna ingredienser visas som du skrivit dem och översätts inte.</p>
+    </div>
+  </section>
+
+  <!-- INFO -->
+  <section class="view info" id="view-info" hidden>
+    <div class="panel emerg">
+      <h3>Vid allvarlig allergisk reaktion</h3>
+      <div class="call"><a href="tel:112">Ring 112</a><a class="calm" href="tel:1177">Rådgivning 1177</a></div>
+      <div>
+        <p class="label">Tecken på allergisk chock (anafylaxi)</p>
+        <ul>
+          <li>Klåda som ofta börjar i hårbotten, handflatorna eller fotsulorna</li>
+          <li>Nässelutslag eller rodnad som snabbt sprider sig</li>
+          <li>Läppar, tunga eller svalg som svullnar, domnar eller kliar</li>
+          <li>Svårt att andas</li>
+          <li>Kräkningar eller diarré</li>
+          <li>Yrsel, kallsvett, oro eller känsla av att svimma</li>
+        </ul>
+      </div>
+      <div>
+        <p class="label">Gör så här</p>
+        <ol class="steps">
+          <li><b>Ta adrenalinpennan direkt</b> om du har en. Den ges i lårets yttersida och går bra att ge genom tunna kläder.</li>
+          <li><b>Ring 112</b> och säg att det är en allergisk chock.</li>
+          <li>Har du astma: ta 1–2 doser luftrörsvidgande. Det kan upprepas efter 10 minuter.</li>
+          <li>Ta antihistamin och kortison om du har det, men <b>efter</b> adrenalinpennan. Tabletterna tar flera timmar att verka.</li>
+          <li>Blir det inte bättre kan adrenalinpennan upprepas efter 10–15 minuter.</li>
+          <li>Du ska alltid till sjukhus efter en allergisk chock.</li>
+        </ol>
+      </div>
+      <p class="small">Följ alltid den behandlingsplan du fått av din läkare. Källa: <a href="https://www.1177.se/olyckor--skador/akuta-rad---forsta-hjalpen/allergisk-chock--anafylaxi/" target="_blank" rel="noopener">1177, Allergisk chock – anafylaxi</a>.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Återkallade varor</h3>
+      <p class="small muted">Från Livsmedelsverket. Varor som rör dina allergener är markerade, och appen varnar om du skannar en återkallad vara.</p>
+      <ul class="recalls" id="recallList"></ul>
+      <p class="small muted" id="recallInfo"></p>
+    </div>
+
+    <div class="panel">
+      <h3>Lär dig mer om allergenerna</h3>
+      <p class="small muted">Var de brukar finnas och vilka namn de kan gömma sig bakom. Dina allergener står först.</p>
+      <div id="algInfo"></div>
+    </div>
+
+    <div class="panel">
+      <h3>E-nummer att känna till</h3>
+      <div class="tablewrap">
+        <table class="et">
+          <thead><tr><th>E-nummer</th><th>Vad det är</th><th>Bra att veta</th></tr></thead>
+          <tbody>
+            <tr><td>E220–E228</td><td>Svaveldioxid och sulfiter</td><td>Märkningspliktiga över 10 mg/kg eller 10 mg/l. Vanligt i vin, torkad frukt och korv.</td></tr>
+            <tr><td>E322</td><td>Lecitin</td><td>Kommer ofta från soja, ibland från ägg, solros eller raps. Källan ska framgå om den är ett allergen.</td></tr>
+            <tr><td>E426</td><td>Sojabönshemicellulosa</td><td>Från soja.</td></tr>
+            <tr><td>E479b</td><td>Termiskt oxiderad sojaolja</td><td>Från soja.</td></tr>
+            <tr><td>E1105</td><td>Lysozym</td><td>Från ägg. Används bland annat i ost.</td></tr>
+            <tr><td>E966</td><td>Laktitol</td><td>Sötningsmedel som framställs av mjölksocker.</td></tr>
+            <tr><td>E1404–E1452</td><td>Modifierad stärkelse</td><td>Kan komma från vete. Då ska det framgå, till exempel "modifierad vetestärkelse".</td></tr>
+            <tr><td>E270</td><td>Mjölksyra</td><td>Innehåller inte mjölkprotein trots namnet.</td></tr>
+            <tr><td>E325–E327</td><td>Laktater</td><td>Salter av mjölksyra. Innehåller inte mjölkprotein trots namnet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Så fungerar märkningen</h3>
+      <ul>
+        <li>De 14 allergenerna ska framhävas i ingredienslistan, till exempel med fetstil eller versaler.</li>
+        <li>"Kan innehålla spår av" är frivilligt för tillverkaren. En vara utan den texten kan ändå innehålla spår.</li>
+        <li>På restaurang, café och i lösvikt ska personalen kunna berätta vilka allergener maten innehåller. Fråga alltid.</li>
+        <li>Recept ändras. Läs förpackningen varje gång, även på varor du köpt förut.</li>
+        <li>Några ingredienser är undantagna från märkning eftersom allergenet är bortrenat, till exempel glukossirap och maltodextrin från vete och helt raffinerad sojaolja.</li>
+        <li>"Glutenfri" betyder högst 20 mg gluten per kilo.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Mer hjälp</h3>
+      <ul>
+        <li><a href="https://www.1177.se/" target="_blank" rel="noopener">1177</a>: råd om allergi och vård, eller ring 1177.</li>
+        <li><a href="https://astmaoallergiforbundet.se/" target="_blank" rel="noopener">Astma- och Allergiförbundet</a>: kunskap och stöd.</li>
+        <li><a href="https://www.celiaki.se/" target="_blank" rel="noopener">Svenska Celiakiförbundet</a>: för dig som inte tål gluten.</li>
+        <li><a href="https://www.livsmedelsverket.se/" target="_blank" rel="noopener">Livsmedelsverket</a>: regler om märkning och återkallade varor.</li>
+      </ul>
     </div>
   </section>
 
@@ -212,9 +380,16 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
     <div class="panel">
       <div>
         <h3>EU:s 14 allergener</h3>
-        <p class="small muted">Enligt bilaga II i förordning (EU) nr 1169/2011. Välj <b>Allergi</b> om allt ska undvikas, eller <b>Intolerans</b> om små mängder brukar gå bra.</p>
+        <p class="small muted">Enligt bilaga II i förordning (EU) nr 1169/2011. Välj <b>Allergi</b> om allt ska undvikas, eller <b>Intolerans</b> om små mängder brukar gå bra. Vid allergi kan du också välja att även spår ska ge rött.</p>
       </div>
       <div id="algList"></div>
+    </div>
+    <div class="panel">
+      <div>
+        <h3>Fler vanliga allergener</h3>
+        <p class="small muted">Inte märkningspliktiga i EU, men vanliga. Ärtor och andra baljväxter blir allt vanligare i livsmedel.</p>
+      </div>
+      <div id="algList2"></div>
     </div>
     <div class="panel" id="movePanel" hidden>
       <div>
@@ -287,11 +462,12 @@ const ALLERGENS = [
   excl:["bovete","glutenfri","majskorn","pepparkorn","senapskorn","maltodextrin","maltitol","maltos","fänkål"],
   maybe:[{t:"havre",why:"Havre kan vara förorenad med gluten om den inte är märkt glutenfri.",unless:/glutenfri\s+havre|havre\s*\(glutenfri/}]},
  {id:"krafdjur",name:"Kräftdjur",sub:"räkor, krabba, hummer …",terms:["kräftdjur","hummer","krabb","kräft","langust","scampi","krill","shrimp","prawn","crab","lobster",{t:"räk",edge:1}],excl:["räkna"]},
- {id:"agg",name:"Ägg",sub:"äggula, albumin, lysozym …",terms:["albumin","lysozym","ovomukoid","ovoglobulin","majonnäs","aioli","maräng","egg",{t:"ägg",edge:1}],excl:["pålägg","tillägg","laktalbumin","eggplant"]},
+ {id:"agg",name:"Ägg",sub:"äggula, albumin, lysozym …",terms:["albumin","lysozym","e1105","ovomukoid","ovoglobulin","majonnäs","aioli","maräng","egg",{t:"ägg",edge:1}],excl:["pålägg","tillägg","laktalbumin","eggplant"]},
  {id:"fisk",name:"Fisk",sub:"torsk, lax, ansjovis …",terms:["fisk","torsk","tonfisk","sill","strömming","makrill","ansjovis","sardin","kolja","rödspätta","gädda","abborre","surimi","worcestershire","röding","hälleflundra","fish","anchov","cod","salmon","tuna",{t:"lax",edge:1},{t:"sej",edge:1}],excl:["bläckfisk"]},
  {id:"jordnot",name:"Jordnötter",sub:"jordnötsolja, arakid …",terms:["jordnöt","peanut","arakid"],excl:[]},
- {id:"soja",name:"Soja",sub:"sojalecitin, tofu, miso …",terms:["soja","soy","tofu","edamame","tempeh","tamari","shoyu","yuba",{t:"miso",edge:1}],excl:[],
-  maybe:[{t:"lecitin",why:"Lecitin (E322) kommer ofta från soja om källan inte anges.",unless:/(solros|raps|ägg)lecitin|lecitin(er)?\s*\((solros|raps|ägg)/}]},
+ {id:"soja",name:"Soja",sub:"sojalecitin, tofu, miso …",terms:["soja","soy","tofu","edamame","tempeh","tamari","shoyu","yuba","e426","e479b",{t:"miso",edge:1}],excl:[],
+  maybe:[{t:"lecitin",why:"Lecitin (E322) kommer ofta från soja om källan inte anges.",unless:/(solros|raps|ägg)lecitin|lecitin(er)?\s*\((solros|raps|ägg)/},
+         {t:"e322",why:"E322 är lecitin, som ofta kommer från soja om källan inte anges.",unless:/(solros|raps|ägg)lecitin|e322\s*\((solros|raps|ägg)/}]},
  {id:"mjolk",name:"Mjölk",sub:"vassle, kasein, grädde, smör …",
   terms:["mjölk","grädde","smör","vassle","kasein","laktos","laktalbumin","laktoglobulin","yoghurt","kvarg","kesella","mascarpone","ricotta","mozzarella","parmesan","cheddar","halloumi","gouda","brie","kefir","skyr","keso","ghee","mjölkprotein","whey","milk","butter","cream","cheese",{t:"ost",edge:1},{t:"crème",edge:1},{t:"creme",edge:1}],
   excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","kakaosmör","jordnötssmör","sheasmör","mandelsmör","laktosfri","ostron","cocoa butter"]},
@@ -302,9 +478,16 @@ const ALLERGENS = [
  {id:"sulfit",name:"Svaveldioxid och sulfiter",sub:"E220–E228",terms:["svaveldioxid","sulfit","sulphit","e220","e221","e222","e223","e224","e225","e226","e227","e228"],excl:[]},
  {id:"lupin",name:"Lupin",sub:"lupinmjöl …",terms:["lupin","lupine"],excl:[]},
  {id:"blotdjur",name:"Blötdjur",sub:"musslor, bläckfisk, ostron …",terms:["blötdjur","mussl","ostron","bläckfisk","snäck","kalmar","snigl","escargot","calamar","oyster"],excl:[]},
- {id:"laktos",name:"Laktos",sub:"intolerans mot mjölksocker",extra:1,
+ {id:"laktos",name:"Laktos",sub:"intolerans mot mjölksocker",group:"more",extra:1,
   terms:["mjölk","grädde","vassle","laktos","yoghurt","kvarg","kesella","glass","whey","milk","cream"],
   excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","laktosfri"],lactoseFree:1},
+ {id:"artor",name:"Ärtor",sub:"ärtprotein, ärtmjöl …",group:"more",terms:["ärtprotein","ärtmjöl","ärtfiber","ärtstärkelse","sockerärt","pea protein",{t:"ärt",edge:1}],excl:["kikärt"]},
+ {id:"linser",name:"Linser",sub:"röda linser, linsmjöl …",group:"more",terms:["lentil",{t:"lins",edge:1}],excl:[]},
+ {id:"kikartor",name:"Kikärtor",sub:"hummus, kikärtsmjöl …",group:"more",terms:["kikärt","hummus","chickpea","garbanzo","besan"],excl:[]},
+ {id:"bovete",name:"Bovete",sub:"bovetemjöl, soba …",group:"more",terms:["bovete","buckwheat",{t:"soba",edge:1}],excl:[]},
+ {id:"kiwi",name:"Kiwi",sub:"kiwifrukt",group:"more",terms:["kiwi"],excl:[]},
+ {id:"kokos",name:"Kokos",sub:"kokosmjölk, kokosolja …",group:"more",terms:["kokos","coconut"],excl:[]},
+ {id:"majs",name:"Majs",sub:"majsstärkelse, polenta …",group:"more",terms:["majs","maize","polenta","popcorn","cornflakes",{t:"corn",edge:1}],excl:["peppercorn"]},
 ];
 const TRACE_RE = /(kan innehålla|spår av|may contain|kan förekomma)/i;
 
@@ -324,6 +507,7 @@ let history = store.get("kjad.history", []);
 function saveProfile(){profile.example=false;store.set("kjad.profile",profile);renderChips()}
 
 /* ---------- Matchning ---------- */
+const traceStrict=id=>!!(profile.traces&&profile.traces[id]);
 function activeAllergens(){
   const list = ALLERGENS.filter(a=>profile.levels[a.id]&&profile.levels[a.id]!=="av").map(a=>({...a,level:profile.levels[a.id]}));
   for(const c of profile.custom) list.push({id:"c:"+c,name:c,terms:[c.toLowerCase()],excl:[],level:"allergi",custom:1});
@@ -367,7 +551,7 @@ function analyze(text){
     }
     if(lactoseFree && contains.length){findings.push({a,kind:"info",words:uniq(contains),msg:"Produkten är märkt laktosfri."});continue}
     if(contains.length) findings.push({a,kind:a.level==="allergi"?"red":"amber",words:uniq(contains)});
-    if(traces.length) findings.push({a,kind:a.level==="allergi"?"amber":"info",words:uniq(traces),trace:1});
+    if(traces.length) findings.push({a,kind:a.level==="allergi"?(traceStrict(a.id)?"red":"amber"):"info",words:uniq(traces),trace:1});
     for(const mb of maybe) findings.push({a,kind:"amber",words:[mb.t],msg:mb.why});
   }
   const status = findings.some(f=>f.kind==="red")?"red":findings.some(f=>f.kind==="amber")?"amber":"green";
@@ -406,7 +590,7 @@ const esc = s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&
 function renderChips(){
   const el=$("profileChips"); el.innerHTML="";
   const act=activeAllergens();
-  if(!act.length){el.innerHTML='<span class="chip example">Ingen profil ännu. Gå till Min profil.</span>';return}
+  if(!act.length){el.innerHTML='<span class="chip example">Ingen profil ännu. Gå till Profil.</span>';return}
   for(const a of act){
     const c=document.createElement("span");
     c.className="chip "+a.level+(profile.example?" example":"");
@@ -429,14 +613,14 @@ function renderResult(name,text,res){
   // markera ord i texten
   const marks=res.marks.sort((a,b)=>a.s-b.s); let html="",pos=0;
   for(const mk of marks){ if(mk.s<pos) continue;
-    const cls = (!mk.inTrace && !mk.maybe && mk.a.level==="allergi")?"red":"amber";
+    const cls = (!mk.maybe && mk.a.level==="allergi" && (!mk.inTrace || traceStrict(mk.a.id)))?"red":"amber";
     html+=esc(text.slice(pos,mk.s))+'<mark class="'+cls+'" title="'+esc(mk.a.name)+'">'+esc(text.slice(mk.s,mk.e))+"</mark>"; pos=mk.e;}
   html+=esc(text.slice(pos));
   const items=res.findings.map(f=>{
     const dot=f.kind==="red"?"red":f.kind==="amber"?"amber":"green";
     let line="<b>"+esc(f.a.name)+"</b> ";
     if(f.msg) line+="– "+esc(f.msg)+" ";
-    else if(f.trace) line+="– kan finnas spår ("+esc(f.words.join(", "))+")";
+    else if(f.trace) line+="– kan finnas spår ("+esc(f.words.join(", "))+")"+(f.kind==="red"?' <span class="muted small">(du undviker även spår)</span>':"");
     else line+="– finns i: "+esc(f.words.join(", "));
     if(f.a.level==="intolerans" && f.kind!=="info" && !f.msg) line+=' <span class="muted small">(intolerans)</span>';
     return '<li><span class="dot '+dot+'"></span><span>'+line+"</span></li>";
@@ -446,10 +630,16 @@ function renderResult(name,text,res){
     '<ul class="hits" id="hitList"'+(items?'':' hidden')+'>'+items+'</ul>'+
     '<div id="aiCheck" class="ai" hidden></div>'+
     '<div><p class="label">Ingredienser</p><p class="ingr">'+html+'</p></div>'+
+    '<div class="row listbtns"><button class="btn grow" id="markSafe">Spara som säker</button><button class="btn grow" id="markAvoid">Undvik alltid</button></div>'+
     '<div class="row" id="tipsRow"><button class="btn" id="tipsBtn">'+(res.status==="green"?"Tips för den här produkten":"Föreslå alternativ och tips")+'</button></div>'+
     '<div id="tipsBox" class="ai" hidden></div>';
   renderVerdict();
   wireTips();
+  const ol=lastCheck&&lastCheck.onList;
+  $("markSafe").textContent=ol==="safe"?"Sparad som säker (ta bort)":"Spara som säker";
+  $("markAvoid").textContent=ol==="avoid"?"På undvik-listan (ta bort)":"Undvik alltid";
+  $("markSafe").classList.toggle("on-safe",ol==="safe"); $("markAvoid").classList.toggle("on-avoid",ol==="avoid");
+  $("markSafe").onclick=()=>setList("safe"); $("markAvoid").onclick=()=>setList("avoid");
 }
 
 function renderVerdict(){
@@ -518,7 +708,7 @@ function renderHistory(){
   history.forEach((h,i)=>{
     const li=document.createElement("li"); const b=document.createElement("button");
     b.innerHTML='<span class="dot '+h.status+'"></span><span>'+esc(h.name||h.text.slice(0,40)+"…")+'</span><time>'+new Date(h.at).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})+'</time>';
-    b.onclick=()=>{$("prodName").value=h.name||"";$("ingredients").value=h.text;$("exampleBadge").hidden=true;runCheck(false,true)};
+    b.onclick=()=>{$("prodName").value=h.name||"";$("ingredients").value=h.text;$("exampleBadge").hidden=true;currentCode=h.code||null;runCheck(false,true)};
     li.append(b); ul.append(li);
   });
 }
@@ -528,20 +718,26 @@ function runCheck(save=true,auto=false){
   if(!text){$("result").hidden=false;$("result").innerHTML='<p>Skriv eller klistra in en ingredienslista först.</p>';return}
   const res=analyze(text);
   addSafetyChecks(res,name,text);
-  lastCheck={name,text,res};
+  const key=itemKey(currentCode,name,text), onList=listOf(key);
+  if(onList==="avoid") res.findings.unshift({a:{id:"_avoid",name:"Din undvik-lista",level:"allergi"},kind:"red",words:[],msg:"Du har markerat varan som något du ska undvika."});
+  const rc=recallFor(currentCode);
+  if(rc) res.findings.unshift({a:{id:"_recall",name:"Återkallad vara",level:"allergi"},kind:"red",words:[],msg:rc.title+" (Livsmedelsverket, "+rc.date+")."});
+  res.status=res.findings.some(f=>f.kind==="red")?"red":res.findings.some(f=>f.kind==="amber")?"amber":"green";
+  lastCheck={name,text,res,code:currentCode,onList};
   renderResult(name,text,res);
   aiSeq++;
   if(auto && sample) aiCheck(); else showAiCheckButton();
   if(save && $("exampleBadge").hidden){
-    history=[{name,text,status:res.status,at:Date.now()},...history.filter(h=>h.text!==text)].slice(0,12);
+    history=[{name,text,code:currentCode,status:res.status,at:Date.now()},...history.filter(h=>h.text!==text)].slice(0,12);
     store.set("kjad.history",history); renderHistory();
   }
 }
 
 /* ---------- Profil-vy ---------- */
 function renderProfile(){
-  const list=$("algList"); list.innerHTML="";
+  $("algList").innerHTML=""; $("algList2").innerHTML="";
   for(const a of ALLERGENS){
+    const list=a.group==="more"?$("algList2"):$("algList");
     const row=document.createElement("div"); row.className="alg";
     const cur=profile.levels[a.id]||"av";
     row.innerHTML='<div class="name"><b>'+esc(a.name)+'</b><small>'+esc(a.sub)+'</small></div>';
@@ -552,7 +748,14 @@ function renderProfile(){
       b.onclick=()=>{if(profile.example){profile.levels={};}profile.levels[a.id]=v;saveProfile();renderProfile();if(lastCheck) runCheck(false)};
       seg.append(b);
     }
-    row.append(seg); list.append(row);
+    row.append(seg);
+    if(cur==="allergi"){
+      const lab=document.createElement("label"); lab.className="check trace";
+      lab.innerHTML='<input type="checkbox"'+(traceStrict(a.id)?" checked":"")+'> <span>Undvik även spår ("kan innehålla")</span>';
+      lab.querySelector("input").onchange=e=>{profile.traces=profile.traces||{};profile.traces[a.id]=e.target.checked;saveProfile();if(lastCheck) runCheck(false)};
+      row.append(lab);
+    }
+    list.append(row);
   }
   const cl=$("customList"); cl.innerHTML="";
   if(!profile.custom.length) cl.innerHTML='<span class="small muted">Inga egna ännu.</span>';
@@ -569,18 +772,21 @@ $("customAdd").onclick=()=>{
 $("customInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("customAdd").click()}});
 
 /* ---------- Flikar ---------- */
-const VIEWS=["kolla","fraga","profil"];
+const VIEWS=["kolla","kort","info","fraga","profil"];
 function show(v){
   for(const x of VIEWS){$("view-"+x).hidden=x!==v;$("tab-"+x).setAttribute("aria-selected",x===v)}
+  if(v==="kort") renderCard();
+  if(v==="info") renderInfo();
+  window.scrollTo(0,0);
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>show(b.dataset.view));
-const startHash=(location.hash||"").slice(1); if(VIEWS.includes(startHash)) show(startHash);
+const startHash=(location.hash||"").slice(1); if(VIEWS.includes(startHash)) setTimeout(()=>show(startHash),0);
 
 /* ---------- Claude: foto, tips, frågor ---------- */
 let sample=null;
 const profileText=()=>{const a=activeAllergens();return a.length?a.map(x=>x.name+" ("+x.level+")").join(", "):"ingen angiven"};
 const errCopy=(code,e)=>((e&&e.status&&e.message)?errCopyBase(code)+" (Anthropic: "+e.message+")":errCopyBase(code));
-const errCopyBase=code=>({not_granted:"Du har inte tillåtit sidan att använda Claude.",rate_limited:"För många frågor just nu. Vänta en stund och försök igen.",session_expired:"Logga in i Claude igen.",image_rejected:"Bilden gick inte att läsa. Prova en skarpare bild.",refused:"Claude kunde inte svara på det här.",invalid_json:"Svaret blev konstigt. Försök igen.",bad_key:"API-nyckeln fungerar inte. Kontrollera den under Min profil.",no_credit:"Ditt Claude API-konto saknar krediter. Fyll på på console.anthropic.com."}[code]||"Något gick fel. Försök igen.");
+const errCopyBase=code=>({not_granted:"Du har inte tillåtit sidan att använda Claude.",rate_limited:"För många frågor just nu. Vänta en stund och försök igen.",session_expired:"Logga in i Claude igen.",image_rejected:"Bilden gick inte att läsa. Prova en skarpare bild.",refused:"Claude kunde inte svara på det här.",invalid_json:"Svaret blev konstigt. Försök igen.",bad_key:"API-nyckeln fungerar inte. Kontrollera den under Profil.",no_credit:"Ditt Claude API-konto saknar krediter. Fyll på på console.anthropic.com."}[code]||"Något gick fel. Försök igen.");
 
 function wireTips(){
   const btn=$("tipsBtn"); if(!btn) return;
@@ -712,7 +918,7 @@ function useProduct(p){
   if(al.length) t+=(t?(/[.]$/.test(t)?" ":". "):"")+"Allergener enligt databasen: "+al.join(", ")+".";
   if(tr.length) t+=(t?" ":"")+"Kan innehålla spår av: "+tr.join(", ")+".";
   const name=[p.product_name_sv||p.product_name,p.brands].filter(Boolean).join(" – ");
-  $("prodName").value=name; $("exampleBadge").hidden=true;
+  $("prodName").value=name; $("exampleBadge").hidden=true; currentCode=p.code||null;
   const st=$("searchStatus");
   if(!t){$("ingredients").value="";st.hidden=true;$("result").hidden=true;showOffAdd("noingredients",p.code,name);return}
   if(p.code) showOffAdd("found",p.code,name);
@@ -970,7 +1176,7 @@ function applyAi(){
   sample=k?makeApiSample(k):null;
   for(const id of ["photoBtn","pickBtn"]) $(id).hidden=!sample;
   $("askUnavailable").hidden=!!sample;
-  $("askUnavailable").textContent="Frågor kräver en Claude API-nyckel. Lägg in den under Min profil.";
+  $("askUnavailable").textContent="Frågor kräver en Claude API-nyckel. Lägg in den under Profil.";
   if(lastCheck) runCheck(false);
 }
 $("aiKeySave").onclick=async()=>{
@@ -994,7 +1200,7 @@ const MOVE_PREFIX="KJAD1:";
 const b64enc=str=>btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const b64dec=str=>decodeURIComponent(escape(atob(str.replace(/-/g,"+").replace(/_/g,"/"))));
 function moveCode(withKey){
-  const data={v:1,p:{levels:profile.example?{}:profile.levels,custom:profile.custom}};
+  const data={v:1,p:{levels:profile.example?{}:profile.levels,custom:profile.custom,traces:profile.traces||{}}};
   const k=store.get("kjad.apikey",""); if(withKey&&k) data.k=k;
   return MOVE_PREFIX+b64enc(JSON.stringify(data));
 }
@@ -1053,7 +1259,8 @@ function receiveMove(text){
   $("moveCancel").onclick=()=>{box.hidden=true};
   $("moveAccept").onclick=()=>{
     const clean={}; for(const a of ALLERGENS){const v=levels[a.id]; if(v==="allergi"||v==="intolerans") clean[a.id]=v}
-    profile={levels:clean,custom,example:false}; store.set("kjad.profile",profile);
+    const tr={}; for(const k in (data.p.traces||{})) if(clean[k]==="allergi"&&data.p.traces[k]) tr[k]=true;
+    profile={levels:clean,custom,traces:tr,example:false}; store.set("kjad.profile",profile);
     if(data.k && /^sk-ant-/.test(String(data.k))) store.set("kjad.apikey",String(data.k));
     renderChips(); renderProfile(); renderAiPanel(); applyAi();
     box.hidden=true; $("moveIn").hidden=true; st.hidden=false;
@@ -1078,12 +1285,200 @@ $("moveQrPhoto").addEventListener("change",async e=>{
   finally{e.target.value=""}
 });
 
+/* ---------- Allergikort ---------- */
+const CARD_LANGS=[["sv","Svenska"],["en","English"],["de","Deutsch"],["fr","Français"],["es","Español"],["it","Italiano"]];
+const CARD_T={
+ sv:{title:"Jag har matallergi",allergy:"Jag är allergisk mot följande. Även små mängder kan göra mig allvarligt sjuk:",traces:"Även spår och korskontaminering (samma redskap, olja eller yta) är farligt för mig.",intol:"Jag tål inte heller:",ask:"Kan du hjälpa mig att välja en rätt utan detta, eller fråga kocken? Tack!",close:"Stäng"},
+ en:{title:"I have a food allergy",allergy:"I am allergic to the following. Even small amounts can make me seriously ill:",traces:"Even traces and cross-contamination (shared utensils, oil or surfaces) are dangerous for me.",intol:"I also cannot tolerate:",ask:"Could you help me choose a dish without these, or ask the chef? Thank you!",close:"Close"},
+ de:{title:"Ich habe eine Lebensmittelallergie",allergy:"Ich bin allergisch gegen Folgendes. Schon kleine Mengen können mich ernsthaft krank machen:",traces:"Auch Spuren und Kreuzkontamination (gemeinsame Utensilien, Öl oder Flächen) sind für mich gefährlich.",intol:"Außerdem vertrage ich nicht:",ask:"Können Sie mir helfen, ein Gericht ohne diese Zutaten zu wählen, oder den Koch fragen? Vielen Dank!",close:"Schließen"},
+ fr:{title:"J'ai une allergie alimentaire",allergy:"Je suis allergique aux aliments suivants. Même de petites quantités peuvent me rendre gravement malade :",traces:"Même les traces et la contamination croisée (ustensiles, huile ou surfaces partagés) sont dangereuses pour moi.",intol:"Je ne tolère pas non plus :",ask:"Pourriez-vous m'aider à choisir un plat sans ces ingrédients, ou demander au chef ? Merci !",close:"Fermer"},
+ es:{title:"Tengo alergia alimentaria",allergy:"Soy alérgico/a a lo siguiente. Incluso pequeñas cantidades pueden hacerme enfermar gravemente:",traces:"Incluso las trazas y la contaminación cruzada (utensilios, aceite o superficies compartidos) son peligrosas para mí.",intol:"Tampoco tolero:",ask:"¿Podría ayudarme a elegir un plato sin estos ingredientes o preguntar al cocinero? ¡Gracias!",close:"Cerrar"},
+ it:{title:"Ho un'allergia alimentare",allergy:"Sono allergico/a a quanto segue. Anche piccole quantità possono farmi stare molto male:",traces:"Anche le tracce e la contaminazione crociata (utensili, olio o superfici condivisi) sono pericolose per me.",intol:"Inoltre non tollero:",ask:"Può aiutarmi a scegliere un piatto senza questi ingredienti o chiedere allo chef? Grazie!",close:"Chiudi"}
+};
+const CARD_A={
+ gluten:{sv:"Gluten (vete, råg, korn, havre)",en:"Gluten (wheat, rye, barley, oats)",de:"Gluten (Weizen, Roggen, Gerste, Hafer)",fr:"Gluten (blé, seigle, orge, avoine)",es:"Gluten (trigo, centeno, cebada, avena)",it:"Glutine (frumento, segale, orzo, avena)"},
+ krafdjur:{sv:"Kräftdjur (räkor, krabba, hummer)",en:"Crustaceans (shrimp, crab, lobster)",de:"Krebstiere (Garnelen, Krabben, Hummer)",fr:"Crustacés (crevettes, crabe, homard)",es:"Crustáceos (gambas, cangrejo, langosta)",it:"Crostacei (gamberi, granchio, aragosta)"},
+ agg:{sv:"Ägg",en:"Eggs",de:"Eier",fr:"Œufs",es:"Huevo",it:"Uova"},
+ fisk:{sv:"Fisk",en:"Fish",de:"Fisch",fr:"Poisson",es:"Pescado",it:"Pesce"},
+ jordnot:{sv:"Jordnötter",en:"Peanuts",de:"Erdnüsse",fr:"Arachides (cacahuètes)",es:"Cacahuetes (maní)",it:"Arachidi"},
+ soja:{sv:"Soja",en:"Soy",de:"Soja",fr:"Soja",es:"Soja",it:"Soia"},
+ mjolk:{sv:"Mjölk (även smör, grädde, ost)",en:"Milk (including butter, cream, cheese)",de:"Milch (auch Butter, Sahne, Käse)",fr:"Lait (y compris beurre, crème, fromage)",es:"Leche (también mantequilla, nata, queso)",it:"Latte (anche burro, panna, formaggio)"},
+ notter:{sv:"Nötter (mandel, hasselnöt, valnöt, cashew m.fl.)",en:"Tree nuts (almonds, hazelnuts, walnuts, cashews etc.)",de:"Schalenfrüchte (Mandeln, Haselnüsse, Walnüsse, Cashews usw.)",fr:"Fruits à coque (amandes, noisettes, noix, noix de cajou, etc.)",es:"Frutos de cáscara (almendras, avellanas, nueces, anacardos, etc.)",it:"Frutta a guscio (mandorle, nocciole, noci, anacardi, ecc.)"},
+ selleri:{sv:"Selleri",en:"Celery",de:"Sellerie",fr:"Céleri",es:"Apio",it:"Sedano"},
+ senap:{sv:"Senap",en:"Mustard",de:"Senf",fr:"Moutarde",es:"Mostaza",it:"Senape"},
+ sesam:{sv:"Sesam",en:"Sesame",de:"Sesam",fr:"Sésame",es:"Sésamo",it:"Sesamo"},
+ sulfit:{sv:"Sulfiter",en:"Sulphites",de:"Sulfite",fr:"Sulfites",es:"Sulfitos",it:"Solfiti"},
+ lupin:{sv:"Lupin",en:"Lupin",de:"Lupinen",fr:"Lupin",es:"Altramuces",it:"Lupini"},
+ blotdjur:{sv:"Blötdjur (musslor, ostron, bläckfisk)",en:"Molluscs (mussels, oysters, squid)",de:"Weichtiere (Muscheln, Austern, Tintenfisch)",fr:"Mollusques (moules, huîtres, calmar)",es:"Moluscos (mejillones, ostras, calamar)",it:"Molluschi (cozze, ostriche, calamari)"},
+ laktos:{sv:"Laktos",en:"Lactose",de:"Laktose",fr:"Lactose",es:"Lactosa",it:"Lattosio"},
+ artor:{sv:"Ärtor",en:"Peas",de:"Erbsen",fr:"Petits pois",es:"Guisantes",it:"Piselli"},
+ linser:{sv:"Linser",en:"Lentils",de:"Linsen",fr:"Lentilles",es:"Lentejas",it:"Lenticchie"},
+ kikartor:{sv:"Kikärtor",en:"Chickpeas",de:"Kichererbsen",fr:"Pois chiches",es:"Garbanzos",it:"Ceci"},
+ bovete:{sv:"Bovete",en:"Buckwheat",de:"Buchweizen",fr:"Sarrasin",es:"Trigo sarraceno",it:"Grano saraceno"},
+ kiwi:{sv:"Kiwi",en:"Kiwi",de:"Kiwi",fr:"Kiwi",es:"Kiwi",it:"Kiwi"},
+ kokos:{sv:"Kokos",en:"Coconut",de:"Kokosnuss",fr:"Noix de coco",es:"Coco",it:"Cocco"},
+ majs:{sv:"Majs",en:"Corn (maize)",de:"Mais",fr:"Maïs",es:"Maíz",it:"Mais"}
+};
+let cardLang=store.get("kjad.cardLang","sv");
+function renderCard(){
+  const L=$("cardLangs"); L.innerHTML="";
+  for(const [code,label] of CARD_LANGS){
+    const b=document.createElement("button"); b.textContent=label; b.setAttribute("aria-pressed",code===cardLang);
+    b.onclick=()=>{cardLang=code;store.set("kjad.cardLang",code);renderCard()};
+    L.append(b);
+  }
+  const t=CARD_T[cardLang]||CARD_T.sv;
+  const act=activeAllergens();
+  const name=a=>a.custom?a.name:((CARD_A[a.id]||{})[cardLang]||a.name);
+  const al=act.filter(a=>a.level==="allergi"), it=act.filter(a=>a.level==="intolerans");
+  const box=$("cardBox");
+  if(!act.length){box.innerHTML='<p class="small">Välj dina allergier under <b>Profil</b> först, så fylls kortet i.</p>';$("cardFull").hidden=true;return}
+  $("cardFull").hidden=false;
+  const strict=al.some(a=>traceStrict(a.id));
+  box.innerHTML='<div class="acard" id="acard" lang="'+cardLang+'">'+
+    '<button class="closefull" id="cardClose" hidden>'+esc(t.close)+'</button>'+
+    '<h2>'+esc(t.title)+'</h2>'+
+    (al.length?'<p>'+esc(t.allergy)+'</p><ul>'+al.map(a=>'<li>'+esc(name(a))+'</li>').join("")+'</ul>':'')+
+    (strict?'<p class="warn">'+esc(t.traces)+'</p>':'')+
+    (it.length?'<p>'+esc(t.intol)+'</p><ul>'+it.map(a=>'<li>'+esc(name(a))+'</li>').join("")+'</ul>':'')+
+    '<p>'+esc(t.ask)+'</p></div>';
+  $("cardClose").onclick=closeCardFull;
+}
+function closeCardFull(){
+  const c=$("acard"); if(!c) return;
+  c.classList.remove("full"); $("cardClose").hidden=true;
+  try{if(document.fullscreenElement) document.exitFullscreen()}catch(e){}
+}
+$("cardFull").onclick=async()=>{
+  const c=$("acard"); if(!c) return;
+  c.classList.add("full"); $("cardClose").hidden=false;
+  try{await c.requestFullscreen()}catch(e){}
+  try{if(navigator.wakeLock) await navigator.wakeLock.request("screen")}catch(e){}
+};
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement){const c=$("acard"); if(c&&c.classList.contains("full")) closeCardFull()}});
+
+/* ---------- Info om allergenerna ---------- */
+const ALG_INFO={
+ gluten:{finns:"Bröd, pasta, kakor, panering, såser, soppor och öl.",dolda:"Dinkel, spelt, kamut, durum, semolina, bulgur, couscous, seitan, malt och maltextrakt, ströbröd. Havre kan vara förorenad om den inte är märkt glutenfri.",bra:"Glukossirap och maltodextrin från vete är undantagna från märkning eftersom glutenet är bortrenat. Glutenfri betyder högst 20 mg/kg."},
+ krafdjur:{finns:"Räkor, krabba, hummer, kräftor och krill.",dolda:"Skaldjursfond, räkpasta i asiatisk mat, surimi, fisksoppor och paella."},
+ agg:{finns:"Bakverk, pasta, majonnäs, aioli, maräng, panering, glass och glaserat bröd.",dolda:"Albumin, ovalbumin, lysozym (E1105), äggpulver. Lecitin (E322) kan komma från ägg."},
+ fisk:{finns:"Fiskbuljong, fisksås, sushi, surimi och kaviar.",dolda:"Ansjovis i såser som Caesar-dressing och worcestershiresås.",bra:"Fiskgelatin som används för att klarna öl och vin är undantaget från märkning."},
+ jordnot:{finns:"Jordnötssmör, satésås, asiatisk mat, godis, müsli och glass.",dolda:"Arakidolja (jordnötsolja), engelska \"groundnut\" och \"peanut\"."},
+ soja:{finns:"Sojasås, tofu, tempeh, miso, edamame, köttersättning, bröd och choklad.",dolda:"Lecitin (E322), E426, E479b, sojaprotein, vegetabiliskt protein.",bra:"Helt raffinerad sojaolja är undantagen från märkning."},
+ mjolk:{finns:"Ost, smör, grädde, yoghurt, glass, choklad, bröd och korv.",dolda:"Vassle, kasein och kaseinat, laktos, mjölkprotein, ghee, skummjölkspulver.",bra:"Laktosfria produkter innehåller fortfarande mjölkprotein. Mjölksyra (E270), kakaosmör och kokosmjölk innehåller inte mjölk."},
+ notter:{finns:"Choklad, bakverk, müsli, pesto, glass och asiatisk mat.",dolda:"Marsipan, mandelmassa, praliné, gianduja, frangipane, nougat och nötoljor.",bra:"Kokosnöt och muskotnöt räknas inte till nötterna i märkningen."},
+ selleri:{finns:"Buljong, soppor, kryddblandningar, korv och färdiga såser.",dolda:"Sellerisalt, rotselleri, \"kryddor\" i blandningar."},
+ senap:{finns:"Dressingar, majonnäs, marinader, kryddblandningar, korv och curry.",dolda:"Senapsfrö, senapsmjöl och dijon."},
+ sesam:{finns:"Hummus, bröd och knäckebröd, falafel, asiatisk mat och halva.",dolda:"Tahini, sesamolja, gomasio."},
+ sulfit:{finns:"Vin, torkad frukt, citronjuice på flaska, korv och potatisprodukter.",dolda:"E220–E228, svaveldioxid.",bra:"Märks om halten är över 10 mg/kg eller 10 mg/l."},
+ lupin:{finns:"Lupinmjöl i bröd, glutenfria produkter, pasta och köttersättning.",bra:"Vissa med jordnötsallergi reagerar också på lupin."},
+ blotdjur:{finns:"Musslor, ostron, bläckfisk, snäckor och sniglar.",dolda:"Ostronsås i asiatisk mat, skaldjursfond."},
+ laktos:{finns:"Mjölk, grädde, glass, mjukost och mjölkpulver i färdigmat.",bra:"Hårdost och smör innehåller mycket lite laktos. Laktosfria produkter går bra."},
+ artor:{finns:"Ärtprotein i köttersättning, proteinpulver, bars och glutenfria produkter.",bra:"Vissa reagerar även på andra baljväxter."},
+ linser:{finns:"Soppor, grytor, dal och vegetariska rätter.",dolda:"Linsmjöl."},
+ kikartor:{finns:"Hummus, falafel och vegetariska rätter.",dolda:"Besan (kikärtsmjöl) i indisk mat."},
+ bovete:{finns:"Galettes, soba-nudlar och glutenfritt bröd och müsli.",bra:"Bovete är inte släkt med vete trots namnet."},
+ kiwi:{finns:"Fruktsallader, smoothies, juice och desserter.",bra:"Kan korsreagera med latex och björkpollen."},
+ kokos:{finns:"Kokosmjölk, kokosolja, godis, bakverk och asiatisk mat."},
+ majs:{finns:"Majsstärkelse, polenta, popcorn, tortillas och cornflakes.",dolda:"Glukossirap och stärkelse kan komma från majs."}
+};
+function renderInfo(){
+  const box=$("algInfo"); box.innerHTML="";
+  const act=new Map(activeAllergens().map(a=>[a.id,a.level]));
+  const sorted=[...ALLERGENS].sort((a,b)=>(act.has(b.id)?1:0)-(act.has(a.id)?1:0));
+  for(const a of sorted){
+    const inf=ALG_INFO[a.id]; if(!inf) continue;
+    const d=document.createElement("details"); d.className="alginfo"; if(act.has(a.id)) d.open=true;
+    const lvl=act.get(a.id);
+    d.innerHTML='<summary>'+esc(a.name)+(lvl?' <span class="chip '+lvl+'">'+(lvl==="allergi"?"din allergi":"din intolerans")+'</span>':'')+'</summary>'+
+      '<div class="body">'+(inf.finns?'<p><b>Finns ofta i:</b> '+esc(inf.finns)+'</p>':'')+(inf.dolda?'<p><b>Andra namn:</b> '+esc(inf.dolda)+'</p>':'')+(inf.bra?'<p><b>Bra att veta:</b> '+esc(inf.bra)+'</p>':'')+'</div>';
+    box.append(d);
+  }
+  renderRecalls();
+}
+
+/* ---------- Mina varor: säkra och undvik ---------- */
+let lists=store.get("kjad.lists",{safe:[],avoid:[]});
+let listTab="safe", currentCode=null;
+const itemKey=(code,name,text)=>code?String(code):"n:"+norm(name||String(text||"").slice(0,60));
+function listOf(key){ if(lists.safe.some(x=>x.key===key)) return "safe"; if(lists.avoid.some(x=>x.key===key)) return "avoid"; return null }
+function setList(which){
+  const c=lastCheck; if(!c) return;
+  const key=itemKey(c.code,c.name,c.text), cur=listOf(key);
+  lists.safe=lists.safe.filter(x=>x.key!==key); lists.avoid=lists.avoid.filter(x=>x.key!==key);
+  if(cur!==which) lists[which].unshift({key,code:c.code||null,name:c.name||c.text.slice(0,40),text:c.text,at:Date.now()});
+  store.set("kjad.lists",lists); renderLists(); runCheck(false);
+}
+function renderLists(){
+  const any=lists.safe.length||lists.avoid.length;
+  $("listsPanel").hidden=!any; if(!any) return;
+  $("listTabSafe").setAttribute("aria-pressed",listTab==="safe"); $("listTabAvoid").setAttribute("aria-pressed",listTab==="avoid");
+  $("listTabSafe").textContent="Säkra ("+lists.safe.length+")"; $("listTabAvoid").textContent="Undvik ("+lists.avoid.length+")";
+  const box=$("listItems"); box.innerHTML="";
+  const arr=lists[listTab];
+  if(!arr.length){box.innerHTML='<p class="small muted">'+(listTab==="safe"?"Inga säkra varor sparade än.":"Inga varor att undvika än.")+'</p>';return}
+  arr.forEach(x=>{
+    const row=document.createElement("div"); row.className="item";
+    row.innerHTML='<span class="dot '+(listTab==="safe"?"green":"red")+'"></span>';
+    const o=document.createElement("button"); o.className="open"; o.textContent=x.name;
+    o.onclick=()=>{$("prodName").value=x.name;$("ingredients").value=x.text;$("exampleBadge").hidden=true;currentCode=x.code;runCheck(false,false);$("result").scrollIntoView({behavior:"smooth",block:"start"})};
+    const rm=document.createElement("button"); rm.className="rm"; rm.textContent="Ta bort"; rm.setAttribute("aria-label","Ta bort "+x.name);
+    rm.onclick=()=>{lists[listTab]=lists[listTab].filter(y=>y.key!==x.key);store.set("kjad.lists",lists);renderLists()};
+    row.append(o,rm); box.append(row);
+  });
+}
+$("listTabSafe").onclick=()=>{listTab="safe";renderLists()};
+$("listTabAvoid").onclick=()=>{listTab="avoid";renderLists()};
+
+/* ---------- Återkallade varor (Livsmedelsverket, hämtas dagligen av GitHub Actions) ---------- */
+let recalls=null, recallsPromise=null;
+function loadRecalls(){
+  if(!standalone) return Promise.resolve(null);
+  if(!recallsPromise) recallsPromise=fetch("data/recalls.json").then(r=>r.ok?r.json():null).then(d=>{recalls=d&&Array.isArray(d.items)?d:null;return recalls}).catch(()=>{recallsPromise=null;return null});
+  return recallsPromise;
+}
+function recallHits(r){
+  const res=analyze((r.title||"")+". "+(r.desc||""));
+  return [...new Set(res.findings.filter(f=>f.kind!=="info").map(f=>f.a.name))];
+}
+function recallFor(code){ return code&&recalls?recalls.items.find(r=>(r.eans||[]).includes(String(code))):null }
+async function renderRecalls(){
+  const ul=$("recallList"), info=$("recallInfo"); ul.innerHTML="";
+  if(!standalone){info.textContent="Återkallelser visas i appen på din webbadress.";return}
+  info.textContent="Hämtar…";
+  const d=await loadRecalls();
+  if(!d){info.textContent="Listan gick inte att hämta just nu.";return}
+  const items=d.items.slice(0,30);
+  if(!items.length){info.textContent="Inga återkallelser just nu.";return}
+  for(const r of items){
+    const li=document.createElement("li"), hits=recallHits(r);
+    li.innerHTML='<time>'+esc(r.date||"")+'</time><a href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a>'+(r.desc?'<span class="small muted">'+esc(r.desc)+'</span>':'')+(hits.length?'<span class="hitchip">Rör din profil: '+esc(hits.join(", "))+'</span>':'');
+    ul.append(li);
+  }
+  info.textContent="Uppdaterad "+(d.updated||"")+". Källa: Livsmedelsverket.";
+}
+async function checkRecallBanner(){
+  const d=await loadRecalls(); if(!d) return;
+  const seen=store.get("kjad.recallSeen",[]);
+  const cutoff=Date.now()-21*864e5;
+  const r=d.items.find(r=>Date.parse(r.date)>=cutoff && !seen.includes(r.link) && recallHits(r).length);
+  const b=$("recallBanner");
+  if(!r){b.hidden=true;return}
+  b.hidden=false;
+  b.innerHTML='<b>Återkallelse som rör din profil ('+esc(recallHits(r).join(", "))+')</b>'+
+    '<p><a href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a></p>'+
+    '<div class="row"><button class="btn" id="recallAll">Visa alla</button><button class="btn" id="recallOk">Jag har sett den</button></div>';
+  $("recallAll").onclick=()=>show("info");
+  $("recallOk").onclick=()=>{seen.push(r.link);store.set("kjad.recallSeen",seen.slice(-200));checkRecallBanner()};
+}
+
 /* ---------- Start ---------- */
+
 $("prodName").value=EXAMPLE.name; $("ingredients").value=EXAMPLE.text;
-$("ingredients").addEventListener("input",()=>{$("exampleBadge").hidden=true});
+$("ingredients").addEventListener("input",()=>{$("exampleBadge").hidden=true;currentCode=null});
 $("prodName").addEventListener("input",()=>{$("exampleBadge").hidden=true});
 $("checkBtn").onclick=()=>runCheck(true,true);
-renderChips(); renderProfile(); renderHistory(); runCheck(false);
+renderChips(); renderProfile(); renderHistory(); renderLists(); runCheck(false);
 
 // Sök visas när sidan körs som fristående fil/webbsida (inne i Claude blockeras nätet)
 if(standalone){
@@ -1092,6 +1487,7 @@ if(standalone){
   renderAiPanel(); applyAi();
   if("serviceWorker" in navigator && location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
   setTimeout(()=>loadLocalIndex(),1500);
+  loadRecalls().then(()=>{checkRecallBanner(); if(lastCheck&&lastCheck.code) runCheck(false)});
 }
 (async()=>{
   if(standalone) return;

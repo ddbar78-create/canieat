@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: se-db
+  group: data-commit
   cancel-in-progress: false
 
 jobs:

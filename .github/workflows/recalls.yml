@@ -1,0 +1,48 @@
+# Hämtar Livsmedelsverkets återkallelser till public/data/recalls.json varje dag.
+name: Återkallade varor
+
+on:
+  schedule:
+    - cron: "23 5 * * *"   # varje dag 05:23 UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/fetch_recalls.py
+      - .github/workflows/recalls.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-commit
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Hämta återkallelser
+        id: fetch
+        continue-on-error: true
+        run: python3 tools/fetch_recalls.py public/data/recalls.json
+
+      - name: Spara i repot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/recalls.json
+          if git diff --cached --quiet; then
+            echo "Inga ändringar."
+          else
+            git commit -m "Uppdatera återkallade varor"
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Markera fel
+        if: steps.fetch.outcome == 'failure'
+        run: exit 1
