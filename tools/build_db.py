@@ -101,6 +101,13 @@ def main():
 
         if len(index) < 100:
             raise RuntimeError(f"För få svenska varor hittades ({len(index)} av {rows} rader)")
+        # Skydd mot ofullständig nedladdning: ersätt aldrig en databas med en som är mycket mindre
+        try:
+            prev = json.load(open(os.path.join(out, "se-index.json"), encoding="utf-8")).get("n", 0)
+        except Exception:
+            prev = 0
+        if prev and len(index) < prev * 0.8:
+            raise RuntimeError(f"Bara {len(index)} varor mot {prev} förra gången ({rows} rader lästa). Behåller den gamla databasen.")
 
         index.sort(key=lambda r: (-r[3], r[1].lower()))
         for nn, data in shards.items():
