@@ -11,6 +11,10 @@ En webbapp (PWA) som kollar matvaror mot en personlig allergiprofil. Den fungera
 - Info om allergisk reaktion (enligt 1177), allergener, E-nummer och märkning
 - Varning för återkallade varor från Livsmedelsverket, samt listor med säkra varor och varor att undvika
 
+## Publicering
+
+Appen publiceras från mappen `public/` utan byggsteg. Den fungerar på Cloudflare Pages (byggkommando tomt, output-mapp `public`) och Netlify (`netlify.toml`). `public/_headers` styr cache-inställningar på Cloudflare.
+
 ## Struktur
 
 | Sökväg | Innehåll |
