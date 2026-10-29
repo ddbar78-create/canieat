@@ -1,27 +1,23 @@
 <title>Kan jag äta det?</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
 <style>
-/* Layout: one narrow app column, segmented tabs on top, a traffic-light verdict card as the focal point */
+/* Arkad: 8-bitars spelhall. Medvetet ett enda mörkt tema (samma i ljust och mörkt läge).
+   Pixeltypsnitt bara i rubriker; brödtext, knappar och etiketter i Atkinson Hyperlegible för läsbarheten.
+   Rött, gult och grönt behåller sin betydelse. Allergikortet är alltid ljust. */
 :root{
-  --bg:#F3F6F5; --surface:#FFFFFF; --ink:#16201C; --muted:#5A6A63; --line:#D9E2DE;
-  --accent:#3046A6; --accent-ink:#FFFFFF; --accent-soft:#E6EAFA;
-  --ok:#1D7745; --ok-soft:#E3F3E9; --warn:#9A5C00; --warn-soft:#FDF0D8; --bad:#BC2F26; --bad-soft:#FBE5E2;
-  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --bg:#1F1C44; --surface:#2C2862; --ink:#F4F1FF; --muted:#B9B3E8; --line:#0D0B24;
+  --accent:#FFCC33; --accent-ink:#1F1C44; --accent-soft:#3D3880; --pink:#FF5C8A;
+  --field:#16143A; --btn:#3D3880;
+  --ok:#4BE38A; --ok-soft:#1E4A3A; --warn:#FFB020; --warn-soft:#4A3A16; --bad:#FF5468; --bad-soft:#4A1C2C;
+  --display:"Press Start 2P", ui-monospace, "Courier New", monospace;
   --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111614; --surface:#1A201D; --ink:#E5ECE8; --muted:#94A49D; --line:#2D3633;
-  --accent:#8B9BFF; --accent-ink:#0E1430; --accent-soft:#232A4A;
-  --ok:#5BD08F; --ok-soft:#173023; --warn:#F2B451; --warn-soft:#352812; --bad:#FF7B6E; --bad-soft:#3A1C19; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#111614; --surface:#1A201D; --ink:#E5ECE8; --muted:#94A49D; --line:#2D3633;
-  --accent:#8B9BFF; --accent-ink:#0E1430; --accent-soft:#232A4A;
-  --ok:#5BD08F; --ok-soft:#173023; --warn:#F2B451; --warn-soft:#352812; --bad:#FF7B6E; --bad-soft:#3A1C19; color-scheme:dark}
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+body{background:var(--bg) radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.5px) 0 0/28px 28px;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
 .wrap{max-width:640px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
 h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
 h1{font-size:2rem;font-weight:800;line-height:1.1}
@@ -210,6 +206,50 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
 .scanrow .btn{justify-content:center;padding-inline:8px}
 .acard .who{display:flex;align-items:center;gap:10px}
 .acard .who svg{width:44px;height:44px;flex:0 0 auto}
+
+/* ---------- Arkad ---------- */
+h1{font-family:var(--display);font-weight:400;font-size:1.15rem;line-height:1.55;letter-spacing:0;color:var(--accent);text-shadow:3px 3px 0 var(--pink)}
+.hello{font-family:var(--display);font-size:.62rem;line-height:1.6;color:var(--ok)}
+h3{font-family:var(--display);font-weight:400;font-size:.75rem;line-height:1.6;letter-spacing:0;color:var(--accent)}
+.panel{border:3px solid var(--line);border-radius:0;box-shadow:6px 6px 0 var(--line);background:var(--surface)}
+.tabs{border:3px solid var(--line);border-radius:0;box-shadow:5px 5px 0 var(--line);background:var(--surface)}
+.tabs button{border-radius:0;font-weight:800;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--pink);color:#fff}
+.btn{border:3px solid var(--line);border-radius:0;box-shadow:4px 4px 0 var(--line);background:var(--btn);color:var(--ink);font-weight:800}
+.btn:active{transform:translate(4px,4px);box-shadow:none}
+.btn.primary{background:var(--accent);border-color:var(--line);color:var(--accent-ink)}
+.btn:disabled{box-shadow:none}
+input[type=text],input[type=password],textarea{border:3px solid var(--line);border-radius:0;background:var(--field);color:var(--ink)}
+input::placeholder,textarea::placeholder{color:#8F89C4}
+.chip{border-radius:0;border-width:2px;background:var(--field)}
+.verdict{border-radius:0;border-width:3px;box-shadow:6px 6px 0 var(--line)}
+.verdict h2{font-family:var(--display);font-weight:400;font-size:1rem;line-height:1.55;letter-spacing:0}
+.verdict .lamp{border-radius:0;border:3px solid var(--line)}
+.avbtn{border:3px solid var(--line);border-radius:0;box-shadow:3px 3px 0 var(--line)}
+.avgrid button{border-radius:0}
+.badge{border-radius:0;background:var(--pink);color:#fff}
+.tabs,.seg,.seg2,.whobar button,.langs button,.offbox,.qrbox,.codebox,.scanner video{border-radius:0}
+.seg,.seg2{border:2px solid var(--line)}
+.seg button,.seg2 button{background:var(--field)}
+.seg button+button,.seg2 button+button{border-left:2px solid var(--line)}
+.seg button.on[data-v="av"]{background:var(--btn);color:var(--ink)}
+.whobar button,.langs button{border:2px solid var(--line);background:var(--field);color:var(--ink)}
+.whobar button[aria-pressed="true"],.langs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.listbtns .on-safe{background:var(--ok-soft);color:var(--ok)}
+.listbtns .on-avoid{background:var(--bad-soft);color:var(--bad)}
+mark{border-radius:0}
+.acard{border-radius:0;box-shadow:6px 6px 0 var(--line)}
+.acard h2{font-family:var(--display);font-weight:400;font-size:1.1rem;line-height:1.5;letter-spacing:0}
+.acard.full h2{font-size:1.5rem}
+.acard .closefull{border-radius:0}
+.call a{border-radius:0;box-shadow:4px 4px 0 var(--line)}
+.call a.calm{background:var(--btn);color:var(--ink)}
+.emerg{border-color:var(--bad)}
+.emerg h3{color:var(--bad)}
+.note{border-top-color:rgba(255,255,255,.12)}
+a{color:var(--accent)}
+.recalls a{color:var(--ink)}
+@media (prefers-reduced-motion: reduce){.btn:active{transform:none}}
 </style>
 
 <div class="wrap">
