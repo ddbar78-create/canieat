@@ -100,7 +100,13 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
 /* Profile */
 .alg{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding-block:10px;border-top:1px solid var(--line)}
 .alg:first-of-type{border-top:0}
-.alg .name{min-width:0}
+.alg .name{min-width:0;display:grid;grid-template-columns:28px 1fr;column-gap:8px;align-items:center}
+.alg .name .aicon{grid-row:span 2}
+.aicon{flex:0 0 auto;vertical-align:-4px}
+.chip .aicon{margin-right:4px;vertical-align:-3px}
+.acard ul.ilist{list-style:none;padding-left:0}
+.acard ul.ilist li{display:flex;align-items:center;gap:10px}
+details.alginfo summary .aicon{margin-right:2px}
 .alg .trace{grid-column:1/-1;font-size:.8125rem;color:var(--muted)}
 .alg .name small{display:block;color:var(--muted);font-size:.8125rem}
 .seg{display:inline-grid;grid-template-columns:repeat(3,auto);border:1px solid var(--line);border-radius:9px;overflow:hidden}
@@ -655,6 +661,35 @@ function phraseRanges(lower,phrases){
   const out=[]; for(const ph of phrases||[]){let i=lower.indexOf(ph); while(i>=0){out.push([i,i+ph.length]); i=lower.indexOf(ph,i+1)}} return out;
 }
 
+// Egna allergenikoner (24x24). Fyllda färger som syns på både ljus och mörk bakgrund.
+const ICONS={
+ gluten:`<path d="M12 22V9" stroke="#C8962E" stroke-width="1.6" stroke-linecap="round"/><g fill="#E3B341"><ellipse cx="12" cy="4.5" rx="1.9" ry="3"/><ellipse cx="9.3" cy="8.5" rx="1.8" ry="2.9" transform="rotate(-30 9.3 8.5)"/><ellipse cx="14.7" cy="8.5" rx="1.8" ry="2.9" transform="rotate(30 14.7 8.5)"/><ellipse cx="9.3" cy="13" rx="1.8" ry="2.9" transform="rotate(-30 9.3 13)"/><ellipse cx="14.7" cy="13" rx="1.8" ry="2.9" transform="rotate(30 14.7 13)"/><ellipse cx="9.5" cy="17.4" rx="1.7" ry="2.7" transform="rotate(-30 9.5 17.4)"/><ellipse cx="14.5" cy="17.4" rx="1.7" ry="2.7" transform="rotate(30 14.5 17.4)"/></g>`,
+ krafdjur:`<path d="M19 7c-4-3.5-11-2-12.5 4.5-.8 3.5 1.3 7.2 5 8l1.5-3c-2.5-.4-3.6-2.4-3.1-4.5.8-3.5 5.2-4.5 7.6-2.6z" fill="#F07C5A"/><path d="M11.5 19.5l-2.5 3 4.5-1.2" fill="#F07C5A"/><path d="M18.5 7.3l3-3.3M18.8 7.8l3.7-1.2" stroke="#F07C5A" stroke-width="1.2" stroke-linecap="round"/><circle cx="16.3" cy="7.6" r="1" fill="#2a2a2a"/><path d="M9 10.5l-2.5-1.5M8.5 13.5l-2.8-.5M9.5 16l-2.5 1" stroke="#D9573A" stroke-width="1" stroke-linecap="round"/>`,
+ agg:`<path d="M12 2.5c-3.8 0-7 6-7 11.2 0 4.4 3.1 7.8 7 7.8s7-3.4 7-7.8C19 8.5 15.8 2.5 12 2.5z" fill="#F3E3C3"/><path d="M12 2.5c-3.8 0-7 6-7 11.2 0 4.4 3.1 7.8 7 7.8s7-3.4 7-7.8C19 8.5 15.8 2.5 12 2.5z" fill="none" stroke="#C9A46A" stroke-width="1.1"/><ellipse cx="9.5" cy="9" rx="1.2" ry="2" fill="#fff" opacity=".8"/>`,
+ fisk:`<path d="M3 12c3.5-5 10-6.5 14.5-2.5L21 6.5v11L17.5 14.5C13 18.5 6.5 17 3 12z" fill="#4E9BD6"/><circle cx="7.3" cy="11" r="1.2" fill="#fff"/><circle cx="7.3" cy="11" r=".6" fill="#123"/><path d="M11 9.5c1 1.5 1 3.5 0 5" stroke="#2F78B0" stroke-width="1" fill="none"/>`,
+ jordnot:`<path d="M9 3c-3 0-4.6 2.8-3.6 5.6.6 1.6.3 2.6-.6 3.9C2.9 15.4 4.6 21 9.6 21c3.4 0 5-2.3 5.3-4.6.2-1.5 1-2.3 2.4-3 2.8-1.3 3.4-5 1.5-7.2C16.6 3.6 13.6 4.4 12 4.6 11 3.6 10.2 3 9 3z" fill="#D7A365"/><path d="M8 7.5l1.5 1M7.5 15l1.5 1M12 12l1.5 1M15.5 8l1.3.8" stroke="#A9733B" stroke-width="1" stroke-linecap="round"/>`,
+ soja:`<path d="M3.5 17c1-6.5 8.5-13.5 17-13-1 6.5-8.5 13.5-17 13z" fill="#8DBF4D"/><circle cx="8" cy="14" r="2.1" fill="#C9E28E"/><circle cx="12.2" cy="10.4" r="2.1" fill="#C9E28E"/><circle cx="16.3" cy="7" r="2.1" fill="#C9E28E"/><path d="M3.5 17L2 20" stroke="#6E9E35" stroke-width="1.4" stroke-linecap="round"/>`,
+ mjolk:`<path d="M8 2.5h8v3l2 3V21a.8.8 0 0 1-.8.8H6.8A.8.8 0 0 1 6 21V8.5l2-3z" fill="#F4F6FA"/><path d="M8 2.5h8v3l2 3V21a.8.8 0 0 1-.8.8H6.8A.8.8 0 0 1 6 21V8.5l2-3z" fill="none" stroke="#7C8FB3" stroke-width="1.1"/><path d="M6 12h12v5H6z" fill="#5B8DEF"/><path d="M8 5.5h8" stroke="#7C8FB3" stroke-width="1.1"/>`,
+ notter:`<path d="M5 10.5c0-4 3.1-6 7-6s7 2 7 6z" fill="#8B5A2B"/><path d="M12 4.5V2.5" stroke="#6B421E" stroke-width="1.6" stroke-linecap="round"/><path d="M6 10.5h12c0 6-2.8 10.5-6 10.5S6 16.5 6 10.5z" fill="#C98B4E"/><path d="M5 10.5h14" stroke="#6B421E" stroke-width="1.2"/><path d="M9 8l1-2M12 8V6M15 8l-1-2" stroke="#A8743F" stroke-width=".9" stroke-linecap="round"/>`,
+ selleri:`<path d="M8 22c-.5-5 .5-10 2-14M12 22c0-5 .2-10 1-14M16 22c.5-5 0-10-1-14" stroke="#6DB24E" stroke-width="2.4" stroke-linecap="round" fill="none"/><g fill="#4C9A2E"><circle cx="9.5" cy="6" r="2.4"/><circle cx="13" cy="4.5" r="2.6"/><circle cx="16" cy="6.5" r="2.2"/><circle cx="11.5" cy="7.5" r="1.8"/></g>`,
+ senap:`<path d="M10 2h4v3h-4z" fill="#C9502E"/><path d="M9 5h6l1.5 3v12.2a.8.8 0 0 1-.8.8H8.3a.8.8 0 0 1-.8-.8V8z" fill="#F2C230"/><path d="M8.5 11h7v5h-7z" fill="#fff" opacity=".85"/><path d="M10 13.5h4" stroke="#C99A12" stroke-width="1.2" stroke-linecap="round"/>`,
+ sesam:`<g fill="#E9D8A6" stroke="#B89B55" stroke-width=".8"><path d="M7 4c2 1.5 2.5 4.5 1 6.5C6 9 5.3 6 7 4z"/><path d="M16 5c1.8 1.6 2 4.6.3 6.4-1.8-1.6-2-4.6-.3-6.4z"/><path d="M10.5 12c2.2 1 3.3 3.9 2.3 6.2-2.2-1-3.3-3.9-2.3-6.2z"/><path d="M5 15c2.3.5 3.8 3 3.4 5.4-2.3-.5-3.8-3-3.4-5.4z"/><path d="M18.5 13.5c1.2 2.1.7 5.1-1.2 6.6-1.2-2.1-.7-5.1 1.2-6.6z"/></g>`,
+ sulfit:`<path d="M7 3h10l-.6 6.5a4.4 4.4 0 0 1-8.8 0z" fill="#E8EDF3" stroke="#8796AA" stroke-width="1"/><path d="M7.4 7h9.2l-.2 2.5a4.2 4.2 0 0 1-8.8 0z" fill="#9B2C4A"/><path d="M12 14v6M8.5 21h7" stroke="#8796AA" stroke-width="1.4" stroke-linecap="round"/>`,
+ lupin:`<path d="M12 22V10" stroke="#4E8B3A" stroke-width="1.6" stroke-linecap="round"/><g fill="#8A6BD1"><ellipse cx="12" cy="3.5" rx="1.6" ry="1.8"/><ellipse cx="10" cy="6.3" rx="1.8" ry="1.6"/><ellipse cx="14" cy="6.3" rx="1.8" ry="1.6"/><ellipse cx="9.6" cy="9.6" rx="2" ry="1.7"/><ellipse cx="14.4" cy="9.6" rx="2" ry="1.7"/></g><g fill="#B7A0EA"><ellipse cx="9.6" cy="13" rx="2.1" ry="1.7"/><ellipse cx="14.4" cy="13" rx="2.1" ry="1.7"/></g><path d="M12 19c-2-1-4-1-5.5 0M12 18c2-1 4-1 5.5 0" stroke="#4E8B3A" stroke-width="1.3" fill="none" stroke-linecap="round"/>`,
+ blotdjur:`<path d="M12 20.5L3 9.5c1.5-4 6-6 9-6s7.5 2 9 6z" fill="#5C6FA8"/><path d="M12 20.5L3 9.5c1.5-4 6-6 9-6s7.5 2 9 6z" fill="none" stroke="#3D4E85" stroke-width="1"/><path d="M12 20.5V4M12 20.5L7 5.2M12 20.5l5-15.3M12 20.5L4.5 7.5M12 20.5l7.5-13" stroke="#8FA0D6" stroke-width=".9"/>`,
+ laktos:`<path d="M6.5 4h11l-1.4 16.3a1 1 0 0 1-1 .9H8.9a1 1 0 0 1-1-.9z" fill="#EEF2F8" stroke="#7C8FB3" stroke-width="1.1"/><path d="M7.3 10h9.4l-.85 10H8.15z" fill="#fff"/><path d="M7.3 10c1.6-.9 3.1-.9 4.7 0s3.1.9 4.7 0" stroke="#AFC0DE" stroke-width="1" fill="none"/>`,
+ artor:`<path d="M2.5 14.5C5 8 13 4.5 21.5 7c-2.5 6.5-10.5 10-19 7.5z" fill="#6DB34A"/><circle cx="7.5" cy="12.4" r="2.2" fill="#A8DB6E"/><circle cx="12" cy="10.6" r="2.3" fill="#A8DB6E"/><circle cx="16.6" cy="9.3" r="2.2" fill="#A8DB6E"/><path d="M21.5 7l1-2.5" stroke="#4E8B3A" stroke-width="1.4" stroke-linecap="round"/>`,
+ linser:`<g fill="#E07B39"><ellipse cx="8" cy="9" rx="3.4" ry="2.4"/><ellipse cx="15.5" cy="8" rx="3.4" ry="2.4"/><ellipse cx="11.5" cy="14" rx="3.4" ry="2.4"/><ellipse cx="5.5" cy="16" rx="3.2" ry="2.3"/><ellipse cx="18" cy="15" rx="3.2" ry="2.3"/></g><g fill="#F5A66B"><ellipse cx="7.5" cy="8.5" rx="1.4" ry=".8"/><ellipse cx="15" cy="7.5" rx="1.4" ry=".8"/><ellipse cx="11" cy="13.5" rx="1.4" ry=".8"/></g>`,
+ kikartor:`<path d="M12 4c5 0 8 3.4 8 8s-3.6 8-8 8-8-3.4-8-8c0-2.6 1.1-4.5 2.6-5.8L9 3.5 10 5.3c.6-.9 1.2-1.3 2-1.3z" fill="#E4C27A"/><path d="M9 3.5l1 1.8" stroke="#B8924A" stroke-width="1"/><path d="M12 6c2.8.3 4.7 2.6 4.8 5.4" stroke="#F5DDA6" stroke-width="1.4" fill="none" stroke-linecap="round"/>`,
+ bovete:`<path d="M12 3l8 15.5H4z" fill="#8C6A47"/><path d="M12 3l8 15.5H4z" fill="none" stroke="#5E4529" stroke-width="1"/><path d="M12 3v15.5M12 18.5L7.5 12M12 18.5l4.5-6.5" stroke="#B08B62" stroke-width=".9"/>`,
+ kiwi:`<circle cx="12" cy="12" r="9.5" fill="#7A5A33"/><circle cx="12" cy="12" r="8.2" fill="#8BC34A"/><circle cx="12" cy="12" r="3" fill="#F2F5D3"/><g fill="#1d1d1f"><circle cx="12" cy="6.6" r=".6"/><circle cx="12" cy="17.4" r=".6"/><circle cx="6.6" cy="12" r=".6"/><circle cx="17.4" cy="12" r=".6"/><circle cx="8.2" cy="8.2" r=".6"/><circle cx="15.8" cy="15.8" r=".6"/><circle cx="15.8" cy="8.2" r=".6"/><circle cx="8.2" cy="15.8" r=".6"/></g>`,
+ kokos:`<path d="M2.5 11h19a9.5 9.5 0 0 1-19 0z" fill="#7B4F2C"/><path d="M4 11h16a8 8 0 0 1-16 0z" fill="#FBF6EC"/><path d="M2.5 11h19" stroke="#5A3A20" stroke-width="1.2"/><circle cx="8" cy="6.5" r="1" fill="#7B4F2C"/><circle cx="12" cy="5" r="1" fill="#7B4F2C"/><circle cx="16" cy="6.5" r="1" fill="#7B4F2C"/>`,
+ majs:`<path d="M12 2.5c3 0 4.8 4.3 4.8 9.5S15 21 12 21s-4.8-3.8-4.8-9 1.8-9.5 4.8-9.5z" fill="#F5C842"/><g fill="#E6AC1E"><circle cx="10.3" cy="7" r=".9"/><circle cx="13.7" cy="7" r=".9"/><circle cx="12" cy="9.5" r=".9"/><circle cx="10.3" cy="12" r=".9"/><circle cx="13.7" cy="12" r=".9"/><circle cx="12" cy="14.5" r=".9"/><circle cx="10.3" cy="17" r=".9"/><circle cx="13.7" cy="17" r=".9"/></g><path d="M12 21.5c-3-1-6-4-6.5-9 2 1.5 3.6 4.5 4.3 8.2M12 21.5c3-1 6-4 6.5-9-2 1.5-3.6 4.5-4.3 8.2" fill="#6DB34A"/>`
+};
+const ICON_OTHER=`<circle cx="12" cy="12" r="8" fill="#A0A7B8"/><path d="M12 7.5v5.5M12 16.2v.3" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>`;
+const algIcon=(id,size)=>`<svg class="aicon" viewBox="0 0 24 24" width="${size||20}" height="${size||20}" aria-hidden="true" focusable="false">${ICONS[id]||ICON_OTHER}</svg>`;
+const iconFor=(a,size)=>a&&a.id&&!String(a.id).startsWith("_")?algIcon(a.custom?"_egen":a.id,size):"";
+
 /* ---------- Matchning ---------- */
 const traceStrict=id=>!!(profile.traces&&profile.traces[id]);
 function activeAllergens(){
@@ -750,7 +785,7 @@ function renderChips(){
   for(const a of act){
     const c=document.createElement("span");
     c.className="chip "+a.level+(profile.example?" example":"");
-    c.textContent=a.name+(a.level==="intolerans"?" (intolerans)":"");
+    c.innerHTML=iconFor(a,16)+esc(a.name+(a.level==="intolerans"?" (intolerans)":""));
     el.append(c);
   }
   if(profile.example){const n=document.createElement("span");n.className="chip example";n.textContent="Exempelprofil";el.append(n)}
@@ -774,7 +809,7 @@ function renderResult(name,text,res){
   html+=esc(text.slice(pos));
   const items=res.findings.map(f=>{
     const dot=f.kind==="red"?"red":f.kind==="amber"?"amber":"green";
-    let line="<b>"+esc(f.a.name)+"</b> ";
+    let line=iconFor(f.a,18)+" <b>"+esc(f.a.name)+"</b> ";
     if(f.msg) line+="– "+esc(f.msg)+" ";
     else if(f.trace) line+="– kan finnas spår ("+esc(f.words.join(", "))+")"+(f.kind==="red"?' <span class="muted small">(du undviker även spår)</span>':"");
     else line+="– finns i: "+esc(f.words.join(", "));
@@ -906,7 +941,7 @@ function renderProfile(){
     const list=a.group==="more"?$("algList2"):$("algList");
     const row=document.createElement("div"); row.className="alg";
     const cur=profile.levels[a.id]||"av";
-    row.innerHTML='<div class="name"><b>'+esc(a.name)+'</b><small>'+esc(a.sub)+'</small></div>';
+    row.innerHTML='<div class="name">'+algIcon(a.id,26)+'<b>'+esc(a.name)+'</b><small>'+esc(a.sub)+'</small></div>';
     const seg=document.createElement("div"); seg.className="seg"; seg.setAttribute("role","group"); seg.setAttribute("aria-label",a.name);
     for(const [v,lbl] of [["av","Av"],["intolerans","Intolerans"],["allergi","Allergi"]]){
       const b=document.createElement("button"); b.dataset.v=v; b.textContent=lbl; b.setAttribute("aria-pressed",cur===v);
@@ -1558,9 +1593,9 @@ function renderCard(){
     '<button class="closefull" id="cardClose" hidden>'+esc(t.close)+'</button>'+
     '<div class="who">'+avatarSvg(profile.avatar||"uggla",44)+'<h2>'+esc(t.title)+'</h2></div>'+
     (profile.name?'<p><b>'+esc(t.me.replace("{n}",profile.name))+'</b></p>':'')+
-    (al.length?'<p>'+esc(t.allergy)+'</p><ul>'+al.map(a=>'<li>'+esc(name(a))+'</li>').join("")+'</ul>':'')+
+    (al.length?'<p>'+esc(t.allergy)+'</p><ul class="ilist">'+al.map(a=>'<li>'+iconFor(a,32)+esc(name(a))+'</li>').join("")+'</ul>':'')+
     (strict?'<p class="warn">'+esc(t.traces)+'</p>':'')+
-    (it.length?'<p>'+esc(t.intol)+'</p><ul>'+it.map(a=>'<li>'+esc(name(a))+'</li>').join("")+'</ul>':'')+
+    (it.length?'<p>'+esc(t.intol)+'</p><ul class="ilist">'+it.map(a=>'<li>'+iconFor(a,32)+esc(name(a))+'</li>').join("")+'</ul>':'')+
     '<p>'+esc(t.ask)+'</p></div>';
   $("cardClose").onclick=closeCardFull;
 }
@@ -1610,7 +1645,7 @@ function renderInfo(){
     const inf=ALG_INFO[a.id]; if(!inf) continue;
     const d=document.createElement("details"); d.className="alginfo"; if(act.has(a.id)) d.open=true;
     const lvl=act.get(a.id);
-    d.innerHTML='<summary>'+esc(a.name)+(lvl?' <span class="chip '+lvl+'">'+(lvl==="allergi"?"din allergi":"din intolerans")+'</span>':'')+'</summary>'+
+    d.innerHTML='<summary>'+algIcon(a.id,22)+esc(a.name)+(lvl?' <span class="chip '+lvl+'">'+(lvl==="allergi"?"din allergi":"din intolerans")+'</span>':'')+'</summary>'+
       '<div class="body">'+(inf.finns?'<p><b>Finns ofta i:</b> '+esc(inf.finns)+'</p>':'')+(inf.dolda?'<p><b>Andra namn:</b> '+esc(inf.dolda)+'</p>':'')+(inf.bra?'<p><b>Bra att veta:</b> '+esc(inf.bra)+'</p>':'')+'</div>';
     box.append(d);
   }
