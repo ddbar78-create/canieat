@@ -207,6 +207,20 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
 .avgrid button{font:inherit;font-size:.75rem;color:var(--muted);background:none;border:2px solid transparent;border-radius:14px;padding:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
 .avgrid button svg{width:52px;height:52px}
 .avgrid button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);font-weight:700;background:var(--accent-soft)}
+.whobar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.whobar .lbl{font-size:.8125rem;color:var(--muted);margin-right:2px}
+.whobar button{font:inherit;font-size:.8125rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:3px 10px 3px 3px;cursor:pointer}
+.whobar button svg{width:24px;height:24px}
+.whobar button.all{padding:5px 12px}
+.whobar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.others{display:flex;flex-direction:column}
+.others .o{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;border-top:1px solid var(--line);padding-block:8px}
+.others .o:first-child{border-top:0}
+.others .o svg.av{width:40px;height:40px}
+.others .o .chips{margin-top:4px}
+.importbox{border:2px solid var(--accent);background:var(--accent-soft)}
+.importbox .head{display:flex;align-items:center;gap:10px}
+.importbox .head svg{width:44px;height:44px;flex:0 0 auto}
 .scanrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .scanrow .btn{justify-content:center;padding-inline:8px}
 .acard .who{display:flex;align-items:center;gap:10px}
@@ -219,7 +233,8 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
       <button class="avbtn" id="headAvatar" aria-label="Öppna din profil"></button>
       <div class="htxt"><h1>Kan jag äta det?</h1><p class="hello" id="hello" hidden></p></div>
     </div>
-    <div class="chips" id="profileChips" aria-label="Din allergiprofil"></div>
+    <div class="chips" id="profileChips" aria-label="Allergier som appen kollar mot"></div>
+    <div class="whobar" id="whoBar" role="group" aria-label="Kolla för" hidden></div>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -232,6 +247,7 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
 
   <!-- KOLLA -->
   <section class="view" id="view-kolla">
+    <div class="panel importbox" id="importBox" hidden></div>
     <div class="panel banner" id="recallBanner" hidden></div>
     <div class="panel" id="searchPanel" hidden>
       <h3>Hitta vara</h3>
@@ -431,6 +447,25 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
         <h3>Fler vanliga allergener</h3>
       </div>
       <div id="algList2"></div>
+    </div>
+    <div class="panel" id="sharePanel">
+      <div>
+        <h3>Dela min allergiprofil</h3>
+        <p class="small muted">Till någon som handlar eller lagar mat åt dig. De sparar den i sin app. Nyckeln följer inte med.</p>
+      </div>
+      <div class="row">
+        <button class="btn grow" id="shareLink">Dela länk</button>
+        <button class="btn grow" id="shareQrBtn">Visa QR-kod</button>
+      </div>
+      <div class="qrbox" id="shareQrBox" hidden>
+        <canvas id="shareQr" aria-label="QR-kod med din allergiprofil"></canvas>
+        <p class="small">Skanna med mobilkameran för att öppna och spara profilen.</p>
+      </div>
+      <p class="small" id="shareStatus" hidden></p>
+    </div>
+    <div class="panel" id="othersPanel" hidden>
+      <h3>Andras profiler</h3>
+      <div class="others" id="othersList"></div>
     </div>
     <div class="panel" id="movePanel" hidden>
       <div>
@@ -691,10 +726,22 @@ const algIcon=(id,size)=>`<svg class="aicon" viewBox="0 0 24 24" width="${size||
 const iconFor=(a,size)=>a&&a.id&&!String(a.id).startsWith("_")?algIcon(a.custom?"_egen":a.id,size):"";
 
 /* ---------- Matchning ---------- */
-const traceStrict=id=>!!(profile.traces&&profile.traces[id]);
+let others=store.get("kjad.others",[]);
+let activeWho=store.get("kjad.who","me");
+function whoProfiles(){
+  if(activeWho==="all") return [profile,...others];
+  const o=others.find(x=>x.id===activeWho);
+  return o?[o]:[profile];
+}
+const traceStrict=id=>whoProfiles().some(p=>p.traces&&p.traces[id]);
 function activeAllergens(){
-  const list = ALLERGENS.filter(a=>profile.levels[a.id]&&profile.levels[a.id]!=="av").map(a=>({...a,level:profile.levels[a.id]}));
-  for(const c of profile.custom) list.push({id:"c:"+c,name:c,terms:[c.toLowerCase()],excl:[],level:"allergi",custom:1});
+  const levels={}, custom=[];
+  for(const p of whoProfiles()){
+    for(const [id,v] of Object.entries(p.levels||{})) if(v==="allergi"||(v==="intolerans"&&levels[id]!=="allergi")) levels[id]=v;
+    for(const c of (p.custom||[])) if(!custom.includes(c)) custom.push(c);
+  }
+  const list = ALLERGENS.filter(a=>levels[a.id]).map(a=>({...a,level:levels[a.id]}));
+  for(const c of custom) list.push({id:"c:"+c,name:c,terms:[c.toLowerCase()],excl:[],level:"allergi",custom:1});
   return list;
 }
 function matchWord(w,a){
@@ -784,11 +831,11 @@ function renderChips(){
   if(!act.length){el.innerHTML='<span class="chip example">Ingen profil ännu. Gå till Profil.</span>';return}
   for(const a of act){
     const c=document.createElement("span");
-    c.className="chip "+a.level+(profile.example?" example":"");
+    c.className="chip "+a.level+(profile.example&&activeWho==="me"?" example":"");
     c.innerHTML=iconFor(a,16)+esc(a.name+(a.level==="intolerans"?" (intolerans)":""));
     el.append(c);
   }
-  if(profile.example){const n=document.createElement("span");n.className="chip example";n.textContent="Exempelprofil";el.append(n)}
+  if(profile.example&&activeWho==="me"){const n=document.createElement("span");n.className="chip example";n.textContent="Exempelprofil";el.append(n)}
 }
 
 const VERDICT = {
@@ -952,7 +999,7 @@ function renderProfile(){
     row.append(seg);
     if(cur==="allergi"){
       const lab=document.createElement("label"); lab.className="check trace";
-      lab.innerHTML='<input type="checkbox"'+(traceStrict(a.id)?" checked":"")+'> <span>Undvik även spår ("kan innehålla")</span>';
+      lab.innerHTML='<input type="checkbox"'+((profile.traces&&profile.traces[a.id])?" checked":"")+'> <span>Undvik även spår ("kan innehålla")</span>';
       lab.querySelector("input").onchange=e=>{profile.traces=profile.traces||{};profile.traces[a.id]=e.target.checked;saveProfile();if(lastCheck) runCheck(false)};
       row.append(lab);
     }
@@ -1520,6 +1567,7 @@ const avatarSvg=(id,size)=>{const a=AVATARS.find(x=>x.id===id)||AVATARS[0];retur
 
 function renderAvatar(){
   const id=profile.avatar||"uggla";
+  if(typeof renderWho==="function"&&others.length) renderWho();
   $("headAvatar").innerHTML=avatarSvg(id,52);
   const h=$("hello"); h.hidden=!profile.name; h.textContent=profile.name?"Hej "+profile.name+"!":"";
   const g=$("avGrid"); g.innerHTML="";
@@ -1538,6 +1586,93 @@ function saveProfileMeta(){
 }
 $("profName").addEventListener("input",e=>{profile.name=e.target.value.trim().slice(0,30);saveProfileMeta();renderAvatar()});
 $("headAvatar").onclick=()=>show("profil");
+
+/* ---------- Dela allergiprofilen ---------- */
+const SHARE_KEY="dela=";
+function shareCode(){
+  const d={v:1,n:profile.name||"",a:profile.avatar||"uggla",l:profile.example?{}:profile.levels,c:profile.custom||[],t:profile.traces||{}};
+  return b64enc(JSON.stringify(d));
+}
+function shareUrl(){ return location.origin+location.pathname+"#"+SHARE_KEY+shareCode() }
+function cleanShared(d){
+  const levels={}; for(const a of ALLERGENS){const v=(d.l||{})[a.id]; if(v==="allergi"||v==="intolerans") levels[a.id]=v}
+  const traces={}; for(const k in (d.t||{})) if(levels[k]==="allergi"&&d.t[k]) traces[k]=true;
+  return {name:String(d.n||"").slice(0,30),avatar:AVATARS.some(a=>a.id===d.a)?d.a:"uggla",levels,custom:Array.isArray(d.c)?d.c.map(String).slice(0,50):[],traces};
+}
+function profileSummary(p){
+  const parts=ALLERGENS.filter(a=>p.levels[a.id]).map(a=>'<span class="chip '+p.levels[a.id]+'">'+algIcon(a.id,16)+esc(a.name+(p.levels[a.id]==="intolerans"?" (intolerans)":""))+'</span>');
+  for(const c of p.custom||[]) parts.push('<span class="chip allergi">'+algIcon("_egen",16)+esc(c)+'</span>');
+  return '<div class="chips">'+(parts.join("")||'<span class="small muted">Inga allergier valda</span>')+'</div>';
+}
+function noAllergies(){ return profile.example||(!Object.values(profile.levels||{}).some(v=>v&&v!=="av")&&!(profile.custom||[]).length) }
+$("shareLink").onclick=async()=>{
+  const st=$("shareStatus"); st.hidden=false;
+  if(noAllergies()){st.textContent="Välj dina allergier först.";return}
+  const url=shareUrl(), who=profile.name?profile.name+"s":"Min";
+  try{
+    if(navigator.share){await navigator.share({title:who+" allergiprofil",text:"Öppna länken för att se och spara "+(profile.name?profile.name+"s":"min")+" allergiprofil i Kan jag äta det?",url});st.textContent="Delad.";return}
+  }catch(e){ if(e&&e.name==="AbortError"){st.hidden=true;return} }
+  try{await navigator.clipboard.writeText(url);st.textContent="Länken är kopierad. Klistra in den i ett meddelande."}
+  catch(e){st.innerHTML='Kopiera länken: <span class="codebox">'+esc(url)+'</span>'}
+};
+$("shareQrBtn").onclick=async()=>{
+  const st=$("shareStatus"), box=$("shareQrBox");
+  if(noAllergies()){st.hidden=false;st.textContent="Välj dina allergier först.";return}
+  if(!box.hidden){box.hidden=true;return}
+  try{
+    const qrcode=await loadQrLib(); const qr=qrcode(0,"M"); qr.addData(shareUrl()); qr.make();
+    const n=qr.getModuleCount(), q=4, sz=6, c=$("shareQr"); c.width=c.height=(n+q*2)*sz;
+    const g=c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,c.width,c.height); g.fillStyle="#000";
+    for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(qr.isDark(r,k)) g.fillRect((k+q)*sz,(r+q)*sz,sz,sz);
+    box.hidden=false; st.hidden=true;
+  }catch(e){st.hidden=false;st.textContent="QR-koden gick inte att skapa utan uppkoppling. Använd Dela länk."}
+};
+function renderOthers(){
+  $("othersPanel").hidden=!others.length;
+  const box=$("othersList"); box.innerHTML="";
+  for(const o of others){
+    const row=document.createElement("div"); row.className="o";
+    row.innerHTML=avatarSvg(o.avatar,40).replace("<svg ",'<svg class="av" ')+'<div><b>'+esc(o.name||"Utan namn")+'</b>'+profileSummary(o)+'</div>';
+    const rm=document.createElement("button"); rm.className="btn"; rm.textContent="Ta bort";
+    rm.onclick=()=>{others=others.filter(x=>x.id!==o.id);store.set("kjad.others",others);if(activeWho===o.id||(activeWho==="all"&&!others.length)) setWho("me");renderOthers();renderWho()};
+    row.append(rm); box.append(row);
+  }
+}
+function setWho(w){
+  activeWho=w; store.set("kjad.who",w);
+  renderChips(); renderWho();
+  if(lastCheck) runCheck(false);
+  if(!$("view-kort").hidden) renderCard();
+}
+function renderWho(){
+  const bar=$("whoBar"); bar.hidden=!others.length; bar.innerHTML=""; if(!others.length) return;
+  bar.insertAdjacentHTML("beforeend",'<span class="lbl">Kolla för:</span>');
+  const add=(id,html,cls)=>{const b=document.createElement("button");b.innerHTML=html;if(cls)b.className=cls;b.setAttribute("aria-pressed",activeWho===id);b.onclick=()=>setWho(id);bar.append(b)};
+  add("me",avatarSvg(profile.avatar||"uggla",24)+esc(profile.name||"Mig"));
+  for(const o of others) add(o.id,avatarSvg(o.avatar,24)+esc(o.name||"Utan namn"));
+  add("all","Alla","all");
+}
+function handleSharedLink(){
+  const h=location.hash.slice(1); if(!h.startsWith(SHARE_KEY)) return;
+  try{window.history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+  let d; try{d=cleanShared(JSON.parse(b64dec(h.slice(SHARE_KEY.length))))}catch(e){d=null}
+  const box=$("importBox"); box.hidden=false;
+  if(!d){box.innerHTML='<p>Länken går inte att läsa. Be om en ny länk.</p><div class="row"><button class="btn" id="impNo">Stäng</button></div>';$("impNo").onclick=()=>{box.hidden=true};return}
+  const who=d.name||"Någon";
+  const existing=others.find(o=>o.name&&o.name===d.name);
+  box.innerHTML='<div class="head">'+avatarSvg(d.avatar,44)+'<b>'+esc(who)+' har delat sin allergiprofil</b></div>'+profileSummary(d)+
+    '<div class="row"><button class="btn primary grow" id="impYes">'+(existing?"Uppdatera":"Spara")+' '+esc(who)+'s profil</button><button class="btn" id="impNo">Avbryt</button></div>';
+  $("impNo").onclick=()=>{box.hidden=true};
+  $("impYes").onclick=()=>{
+    const id=existing?existing.id:"p"+Date.now().toString(36);
+    const rec={id,...d,at:Date.now()};
+    others=existing?others.map(o=>o.id===id?rec:o):[...others,rec];
+    store.set("kjad.others",others);
+    box.innerHTML='<p>Sparat. Appen kollar nu mot '+esc(who)+'s allergier. Byt med knapparna överst.</p>';
+    setTimeout(()=>{box.hidden=true},6000);
+    renderOthers(); setWho(id);
+  };
+}
 
 /* ---------- Allergikort ---------- */
 const CARD_LANGS=[["sv","Svenska"],["en","English"],["de","Deutsch"],["fr","Français"],["es","Español"],["it","Italiano"]];
@@ -1589,10 +1724,11 @@ function renderCard(){
   if(!act.length){box.innerHTML='<p class="small">Välj dina allergier under <b>Profil</b> först, så fylls kortet i.</p>';$("cardFull").hidden=true;return}
   $("cardFull").hidden=false;
   const strict=al.some(a=>traceStrict(a.id));
+  const wp=whoProfiles(), cardWho=wp.length===1?wp[0]:{avatar:profile.avatar,name:""};
   box.innerHTML='<div class="acard" id="acard" lang="'+cardLang+'">'+
     '<button class="closefull" id="cardClose" hidden>'+esc(t.close)+'</button>'+
-    '<div class="who">'+avatarSvg(profile.avatar||"uggla",44)+'<h2>'+esc(t.title)+'</h2></div>'+
-    (profile.name?'<p><b>'+esc(t.me.replace("{n}",profile.name))+'</b></p>':'')+
+    '<div class="who">'+avatarSvg(cardWho.avatar||"uggla",44)+'<h2>'+esc(t.title)+'</h2></div>'+
+    (cardWho.name?'<p><b>'+esc(t.me.replace("{n}",cardWho.name))+'</b></p>':'')+
     (al.length?'<p>'+esc(t.allergy)+'</p><ul class="ilist">'+al.map(a=>'<li>'+iconFor(a,32)+esc(name(a))+'</li>').join("")+'</ul>':'')+
     (strict?'<p class="warn">'+esc(t.traces)+'</p>':'')+
     (it.length?'<p>'+esc(t.intol)+'</p><ul class="ilist">'+it.map(a=>'<li>'+iconFor(a,32)+esc(name(a))+'</li>').join("")+'</ul>':'')+
@@ -1748,7 +1884,10 @@ $("prodName").value=EXAMPLE.name; $("ingredients").value=EXAMPLE.text;
 $("ingredients").addEventListener("input",()=>{$("exampleBadge").hidden=true;currentCode=null;currentLang=null;translatedFrom=null});
 $("prodName").addEventListener("input",()=>{$("exampleBadge").hidden=true});
 $("checkBtn").onclick=()=>runCheck(true,true);
-renderChips(); renderProfile(); renderAvatar(); renderHistory(); renderLists(); runCheck(false);
+if(activeWho!=="me"&&activeWho!=="all"&&!others.some(o=>o.id===activeWho)) activeWho="me";
+renderChips(); renderProfile(); renderAvatar(); renderOthers(); renderWho(); renderHistory(); renderLists(); runCheck(false);
+if(!standalone) $("sharePanel").hidden=true;
+handleSharedLink();
 
 // Sök visas när sidan körs som fristående fil/webbsida (inne i Claude blockeras nätet)
 if(standalone){
