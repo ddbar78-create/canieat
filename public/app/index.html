@@ -1798,14 +1798,19 @@ async function prefetchAllShards(){
   const info=$("offlineInfo");
   if(done===idx.updated){info.textContent="Offline: alla varor finns sparade i telefonen.";return}
   if(navigator.connection&&navigator.connection.saveData){info.textContent="Offline: hämtas när du inte har datasparläge på.";return}
+  if(!("caches" in window)){info.textContent="Offline: den här webbläsaren kan inte spara databasen.";return}
   prefetching=true; let n=0;
   const all=[...Array(100).keys()].map(i=>String(i).padStart(2,"0"));
+  // Sparas direkt i samma cache som service workern läser ur, så det fungerar även om den inte hunnit starta
+  const save=async rel=>{const url=new URL(DATA+rel,location.href); const key=url.origin+url.pathname;
+    const r=await fetch(key,{cache:"reload"}); if(!r.ok) return false;
+    await (await caches.open("kjad-data")).put(key,r); return true};
   try{
     for(let i=0;i<all.length;i+=4){
-      await Promise.all(all.slice(i,i+4).map(nn=>fetch(DATA+"p/"+nn+".json",{cache:"reload"}).then(r=>{if(r.ok) n++}).catch(()=>{})));
+      await Promise.all(all.slice(i,i+4).map(nn=>save("p/"+nn+".json").then(ok=>{if(ok) n++}).catch(()=>{})));
       info.textContent="Offline: sparar varudatabasen i telefonen, "+Math.round((i+4)/all.length*100)+" %";
     }
-    await fetch(DATA+"recalls.json").catch(()=>{}); await fetch(DATA+"changes.json").catch(()=>{});
+    for(const f of ["se-index.json","recalls.json","changes.json"]) await save(f).catch(()=>{});
     if(n>=95){store.set("kjad.offlineVer",idx.updated);info.textContent="Offline: alla varor finns sparade i telefonen."}
     else info.textContent="Offline: en del av varudatabasen sparades. Resten hämtas nästa gång.";
   }finally{prefetching=false}
@@ -1878,10 +1883,15 @@ async function postFeedback(body){
   const r=await fetch(location.pathname.includes("/app/")?"../api/feedback":"api/feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
   if(!r.ok) throw new Error("http "+r.status);
 }
+// Skickar kön en gång i taget, så att samma rapport aldrig skickas två gånger
+let fbFlushing=false;
 async function flushFeedback(){
-  const q=store.get("kjad.fbQueue",[]); if(!q.length||!navigator.onLine) return;
-  const left=[]; for(const b of q){try{await postFeedback(b)}catch(e){left.push(b)}}
-  store.set("kjad.fbQueue",left);
+  if(fbFlushing||!navigator.onLine) return;
+  const q=store.get("kjad.fbQueue",[]); if(!q.length) return;
+  fbFlushing=true; store.set("kjad.fbQueue",[]);
+  const left=[];
+  try{ for(const b of q){ if(left.length){left.push(b);continue} try{await postFeedback(b)}catch(e){left.push(b)} } }
+  finally{ if(left.length) store.set("kjad.fbQueue",[...left,...store.get("kjad.fbQueue",[])].slice(-20)); fbFlushing=false }
 }
 $("feedbackOpen").onclick=()=>openFeedback(false);
 $("fbClose").onclick=()=>{$("fbSheet").hidden=true};
@@ -2119,7 +2129,7 @@ if(standalone){
   $("searchPanel").hidden=false; $("aiPanel").hidden=false; $("movePanel").hidden=false;
   if(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) $("scanBtn").hidden=false;
   renderAiPanel(); applyAi();
-  if("serviceWorker" in navigator && location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+  if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")){navigator.serviceWorker.register("sw.js").catch(()=>{})}
   setTimeout(()=>loadLocalIndex().then(()=>{prefetchAllShards();checkSavedChanges()}),1500);
   loadChanges().then(()=>{if(lastCheck&&lastCheck.code) runCheck(false)});
   setOnlineState(); setTimeout(flushFeedback,4000);
