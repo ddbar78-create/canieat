@@ -104,7 +104,7 @@ mark.amber{background:var(--warn-soft);box-shadow:inset 0 -2px 0 var(--warn)}
 .alg .trace{grid-column:1/-1;font-size:.8125rem;color:var(--muted)}
 .alg .name small{display:block;color:var(--muted);font-size:.8125rem}
 .seg{display:inline-grid;grid-template-columns:repeat(3,auto);border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.seg button{font:inherit;font-size:.8125rem;font-weight:700;border:0;background:var(--surface);color:var(--muted);padding:7px 9px;cursor:pointer}
+.seg button{font:inherit;font-size:.75rem;font-weight:700;border:0;background:var(--surface);color:var(--muted);padding:7px 7px;cursor:pointer}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button.on[data-v="av"]{background:var(--bg);color:var(--ink)}
 .seg button.on[data-v="intolerans"]{background:var(--warn-soft);color:var(--warn)}
@@ -192,12 +192,27 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.spinner{animation:none}}
-@media (max-width:420px){.alg{grid-template-columns:1fr}.seg{justify-self:start}}
+.hrow{display:flex;align-items:center;gap:12px}
+.htxt{min-width:0;display:flex;flex-direction:column;gap:2px}
+.hello{margin:0;color:var(--muted);font-size:.9375rem}
+.avbtn{flex:0 0 auto;width:52px;height:52px;border-radius:50%;border:2px solid var(--line);background:var(--surface);padding:0;cursor:pointer;display:grid;place-items:center;overflow:hidden}
+.avbtn svg{width:100%;height:100%;display:block}
+.avgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.avgrid button{font:inherit;font-size:.75rem;color:var(--muted);background:none;border:2px solid transparent;border-radius:14px;padding:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.avgrid button svg{width:52px;height:52px}
+.avgrid button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);font-weight:700;background:var(--accent-soft)}
+.scanrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.scanrow .btn{justify-content:center;padding-inline:8px}
+.acard .who{display:flex;align-items:center;gap:10px}
+.acard .who svg{width:44px;height:44px;flex:0 0 auto}
 </style>
 
 <div class="wrap">
   <header>
-    <h1>Kan jag äta det?</h1>
+    <div class="hrow">
+      <button class="avbtn" id="headAvatar" aria-label="Öppna din profil"></button>
+      <div class="htxt"><h1>Kan jag äta det?</h1><p class="hello" id="hello" hidden></p></div>
+    </div>
     <div class="chips" id="profileChips" aria-label="Din allergiprofil"></div>
   </header>
 
@@ -213,17 +228,15 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
   <section class="view" id="view-kolla">
     <div class="panel banner" id="recallBanner" hidden></div>
     <div class="panel" id="searchPanel" hidden>
-      <h3>Sök produkt</h3>
-      <p class="small muted">Söker bland svenska varor från Open Food Facts, en öppen databas. Skriv namn eller streckkodens siffror.</p>
-      <p class="small muted" id="dbInfo" hidden></p>
+      <h3>Hitta vara</h3>
       <div class="row">
-        <input type="text" id="searchInput" placeholder="t.ex. Marabou mjölkchoklad eller 7310511210504" style="flex:1 1 220px" inputmode="search">
+        <input type="text" id="searchInput" placeholder="Namn eller streckkod" aria-label="Sök vara på namn eller streckkod" style="flex:1 1 180px" inputmode="search">
         <button class="btn primary" id="searchBtn">Sök</button>
       </div>
-      <div class="row" id="scanRow">
-        <button class="btn grow" id="scanBtn" hidden>Skanna streckkod</button>
-        <label class="btn grow" id="barcodePhotoBtn" style="justify-content:center">
-          <span>Fota streckkoden</span>
+      <div class="scanrow" id="scanRow">
+        <button class="btn" id="scanBtn" hidden>Skanna</button>
+        <label class="btn" id="barcodePhotoBtn">
+          <span>Fota streckkod</span>
           <input type="file" id="barcodePhoto" accept="image/*" capture="environment" hidden>
         </label>
       </div>
@@ -233,15 +246,11 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
     </div>
     <div class="panel">
       <div class="row" style="justify-content:space-between;align-items:center">
-        <h3>Ingredienslista</h3>
+        <h3>Ingredienser</h3>
         <span class="badge" id="exampleBadge">Exempel</span>
       </div>
-      <label class="field">Produkt (valfritt)
-        <input type="text" id="prodName" placeholder="t.ex. Chokladkakor 200 g">
-      </label>
-      <label class="field">Klistra in eller skriv av ingredienserna
-        <textarea id="ingredients" placeholder="Vetemjöl, socker, …"></textarea>
-      </label>
+      <input type="text" id="prodName" placeholder="Produktnamn (valfritt)" aria-label="Produktnamn">
+      <textarea id="ingredients" placeholder="Skriv eller klistra in ingredienserna" aria-label="Ingredienser"></textarea>
       <div class="row">
         <label class="btn" id="photoBtn">
           <span>Fota listan</span>
@@ -251,7 +260,7 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
           <span>Välj bild</span>
           <input type="file" class="photoIn" id="pick" accept="image/*" hidden>
         </label>
-        <button class="btn primary grow" id="checkBtn">Kolla mot min profil</button>
+        <button class="btn primary grow" id="checkBtn">Kolla</button>
       </div>
       <p class="small muted" id="photoStatus" hidden></p>
     </div>
@@ -280,7 +289,7 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
     <div class="panel">
       <div>
         <h3>Allergikort</h3>
-        <p class="small muted">Visa kortet för personalen på restaurang, café eller utomlands. Det fylls i från din profil.</p>
+        <p class="small muted">Visa för personalen på restaurang eller utomlands.</p>
       </div>
       <div class="langs" id="cardLangs" role="group" aria-label="Språk"></div>
       <div id="cardBox"></div>
@@ -323,14 +332,13 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
 
     <div class="panel">
       <h3>Återkallade varor</h3>
-      <p class="small muted">Från Livsmedelsverket. Varor som rör dina allergener är markerade, och appen varnar om du skannar en återkallad vara.</p>
+      <p class="small muted">Från Livsmedelsverket. Det som rör din profil är markerat.</p>
       <ul class="recalls" id="recallList"></ul>
       <p class="small muted" id="recallInfo"></p>
     </div>
 
     <div class="panel">
       <h3>Lär dig mer om allergenerna</h3>
-      <p class="small muted">Var de brukar finnas och vilka namn de kan gömma sig bakom. Dina allergener står först.</p>
       <div id="algInfo"></div>
     </div>
 
@@ -367,6 +375,12 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
     </div>
 
     <div class="panel">
+      <h3>Om appen</h3>
+      <p class="small" id="dbInfo">Varudatabasen laddas när du söker första gången.</p>
+      <p class="small muted">Data från <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> (licens ODbL) och Livsmedelsverket. Råd vid allergisk reaktion från 1177. Profilen sparas bara på den här enheten.</p>
+    </div>
+
+    <div class="panel">
       <h3>Mer hjälp</h3>
       <ul>
         <li><a href="https://www.1177.se/" target="_blank" rel="noopener">1177</a>: råd om allergi och vård, eller ring 1177.</li>
@@ -394,23 +408,28 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
   <!-- PROFIL -->
   <section class="view" id="view-profil" hidden>
     <div class="panel">
+      <h3>Din profil</h3>
+      <input type="text" id="profName" placeholder="Ditt namn (valfritt)" aria-label="Ditt namn" autocomplete="given-name" maxlength="30">
+      <p class="label">Välj figur</p>
+      <div class="avgrid" id="avGrid" role="group" aria-label="Figur"></div>
+    </div>
+    <div class="panel">
       <div>
         <h3>EU:s 14 allergener</h3>
-        <p class="small muted">Enligt bilaga II i förordning (EU) nr 1169/2011. Välj <b>Allergi</b> om allt ska undvikas, eller <b>Intolerans</b> om små mängder brukar gå bra. Vid allergi kan du också välja att även spår ska ge rött.</p>
+        <p class="small muted"><b>Allergi</b>: undvik helt. <b>Intolerans</b>: små mängder går bra.</p>
       </div>
       <div id="algList"></div>
     </div>
     <div class="panel">
       <div>
         <h3>Fler vanliga allergener</h3>
-        <p class="small muted">Inte märkningspliktiga i EU, men vanliga. Ärtor och andra baljväxter blir allt vanligare i livsmedel.</p>
       </div>
       <div id="algList2"></div>
     </div>
     <div class="panel" id="movePanel" hidden>
       <div>
         <h3>Flytta till en annan enhet</h3>
-        <p class="small muted">Profil och nyckel sparas på varje enhet för sig. Visa en kod här och skanna den med den andra enheten, så följer allergier och nyckel med.</p>
+        <p class="small muted">Till en annan telefon eller dator, med QR-kod.</p>
       </div>
       <div class="row">
         <button class="btn grow" id="moveShow">Visa kod för att skicka</button>
@@ -441,7 +460,7 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
     <div class="panel" id="aiPanel" hidden>
       <div>
         <h3>AI-funktioner (valfritt)</h3>
-        <p class="small muted">Utanför Claude behöver fotoläsning av ingredienslistor, dubbelkoll och frågor en egen Claude API-nyckel. Skapa en på console.anthropic.com. Varje anrop kostar några ören på ditt konto. Nyckeln sparas bara i den här webbläsaren, så använd det här bara på din egen telefon.</p>
+        <p class="small muted">För fotoläsning, dubbelkoll och frågor. Skapa en nyckel på console.anthropic.com. Den sparas bara på den här enheten.</p>
       </div>
       <p class="small" id="aiKeyState"></p>
       <div class="row">
@@ -466,7 +485,7 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
     <button class="btn" id="scanClose">Avbryt</button>
   </div>
 
-  <p class="note">Appen letar först efter allergener och deras synonymer i en ordlista, och sedan dubbelkollar Claude hela listan. Båda kan missa saker. Läs alltid förpackningen, och följ råd från läkare eller dietist vid svår allergi.</p>
+  <p class="note">Läs alltid förpackningen. Appen kan missa saker och ersätter inte råd från läkare eller dietist.</p>
 </div>
 
 <script>
@@ -768,7 +787,7 @@ function renderResult(name,text,res){
     '<div id="aiCheck" class="ai" hidden></div>'+
     '<div><p class="label">Ingredienser'+(res.lang&&res.lang!=="sv"?' · på '+esc(LANG_NAMES[res.lang]||"okänt språk"):'')+'</p><p class="ingr">'+html+'</p>'+
       (translatedFrom?'<p class="small muted">Översatt från '+esc(LANG_NAMES[translatedFrom]||"annat språk")+' av Claude. Jämför med förpackningen.</p>':'')+
-      (res.lang&&res.lang!=="sv"&&FL[res.lang]?'<p class="small muted">Listan är på '+esc(LANG_NAMES[res.lang])+'. Appen letar efter allergener även på det språket, men läs förpackningen.</p>':'')+
+
       (res.lang&&res.lang!=="sv"&&sample?'<div class="row" style="margin-top:8px"><button class="btn" id="translateBtn">Översätt till svenska</button></div>':'')+
       '</div>'+
     '<div class="row listbtns"><button class="btn grow" id="markSafe">Spara som säker</button><button class="btn grow" id="markAvoid">Undvik alltid</button></div>'+
@@ -795,7 +814,7 @@ let aiSeq=0;
 function showAiCheckButton(){
   const box=$("aiCheck"); if(!box||!sample) return;
   box.hidden=false;
-  box.innerHTML='<div class="row" style="align-items:center;justify-content:space-between"><p class="small muted" style="flex:1 1 220px">Ordlistan kan missa ovanliga namn. Låt Claude läsa hela listan.</p><button class="btn" id="aiBtn">Dubbelkolla med Claude</button></div>';
+  box.innerHTML='<div class="row"><button class="btn" id="aiBtn">Dubbelkolla med Claude</button></div>';
   $("aiBtn").onclick=()=>aiCheck();
 }
 async function aiCheck(){
@@ -830,8 +849,8 @@ Svara med ENDAST JSON: {"extra":[{"allergen":"namn exakt som i profilen","ingred
       const list=$("hitList"); list.hidden=false;
       list.insertAdjacentHTML("beforeend",extra.map(x=>'<li><span class="dot '+x.kind+'"></span><span><b>'+esc(x.a.name)+'</b> – '+esc(x.ing)+' <span class="small muted">('+esc(x.sure)+', enligt Claude)</span><br><span class="small muted">'+esc(x.why)+'</span></span></li>').join(""));
       h+='<p>Hittade '+extra.length+' sak'+(extra.length>1?'er':'')+' till som ordlistan missade. De står i listan ovan.</p>';
-    } else h+='<p>Hittade inget mer än ordlistan.</p>';
-    if(d.kommentar) h+='<p class="small muted">'+esc(String(d.kommentar))+'</p>';
+      if(d.kommentar) h+='<p class="small muted">'+esc(String(d.kommentar))+'</p>';
+    } else h='<p class="small muted">Claude dubbelkollade och hittade inget mer.</p>';
     box.innerHTML=h;
   }catch(e){
     if(my!==aiSeq) return;
@@ -1080,9 +1099,7 @@ function useProduct(p){
   if(!t){$("ingredients").value="";st.hidden=true;$("result").hidden=true;showOffAdd("noingredients",p.code,name);return}
   if(p.code) showOffAdd("found",p.code,name);
   $("ingredients").value=t;
-  st.hidden=false; st.textContent=p._local
-    ? "Från den svenska varudatabasen (Open Food Facts"+(localIdx?", uppdaterad "+localIdx.updated:"")+"). Datan läggs in av användare, så jämför med förpackningen."
-    : "Hämtat från Open Food Facts. Datan läggs in av användare, så jämför med förpackningen.";
+  st.hidden=true;
   runCheck(true,true);
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -1096,8 +1113,7 @@ function loadLocalIndex(){
     .then(d=>{
       if(!d||!Array.isArray(d.items)) return null;
       d.keys=d.items.map(it=>norm(it[1]+" "+it[2])); localIdx=d;
-      const info=$("dbInfo"); info.hidden=false;
-      info.textContent=d.n.toLocaleString("sv-SE")+" svenska varor, uppdaterad "+d.updated+". Data från Open Food Facts (licens ODbL).";
+      $("dbInfo").textContent="Varudatabasen: "+d.n.toLocaleString("sv-SE")+" svenska varor, uppdaterad "+d.updated+".";
       return d;
     })
     .catch(()=>{localIdxPromise=null;return null});
@@ -1363,7 +1379,7 @@ const MOVE_PREFIX="KJAD1:";
 const b64enc=str=>btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const b64dec=str=>decodeURIComponent(escape(atob(str.replace(/-/g,"+").replace(/_/g,"/"))));
 function moveCode(withKey){
-  const data={v:1,p:{levels:profile.example?{}:profile.levels,custom:profile.custom,traces:profile.traces||{}}};
+  const data={v:1,p:{levels:profile.example?{}:profile.levels,custom:profile.custom,traces:profile.traces||{},name:profile.name||"",avatar:profile.avatar||""}};
   const k=store.get("kjad.apikey",""); if(withKey&&k) data.k=k;
   return MOVE_PREFIX+b64enc(JSON.stringify(data));
 }
@@ -1423,7 +1439,8 @@ function receiveMove(text){
   $("moveAccept").onclick=()=>{
     const clean={}; for(const a of ALLERGENS){const v=levels[a.id]; if(v==="allergi"||v==="intolerans") clean[a.id]=v}
     const tr={}; for(const k in (data.p.traces||{})) if(clean[k]==="allergi"&&data.p.traces[k]) tr[k]=true;
-    profile={levels:clean,custom,traces:tr,example:false}; store.set("kjad.profile",profile);
+    const av=AVATARS.some(a=>a.id===data.p.avatar)?data.p.avatar:(profile.avatar||"uggla");
+    profile={levels:clean,custom,traces:tr,name:String(data.p.name||"").slice(0,30),avatar:av,example:false}; store.set("kjad.profile",profile); renderAvatar();
     if(data.k && /^sk-ant-/.test(String(data.k))) store.set("kjad.apikey",String(data.k));
     renderChips(); renderProfile(); renderAiPanel(); applyAi();
     box.hidden=true; $("moveIn").hidden=true; st.hidden=false;
@@ -1448,15 +1465,54 @@ $("moveQrPhoto").addEventListener("change",async e=>{
   finally{e.target.value=""}
 });
 
+// Egna, enkla figurer (64x64). Varje figur har egen bakgrundsfärg.
+const EYE=(x,y)=>`<circle cx="${x}" cy="${y}" r="3.2" fill="#1d1d1f"/><circle cx="${x+1}" cy="${y-1}" r="1" fill="#fff"/>`;
+const AVATARS=[
+ {id:"katt",name:"Katt",svg:`<rect width="64" height="64" rx="32" fill="#F6D9C8"/><path d="M14 22 L18 8 L28 18 Z M50 22 L46 8 L36 18 Z" fill="#E08A4C"/><circle cx="32" cy="35" r="19" fill="#E08A4C"/><path d="M17 20 L19 12 L25 18 Z M47 20 L45 12 L39 18 Z" fill="#F4B9A0"/>${EYE(25,32)}${EYE(39,32)}<path d="M30 39 h4 l-2 2.5 z" fill="#B44B5A"/><path d="M32 41.5 q-3 4 -6 2 M32 41.5 q3 4 6 2" stroke="#1d1d1f" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M12 36 h9 M12 41 h9 M43 36 h9 M43 41 h9" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>`},
+ {id:"rav",name:"Räv",svg:`<rect width="64" height="64" rx="32" fill="#FCE3C2"/><path d="M12 14 L24 22 L18 30 Z M52 14 L40 22 L46 30 Z" fill="#D9622B"/><path d="M14 24 Q32 8 50 24 L32 52 Z" fill="#E9733A"/><path d="M18 32 Q25 36 32 52 Q39 36 46 32 Q32 40 18 32 Z" fill="#fff"/>${EYE(25,30)}${EYE(39,30)}<circle cx="32" cy="48" r="3" fill="#1d1d1f"/>`},
+ {id:"bjorn",name:"Björn",svg:`<rect width="64" height="64" rx="32" fill="#E5D7C6"/><circle cx="17" cy="18" r="7" fill="#8A5A3B"/><circle cx="47" cy="18" r="7" fill="#8A5A3B"/><circle cx="17" cy="18" r="3.5" fill="#C99B76"/><circle cx="47" cy="18" r="3.5" fill="#C99B76"/><circle cx="32" cy="35" r="19" fill="#8A5A3B"/><ellipse cx="32" cy="42" rx="9" ry="7" fill="#C99B76"/>${EYE(25,31)}${EYE(39,31)}<ellipse cx="32" cy="39.5" rx="3.6" ry="2.6" fill="#1d1d1f"/><path d="M32 42 v3 M29 46 q3 2 6 0" stroke="#1d1d1f" stroke-width="1.4" fill="none" stroke-linecap="round"/>`},
+ {id:"kanin",name:"Kanin",svg:`<rect width="64" height="64" rx="32" fill="#E4E6F7"/><ellipse cx="24" cy="15" rx="5" ry="13" fill="#fff"/><ellipse cx="40" cy="15" rx="5" ry="13" fill="#fff"/><ellipse cx="24" cy="15" rx="2.4" ry="9" fill="#F4B6C2"/><ellipse cx="40" cy="15" rx="2.4" ry="9" fill="#F4B6C2"/><circle cx="32" cy="38" r="17" fill="#fff"/>${EYE(26,35)}${EYE(38,35)}<path d="M30 41 h4 l-2 2.2 z" fill="#E07A93"/><path d="M32 43 v3" stroke="#1d1d1f" stroke-width="1.3"/><circle cx="21" cy="41" r="2.5" fill="#F7C9D3"/><circle cx="43" cy="41" r="2.5" fill="#F7C9D3"/>`},
+ {id:"uggla",name:"Uggla",svg:`<rect width="64" height="64" rx="32" fill="#DCE9D5"/><path d="M14 18 L22 24 M50 18 L42 24" stroke="#6B4E37" stroke-width="5" stroke-linecap="round"/><ellipse cx="32" cy="37" rx="19" ry="20" fill="#7D5A40"/><ellipse cx="32" cy="43" rx="11" ry="12" fill="#C9A982"/><circle cx="24" cy="30" r="8" fill="#fff"/><circle cx="40" cy="30" r="8" fill="#fff"/><circle cx="24" cy="30" r="4.2" fill="#1d1d1f"/><circle cx="40" cy="30" r="4.2" fill="#1d1d1f"/><circle cx="25.4" cy="28.6" r="1.3" fill="#fff"/><circle cx="41.4" cy="28.6" r="1.3" fill="#fff"/><path d="M29 37 L32 42 L35 37 Z" fill="#E8A43A"/>`},
+ {id:"groda",name:"Groda",svg:`<rect width="64" height="64" rx="32" fill="#D7EEF2"/><circle cx="21" cy="22" r="8" fill="#4CAF63"/><circle cx="43" cy="22" r="8" fill="#4CAF63"/><ellipse cx="32" cy="38" rx="21" ry="15" fill="#4CAF63"/><circle cx="21" cy="22" r="5" fill="#fff"/><circle cx="43" cy="22" r="5" fill="#fff"/><circle cx="21" cy="22" r="2.6" fill="#1d1d1f"/><circle cx="43" cy="22" r="2.6" fill="#1d1d1f"/><path d="M20 40 Q32 49 44 40" stroke="#1E6B34" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="18" cy="37" r="2.5" fill="#F29BA6" opacity=".7"/><circle cx="46" cy="37" r="2.5" fill="#F29BA6" opacity=".7"/>`},
+ {id:"pingvin",name:"Pingvin",svg:`<rect width="64" height="64" rx="32" fill="#D6E6F5"/><ellipse cx="32" cy="36" rx="19" ry="21" fill="#2A2F3A"/><path d="M19 38 Q19 22 32 24 Q45 22 45 38 Q45 54 32 54 Q19 54 19 38 Z" fill="#fff"/>${EYE(26,33)}${EYE(38,33)}<path d="M28 38 L32 43 L36 38 Z" fill="#F2A53A"/><circle cx="22" cy="40" r="2.3" fill="#F7C0C8"/><circle cx="42" cy="40" r="2.3" fill="#F7C0C8"/>`},
+ {id:"panda",name:"Panda",svg:`<rect width="64" height="64" rx="32" fill="#F1E3EC"/><circle cx="16" cy="19" r="7" fill="#1d1d1f"/><circle cx="48" cy="19" r="7" fill="#1d1d1f"/><circle cx="32" cy="35" r="19" fill="#fff"/><ellipse cx="24" cy="33" rx="5.5" ry="7" transform="rotate(-25 24 33)" fill="#1d1d1f"/><ellipse cx="40" cy="33" rx="5.5" ry="7" transform="rotate(25 40 33)" fill="#1d1d1f"/><circle cx="25" cy="32" r="2" fill="#fff"/><circle cx="39" cy="32" r="2" fill="#fff"/><ellipse cx="32" cy="41" rx="3.4" ry="2.4" fill="#1d1d1f"/><path d="M29 45 q3 2.5 6 0" stroke="#1d1d1f" stroke-width="1.4" fill="none" stroke-linecap="round"/>`},
+ {id:"mus",name:"Mus",svg:`<rect width="64" height="64" rx="32" fill="#F7EBD3"/><circle cx="17" cy="22" r="10" fill="#A3A7B4"/><circle cx="47" cy="22" r="10" fill="#A3A7B4"/><circle cx="17" cy="22" r="6" fill="#F2B8C6"/><circle cx="47" cy="22" r="6" fill="#F2B8C6"/><ellipse cx="32" cy="38" rx="16" ry="15" fill="#A3A7B4"/>${EYE(26,35)}${EYE(38,35)}<circle cx="32" cy="43" r="2.6" fill="#E07A93"/><path d="M18 42 h8 M18 46 h8 M38 42 h8 M38 46 h8" stroke="#5b5f6b" stroke-width="1" stroke-linecap="round"/>`},
+ {id:"hund",name:"Hund",svg:`<rect width="64" height="64" rx="32" fill="#E9F0D8"/><ellipse cx="15" cy="30" rx="6" ry="13" fill="#7A4F2E"/><ellipse cx="49" cy="30" rx="6" ry="13" fill="#7A4F2E"/><circle cx="32" cy="35" r="17" fill="#D8A86E"/><ellipse cx="32" cy="42" rx="9" ry="7" fill="#F2DDBF"/><circle cx="39" cy="29" r="6" fill="#B07A45" opacity=".8"/>${EYE(26,31)}${EYE(39,31)}<ellipse cx="32" cy="39" rx="3.6" ry="2.6" fill="#1d1d1f"/><path d="M32 42 v2 M28.5 45 q3.5 3 7 0" stroke="#1d1d1f" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M31 47 h2 v3 a1 1 0 0 1 -2 0 z" fill="#E86B7E"/>`},
+ {id:"lejon",name:"Lejon",svg:`<rect width="64" height="64" rx="32" fill="#FFF0C9"/><circle cx="32" cy="34" r="23" fill="#C97A2B"/><circle cx="32" cy="35" r="16" fill="#F2C266"/><circle cx="20" cy="22" r="4" fill="#F2C266"/><circle cx="44" cy="22" r="4" fill="#F2C266"/>${EYE(26,32)}${EYE(38,32)}<path d="M29 38 h6 l-3 3 z" fill="#7A3B1E"/><path d="M32 41 q-3 4 -6 2 M32 41 q3 4 6 2" stroke="#7A3B1E" stroke-width="1.4" fill="none" stroke-linecap="round"/>`},
+ {id:"robot",name:"Robot",svg:`<rect width="64" height="64" rx="32" fill="#DDE3FA"/><path d="M32 8 v8" stroke="#5563A8" stroke-width="2.5"/><circle cx="32" cy="8" r="3" fill="#E9733A"/><rect x="14" y="16" width="36" height="32" rx="9" fill="#8E9BDB"/><rect x="19" y="22" width="26" height="14" rx="6" fill="#26304F"/><circle cx="26" cy="29" r="3" fill="#7CF0C2"/><circle cx="38" cy="29" r="3" fill="#7CF0C2"/><rect x="24" y="40" width="16" height="3.5" rx="1.75" fill="#26304F"/><rect x="9" y="27" width="5" height="10" rx="2" fill="#5563A8"/><rect x="50" y="27" width="5" height="10" rx="2" fill="#5563A8"/>`}
+];
+const avatarSvg=(id,size)=>{const a=AVATARS.find(x=>x.id===id)||AVATARS[0];return `<svg viewBox="0 0 64 64" width="${size}" height="${size}" role="img" aria-label="${a.name}">${a.svg}</svg>`};
+
+function renderAvatar(){
+  const id=profile.avatar||"uggla";
+  $("headAvatar").innerHTML=avatarSvg(id,52);
+  const h=$("hello"); h.hidden=!profile.name; h.textContent=profile.name?"Hej "+profile.name+"!":"";
+  const g=$("avGrid"); g.innerHTML="";
+  for(const a of AVATARS){
+    const b=document.createElement("button"); b.setAttribute("aria-pressed",a.id===id);
+    b.innerHTML=avatarSvg(a.id,52)+'<span>'+a.name+'</span>';
+    b.onclick=()=>{profile.avatar=a.id;saveProfileMeta();renderAvatar()};
+    g.append(b);
+  }
+  if(document.activeElement!==$("profName")) $("profName").value=profile.name||"";
+}
+// Namn och figur får inte göra exempelprofilen till en riktig profil
+function saveProfileMeta(){
+  if(profile.example){const keep={name:profile.name,avatar:profile.avatar};profile={levels:{},custom:[],traces:{},...keep}}
+  saveProfile();
+}
+$("profName").addEventListener("input",e=>{profile.name=e.target.value.trim().slice(0,30);saveProfileMeta();renderAvatar()});
+$("headAvatar").onclick=()=>show("profil");
+
 /* ---------- Allergikort ---------- */
 const CARD_LANGS=[["sv","Svenska"],["en","English"],["de","Deutsch"],["fr","Français"],["es","Español"],["it","Italiano"]];
 const CARD_T={
- sv:{title:"Jag har matallergi",allergy:"Jag är allergisk mot följande. Även små mängder kan göra mig allvarligt sjuk:",traces:"Även spår och korskontaminering (samma redskap, olja eller yta) är farligt för mig.",intol:"Jag tål inte heller:",ask:"Kan du hjälpa mig att välja en rätt utan detta, eller fråga kocken? Tack!",close:"Stäng"},
- en:{title:"I have a food allergy",allergy:"I am allergic to the following. Even small amounts can make me seriously ill:",traces:"Even traces and cross-contamination (shared utensils, oil or surfaces) are dangerous for me.",intol:"I also cannot tolerate:",ask:"Could you help me choose a dish without these, or ask the chef? Thank you!",close:"Close"},
- de:{title:"Ich habe eine Lebensmittelallergie",allergy:"Ich bin allergisch gegen Folgendes. Schon kleine Mengen können mich ernsthaft krank machen:",traces:"Auch Spuren und Kreuzkontamination (gemeinsame Utensilien, Öl oder Flächen) sind für mich gefährlich.",intol:"Außerdem vertrage ich nicht:",ask:"Können Sie mir helfen, ein Gericht ohne diese Zutaten zu wählen, oder den Koch fragen? Vielen Dank!",close:"Schließen"},
- fr:{title:"J'ai une allergie alimentaire",allergy:"Je suis allergique aux aliments suivants. Même de petites quantités peuvent me rendre gravement malade :",traces:"Même les traces et la contamination croisée (ustensiles, huile ou surfaces partagés) sont dangereuses pour moi.",intol:"Je ne tolère pas non plus :",ask:"Pourriez-vous m'aider à choisir un plat sans ces ingrédients, ou demander au chef ? Merci !",close:"Fermer"},
- es:{title:"Tengo alergia alimentaria",allergy:"Soy alérgico/a a lo siguiente. Incluso pequeñas cantidades pueden hacerme enfermar gravemente:",traces:"Incluso las trazas y la contaminación cruzada (utensilios, aceite o superficies compartidos) son peligrosas para mí.",intol:"Tampoco tolero:",ask:"¿Podría ayudarme a elegir un plato sin estos ingredientes o preguntar al cocinero? ¡Gracias!",close:"Cerrar"},
- it:{title:"Ho un'allergia alimentare",allergy:"Sono allergico/a a quanto segue. Anche piccole quantità possono farmi stare molto male:",traces:"Anche le tracce e la contaminazione crociata (utensili, olio o superfici condivisi) sono pericolose per me.",intol:"Inoltre non tollero:",ask:"Può aiutarmi a scegliere un piatto senza questi ingredienti o chiedere allo chef? Grazie!",close:"Chiudi"}
+ sv:{me:"Jag heter {n}.",title:"Jag har matallergi",allergy:"Jag är allergisk mot följande. Även små mängder kan göra mig allvarligt sjuk:",traces:"Även spår och korskontaminering (samma redskap, olja eller yta) är farligt för mig.",intol:"Jag tål inte heller:",ask:"Kan du hjälpa mig att välja en rätt utan detta, eller fråga kocken? Tack!",close:"Stäng"},
+ en:{me:"My name is {n}.",title:"I have a food allergy",allergy:"I am allergic to the following. Even small amounts can make me seriously ill:",traces:"Even traces and cross-contamination (shared utensils, oil or surfaces) are dangerous for me.",intol:"I also cannot tolerate:",ask:"Could you help me choose a dish without these, or ask the chef? Thank you!",close:"Close"},
+ de:{me:"Ich heiße {n}.",title:"Ich habe eine Lebensmittelallergie",allergy:"Ich bin allergisch gegen Folgendes. Schon kleine Mengen können mich ernsthaft krank machen:",traces:"Auch Spuren und Kreuzkontamination (gemeinsame Utensilien, Öl oder Flächen) sind für mich gefährlich.",intol:"Außerdem vertrage ich nicht:",ask:"Können Sie mir helfen, ein Gericht ohne diese Zutaten zu wählen, oder den Koch fragen? Vielen Dank!",close:"Schließen"},
+ fr:{me:"Je m'appelle {n}.",title:"J'ai une allergie alimentaire",allergy:"Je suis allergique aux aliments suivants. Même de petites quantités peuvent me rendre gravement malade :",traces:"Même les traces et la contamination croisée (ustensiles, huile ou surfaces partagés) sont dangereuses pour moi.",intol:"Je ne tolère pas non plus :",ask:"Pourriez-vous m'aider à choisir un plat sans ces ingrédients, ou demander au chef ? Merci !",close:"Fermer"},
+ es:{me:"Me llamo {n}.",title:"Tengo alergia alimentaria",allergy:"Soy alérgico/a a lo siguiente. Incluso pequeñas cantidades pueden hacerme enfermar gravemente:",traces:"Incluso las trazas y la contaminación cruzada (utensilios, aceite o superficies compartidos) son peligrosas para mí.",intol:"Tampoco tolero:",ask:"¿Podría ayudarme a elegir un plato sin estos ingredientes o preguntar al cocinero? ¡Gracias!",close:"Cerrar"},
+ it:{me:"Mi chiamo {n}.",title:"Ho un'allergia alimentare",allergy:"Sono allergico/a a quanto segue. Anche piccole quantità possono farmi stare molto male:",traces:"Anche le tracce e la contaminazione crociata (utensili, olio o superfici condivisi) sono pericolose per me.",intol:"Inoltre non tollero:",ask:"Può aiutarmi a scegliere un piatto senza questi ingredienti o chiedere allo chef? Grazie!",close:"Chiudi"}
 };
 const CARD_A={
  gluten:{sv:"Gluten (vete, råg, korn, havre)",en:"Gluten (wheat, rye, barley, oats)",de:"Gluten (Weizen, Roggen, Gerste, Hafer)",fr:"Gluten (blé, seigle, orge, avoine)",es:"Gluten (trigo, centeno, cebada, avena)",it:"Glutine (frumento, segale, orzo, avena)"},
@@ -1500,7 +1556,8 @@ function renderCard(){
   const strict=al.some(a=>traceStrict(a.id));
   box.innerHTML='<div class="acard" id="acard" lang="'+cardLang+'">'+
     '<button class="closefull" id="cardClose" hidden>'+esc(t.close)+'</button>'+
-    '<h2>'+esc(t.title)+'</h2>'+
+    '<div class="who">'+avatarSvg(profile.avatar||"uggla",44)+'<h2>'+esc(t.title)+'</h2></div>'+
+    (profile.name?'<p><b>'+esc(t.me.replace("{n}",profile.name))+'</b></p>':'')+
     (al.length?'<p>'+esc(t.allergy)+'</p><ul>'+al.map(a=>'<li>'+esc(name(a))+'</li>').join("")+'</ul>':'')+
     (strict?'<p class="warn">'+esc(t.traces)+'</p>':'')+
     (it.length?'<p>'+esc(t.intol)+'</p><ul>'+it.map(a=>'<li>'+esc(name(a))+'</li>').join("")+'</ul>':'')+
@@ -1656,7 +1713,7 @@ $("prodName").value=EXAMPLE.name; $("ingredients").value=EXAMPLE.text;
 $("ingredients").addEventListener("input",()=>{$("exampleBadge").hidden=true;currentCode=null;currentLang=null;translatedFrom=null});
 $("prodName").addEventListener("input",()=>{$("exampleBadge").hidden=true});
 $("checkBtn").onclick=()=>runCheck(true,true);
-renderChips(); renderProfile(); renderHistory(); renderLists(); runCheck(false);
+renderChips(); renderProfile(); renderAvatar(); renderHistory(); renderLists(); runCheck(false);
 
 // Sök visas när sidan körs som fristående fil/webbsida (inne i Claude blockeras nätet)
 if(standalone){
