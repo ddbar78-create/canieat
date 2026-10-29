@@ -1082,10 +1082,26 @@ const PHOTO_ERR={
   sampling_disabled:"Claude är inte tillgängligt för ditt konto just nu. Skriv av listan i rutan i stället.",
   image_rejected:"Bilden gick inte att läsa. Ta en ny bild, eller skärmdumpa bilden och välj skärmdumpen."
 };
+// Utan AI-nyckel: förklara hur man gör gratis med telefonens egen textigenkänning
+function showOcrHelp(){
+  const st=$("photoStatus"); st.hidden=false;
+  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent), android=/Android/.test(navigator.userAgent);
+  const how=ios
+    ? '<li>Öppna Kamera-appen och rikta den mot ingredienslistan.</li><li>Tryck på textikonen nere till höger (Live Text).</li><li>Markera texten och välj <b>Kopiera</b>.</li>'
+    : android
+    ? '<li>Öppna Google Lens (i kameran eller Google-appen) och rikta mot ingredienslistan.</li><li>Välj <b>Text</b>, markera listan och välj <b>Kopiera</b>.</li>'
+    : '<li>Använd telefonens textigenkänning (Live Text på iPhone, Google Lens på Android) och kopiera ingredienslistan.</li>';
+  st.innerHTML='<b>Fotoläsning med AI kräver en Claude-nyckel på den här enheten.</b> Gratis alternativ:'+
+    '<ol style="margin:6px 0;padding-left:20px">'+how+'<li>Klistra in i rutan ovan och tryck <b>Kolla</b>.</li></ol>'+
+    '<span class="row"><button class="btn" id="ocrKey">Lägg in nyckel</button><button class="btn" id="ocrMove">Flytta från datorn</button></span>';
+  $("ocrKey").onclick=()=>{show("profil");setTimeout(()=>$("aiPanel").scrollIntoView({behavior:"smooth"}),50)};
+  $("ocrMove").onclick=()=>{show("profil");setTimeout(()=>$("movePanel").scrollIntoView({behavior:"smooth"}),50)};
+}
+$("photoBtn").addEventListener("click",e=>{ if(!sample){ e.preventDefault(); showOcrHelp(); } });
 document.querySelectorAll(".photoIn").forEach(inp=>inp.addEventListener("change",async e=>{
   const f=e.target.files&&e.target.files[0]; if(!f) return;
   const st=$("photoStatus"); st.hidden=false;
-  if(!sample){st.textContent="Bildläsning kräver att sidan är öppen i Claude (appen eller claude.ai). Skriv av listan i rutan så länge.";e.target.value="";return}
+  if(!sample){e.target.value="";showOcrHelp();return}
   st.innerHTML='<span class="spinner"></span> Läser av bilden… (kan ta upp till en halv minut)';
   try{
     const img=await toJpeg(f);
@@ -1436,7 +1452,7 @@ function renderAiPanel(){
 function applyAi(){
   const k=store.get("kjad.apikey","");
   sample=k?makeApiSample(k):null;
-  for(const id of ["photoBtn","pickBtn"]) $(id).hidden=!sample;
+  $("photoBtn").hidden=false; $("pickBtn").hidden=!sample;
   $("askUnavailable").hidden=!!sample;
   $("askUnavailable").textContent="Frågor kräver en Claude API-nyckel. Lägg in den under Profil.";
   if(lastCheck) runCheck(false);
