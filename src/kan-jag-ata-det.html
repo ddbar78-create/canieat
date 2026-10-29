@@ -1,23 +1,24 @@
 <title>Kan jag äta det?</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;600;700&display=swap">
 <style>
-/* Arkad: 8-bitars spelhall. Medvetet ett enda mörkt tema (samma i ljust och mörkt läge).
-   Pixeltypsnitt bara i rubriker; brödtext, knappar och etiketter i Atkinson Hyperlegible för läsbarheten.
-   Rött, gult och grönt behåller sin betydelse. Allergikortet är alltid ljust. */
+/* Skog: ljust havsskum (60 %), salviagrön och dämpad lavendel (30 %), blekt terrakotta för knappar (10 %).
+   Text i djup skogsnatt. Rubriker Plus Jakarta Sans, brödtext Inter med radavstånd 1,6. Ett ljust tema. */
 :root{
-  --bg:#1F1C44; --surface:#2C2862; --ink:#F4F1FF; --muted:#B9B3E8; --line:#0D0B24;
-  --accent:#FFCC33; --accent-ink:#1F1C44; --accent-soft:#3D3880; --pink:#FF5C8A;
-  --field:#16143A; --btn:#3D3880;
-  --ok:#4BE38A; --ok-soft:#1E4A3A; --warn:#FFB020; --warn-soft:#4A3A16; --bad:#FF5468; --bad-soft:#4A1C2C;
-  --display:"Press Start 2P", ui-monospace, "Courier New", monospace;
-  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
-  color-scheme:dark;
+  --bg:#E7EFE9; --surface:#F7FAF8; --ink:#2C3A34; --muted:#56655E; --line:#B2C6B5;
+  --sage:#B2C6B5; --sage-soft:#DCE7DE; --lavender:#D2C4DB; --lavender-soft:#ECE5F1;
+  --accent:#2C3A34; --accent-ink:#F7FAF8; --accent-soft:#DCE7DE;
+  --cta:#F2C19E; --cta-ink:#2C3A34; --cta-hover:#ECAE83;
+  --field:#FFFFFF; --btn:#F7FAF8; --pink:#D2C4DB;
+  --ok:#2E7A4F; --ok-soft:#DDEFE3; --warn:#9A5E00; --warn-soft:#F8E8C9; --bad:#B23A2E; --bad-soft:#F6DEDA;
+  --display:"Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --body:"Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme:light;
 }
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg) radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.5px) 0 0/28px 28px;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
 .wrap{max-width:640px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
 h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
 h1{font-size:2rem;font-weight:800;line-height:1.1}
@@ -207,49 +208,50 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
 .acard .who{display:flex;align-items:center;gap:10px}
 .acard .who svg{width:44px;height:44px;flex:0 0 auto}
 
-/* ---------- Arkad ---------- */
-h1{font-family:var(--display);font-weight:400;font-size:1.15rem;line-height:1.55;letter-spacing:0;color:var(--accent);text-shadow:3px 3px 0 var(--pink)}
-.hello{font-family:var(--display);font-size:.62rem;line-height:1.6;color:var(--ok)}
-h3{font-family:var(--display);font-weight:400;font-size:.75rem;line-height:1.6;letter-spacing:0;color:var(--accent)}
-.panel{border:3px solid var(--line);border-radius:0;box-shadow:6px 6px 0 var(--line);background:var(--surface)}
-.tabs{border:3px solid var(--line);border-radius:0;box-shadow:5px 5px 0 var(--line);background:var(--surface)}
-.tabs button{border-radius:0;font-weight:800;color:var(--muted)}
-.tabs button[aria-selected="true"]{background:var(--pink);color:#fff}
-.btn{border:3px solid var(--line);border-radius:0;box-shadow:4px 4px 0 var(--line);background:var(--btn);color:var(--ink);font-weight:800}
-.btn:active{transform:translate(4px,4px);box-shadow:none}
-.btn.primary{background:var(--accent);border-color:var(--line);color:var(--accent-ink)}
-.btn:disabled{box-shadow:none}
-input[type=text],input[type=password],textarea{border:3px solid var(--line);border-radius:0;background:var(--field);color:var(--ink)}
-input::placeholder,textarea::placeholder{color:#8F89C4}
-.chip{border-radius:0;border-width:2px;background:var(--field)}
-.verdict{border-radius:0;border-width:3px;box-shadow:6px 6px 0 var(--line)}
-.verdict h2{font-family:var(--display);font-weight:400;font-size:1rem;line-height:1.55;letter-spacing:0}
-.verdict .lamp{border-radius:0;border:3px solid var(--line)}
-.avbtn{border:3px solid var(--line);border-radius:0;box-shadow:3px 3px 0 var(--line)}
-.avgrid button{border-radius:0}
-.badge{border-radius:0;background:var(--pink);color:#fff}
-.tabs,.seg,.seg2,.whobar button,.langs button,.offbox,.qrbox,.codebox,.scanner video{border-radius:0}
-.seg,.seg2{border:2px solid var(--line)}
-.seg button,.seg2 button{background:var(--field)}
-.seg button+button,.seg2 button+button{border-left:2px solid var(--line)}
-.seg button.on[data-v="av"]{background:var(--btn);color:var(--ink)}
-.whobar button,.langs button{border:2px solid var(--line);background:var(--field);color:var(--ink)}
-.whobar button[aria-pressed="true"],.langs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.listbtns .on-safe{background:var(--ok-soft);color:var(--ok)}
-.listbtns .on-avoid{background:var(--bad-soft);color:var(--bad)}
-mark{border-radius:0}
-.acard{border-radius:0;box-shadow:6px 6px 0 var(--line)}
-.acard h2{font-family:var(--display);font-weight:400;font-size:1.1rem;line-height:1.5;letter-spacing:0}
-.acard.full h2{font-size:1.5rem}
-.acard .closefull{border-radius:0}
-.call a{border-radius:0;box-shadow:4px 4px 0 var(--line)}
-.call a.calm{background:var(--btn);color:var(--ink)}
-.emerg{border-color:var(--bad)}
-.emerg h3{color:var(--bad)}
-.note{border-top-color:rgba(255,255,255,.12)}
-a{color:var(--accent)}
-.recalls a{color:var(--ink)}
-@media (prefers-reduced-motion: reduce){.btn:active{transform:none}}
+/* ---------- Skog: komponenter ---------- */
+h1{font-family:var(--display);font-weight:800;font-size:2.25rem;line-height:1.1;letter-spacing:-.005em;word-spacing:.04em;color:var(--ink);text-shadow:none}
+h2{font-family:var(--display);font-weight:600}
+h3{font-family:var(--display);font-weight:700;font-size:1.125rem;line-height:1.3;letter-spacing:-.01em;color:var(--ink)}
+.hello{font-family:var(--body);font-size:.9375rem;line-height:1.4;color:var(--muted)}
+.label{font-family:var(--body);color:var(--muted)}
+.panel{border:1px solid var(--sage);border-radius:20px;box-shadow:0 1px 0 rgba(44,58,52,.04);background:var(--surface)}
+.tabs{border:0;border-radius:999px;box-shadow:none;background:var(--sage);padding:5px}
+.tabs button{border-radius:999px;font-weight:600;color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+.btn{border:1.5px solid var(--sage);border-radius:999px;box-shadow:none;background:var(--surface);color:var(--ink);font-weight:600}
+.btn:active{transform:none;box-shadow:none}
+.btn.primary{background:var(--cta);border-color:var(--cta);color:var(--cta-ink);font-weight:700}
+.btn.primary:hover{background:var(--cta-hover);border-color:var(--cta-hover)}
+input[type=text],input[type=password],textarea{border:1.5px solid var(--sage);border-radius:14px;background:var(--field);color:var(--ink)}
+input::placeholder,textarea::placeholder{color:#7D8C85}
+.chip{border-radius:999px;border-width:1.5px;background:var(--surface)}
+.verdict{border-radius:18px;border-width:2px;box-shadow:none}
+.verdict h2{font-family:var(--display);font-weight:800;font-size:1.5rem;line-height:1.2;letter-spacing:-.01em}
+.verdict .lamp{border-radius:50%;border:0}
+.avbtn{border:2px solid var(--sage);border-radius:50%;box-shadow:none}
+.avgrid button{border-radius:16px}
+.avgrid button[aria-pressed="true"]{border-color:var(--ink);background:var(--lavender-soft)}
+.badge{border-radius:999px;background:var(--lavender);color:var(--ink)}
+.seg,.seg2{border:1.5px solid var(--sage);border-radius:10px}
+.seg button,.seg2 button{background:var(--surface)}
+.seg button+button,.seg2 button+button{border-left:1.5px solid var(--sage)}
+.seg button.on[data-v="av"]{background:var(--sage-soft);color:var(--ink)}
+.whobar button,.langs button{border:1.5px solid var(--sage);border-radius:999px;background:var(--surface);color:var(--ink)}
+.whobar button[aria-pressed="true"],.langs button[aria-pressed="true"]{background:var(--lavender);border-color:var(--lavender);color:var(--ink)}
+mark{border-radius:4px}
+.acard{border-radius:20px;box-shadow:none}
+.acard h2{font-family:var(--display);font-weight:800;font-size:1.6rem;line-height:1.15;letter-spacing:-.01em}
+.acard .closefull{border-radius:999px}
+.call a{border-radius:14px;box-shadow:none;font-family:var(--display);font-weight:800}
+.call a.calm{background:var(--sage-soft);color:var(--ink)}
+.offbox,.qrbox,.codebox{border-radius:14px}
+.offbox{background:var(--lavender-soft)}
+.ai{border-left-color:var(--lavender)}
+.importbox{border-color:var(--lavender);background:var(--lavender-soft)}
+.banner{border-color:var(--bad)}
+.note{border-top-color:var(--sage)}
+a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
+.small{line-height:1.55}
 </style>
 
 <div class="wrap">
@@ -1227,11 +1229,13 @@ function useProduct(p){
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
 /* ---------- Lokal svensk varudatabas (byggs varje vecka av GitHub Actions) ---------- */
+// Appen ligger i /app/ och datan i /data/ på samma webbplats
+const DATA=/\/app\/(index\.html)?$/.test(location.pathname)?"../data/":"data/";
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
 let localIdx=null, localIdxPromise=null;
 function loadLocalIndex(){
   if(!standalone) return Promise.resolve(null);
-  if(!localIdxPromise) localIdxPromise=fetch("data/se-index.json")
+  if(!localIdxPromise) localIdxPromise=fetch(DATA+"se-index.json")
     .then(r=>r.ok?r.json():null)
     .then(d=>{
       if(!d||!Array.isArray(d.items)) return null;
@@ -1246,7 +1250,7 @@ const shardCache=new Map();
 async function localProduct(code){
   if(!standalone) return null;
   const nn=code.slice(-2).padStart(2,"0");
-  if(!shardCache.has(nn)) shardCache.set(nn,fetch("data/p/"+nn+".json").then(r=>r.ok?r.json():{}).catch(()=>{shardCache.delete(nn);return {}}));
+  if(!shardCache.has(nn)) shardCache.set(nn,fetch(DATA+"p/"+nn+".json").then(r=>r.ok?r.json():{}).catch(()=>{shardCache.delete(nn);return {}}));
   const r=(await shardCache.get(nn))[code];
   return r?{code,product_name:r[0],brands:r[1],ingredients_text:r[2],allergens_tags:r[3]||[],traces_tags:r[4]||[],_lang:r[5]||"",_local:true}:null;
 }
@@ -1888,7 +1892,7 @@ $("listTabAvoid").onclick=()=>{listTab="avoid";renderLists()};
 let recalls=null, recallsPromise=null;
 function loadRecalls(){
   if(!standalone) return Promise.resolve(null);
-  if(!recallsPromise) recallsPromise=fetch("data/recalls.json").then(r=>r.ok?r.json():null).then(d=>{recalls=d&&Array.isArray(d.items)?d:null;return recalls}).catch(()=>{recallsPromise=null;return null});
+  if(!recallsPromise) recallsPromise=fetch(DATA+"recalls.json").then(r=>r.ok?r.json():null).then(d=>{recalls=d&&Array.isArray(d.items)?d:null;return recalls}).catch(()=>{recallsPromise=null;return null});
   return recallsPromise;
 }
 function recallHits(r){

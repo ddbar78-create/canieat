@@ -1,14 +1,27 @@
+"""Bygger public/ från src/.
+
+  public/index.html        startsidan (src/landing.html)
+  public/app/              appen (src/kan-jag-ata-det.html) med manifest, service worker och ikoner
+  public/data/             varudatabas och återkallelser – skrivs av GitHub Actions, rörs inte här
+
+Kör: python3 tools/build.py   (kräver Pillow)
+"""
 import os, json, shutil
 from PIL import Image, ImageDraw
-src=open("src/kan-jag-ata-det.html",encoding="utf8").read()
-out="public"
-os.makedirs(out,exist_ok=True)  # rör inte public/data, den skrivs av GitHub Actions
-head='''<!doctype html>
+
+ROOT = "public"
+APP = os.path.join(ROOT, "app")
+VERSION = "kjad-v10"
+os.makedirs(APP, exist_ok=True)
+
+# ---------- Appen ----------
+src = open("src/kan-jag-ata-det.html", encoding="utf8").read()
+head = '''<!doctype html>
 <html lang="sv">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1F1C44">
+<meta name="theme-color" content="#E7EFE9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Kan jag äta?">
@@ -20,23 +33,44 @@ head='''<!doctype html>
 </head>
 <body>
 '''
-open(f"{out}/index.html","w",encoding="utf8").write(head+src+"\n</body>\n</html>\n")
-json.dump({"name":"Kan jag äta det?","short_name":"Kan jag äta?","lang":"sv","start_url":"./","scope":"./","display":"standalone",
-  "background_color":"#1F1C44","theme_color":"#1F1C44",
-  "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]},
-  open(f"{out}/manifest.webmanifest","w",encoding="utf8"),ensure_ascii=False,indent=1)
-open(f"{out}/sw.js","w").write('''const C="kjad-v9";
-self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest","./icon-192.png"])));self.skipWaiting()});
+open(f"{APP}/index.html", "w", encoding="utf8").write(head + src + "\n</body>\n</html>\n")
+
+def manifest(start, scope, path):
+    json.dump({"name": "Kan jag äta det?", "short_name": "Kan jag äta?", "lang": "sv",
+               "start_url": start, "scope": scope, "display": "standalone",
+               "background_color": "#E7EFE9", "theme_color": "#E7EFE9",
+               "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+                         {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+                         {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]},
+              open(path, "w", encoding="utf8"), ensure_ascii=False, indent=1)
+
+manifest("./", "./", f"{APP}/manifest.webmanifest")
+# Äldre installationer pekar på /manifest.webmanifest – skicka dem till appen
+manifest("app/", "./", f"{ROOT}/manifest.webmanifest")
+
+SW = '''const C="%s";
+self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(%s)));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{const u=new URL(e.request.url);if(e.request.method!=="GET"||u.origin!==location.origin)return;
  e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(C).then(c=>c.put(e.request,cp));return r}).catch(()=>caches.match(e.request)))});
-''')
+'''
+open(f"{APP}/sw.js", "w").write(SW % (VERSION, '["./","./index.html","./manifest.webmanifest","./icon-192.png"]'))
+# Service worker på roten finns kvar för äldre installationer (nätverk först)
+open(f"{ROOT}/sw.js", "w").write(SW % (VERSION + "-root", '["./"]'))
+
+# ---------- Ikoner: trafikljus på skogsgrönt ----------
 def icon(n):
-    S=n*4; im=Image.new("RGB",(S,S),(48,70,166)); d=ImageDraw.Draw(im)
-    pad=int(S*.2); d.rounded_rectangle([pad,int(S*.33),S-pad,int(S*.67)],radius=int(S*.17),fill=(255,255,255))
-    r=int(S*.075); cy=S//2
-    for i,col in enumerate([(188,47,38),(230,150,20),(29,119,69)]):
-        cx=int(S*(.33+.17*i)); d.ellipse([cx-r,cy-r,cx+r,cy+r],fill=col)
-    return im.resize((n,n),Image.LANCZOS)
-for n in (180,192,512): icon(n).save(f"{out}/icon-{n}.png")
-print(os.listdir(out))
+    S = n * 4
+    im = Image.new("RGB", (S, S), (44, 58, 52)); d = ImageDraw.Draw(im)
+    pad = int(S * .2); d.rounded_rectangle([pad, int(S * .33), S - pad, int(S * .67)], radius=int(S * .17), fill=(231, 239, 233))
+    r = int(S * .075); cy = S // 2
+    for i, col in enumerate([(178, 58, 46), (209, 138, 0), (46, 122, 79)]):
+        cx = int(S * (.33 + .17 * i)); d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=col)
+    return im.resize((n, n), Image.LANCZOS)
+for n in (180, 192, 512):
+    im = icon(n); im.save(f"{APP}/icon-{n}.png"); im.save(f"{ROOT}/icon-{n}.png")
+
+# ---------- Startsidan ----------
+shutil.copy("src/landing.html", f"{ROOT}/index.html")
+shutil.copy("src/assets/app-resultat.png", f"{ROOT}/app-resultat.png")
+print(sorted(os.listdir(ROOT)), sorted(os.listdir(APP)))

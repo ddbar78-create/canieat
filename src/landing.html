@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kan jag äta det? – kolla maten mot dina allergier</title>
+<meta name="description" content="Skanna maten och se direkt om den innehåller något du är allergisk mot. Gratis, på svenska och utan konto.">
+<meta name="theme-color" content="#E7EFE9">
+<link rel="icon" href="app/icon-192.png">
+<link rel="apple-touch-icon" href="app/icon-180.png">
+<link rel="manifest" href="app/manifest.webmanifest">
+<script>
+// Öppnas sidan från en hemskärmsikon, eller via en delningslänk, går vi direkt till appen.
+(function(){
+  var standalone = window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  if (standalone || location.hash.indexOf("#dela=") === 0) location.replace("app/" + location.search + location.hash);
+})();
+</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* Startsida: Z-mönster i hjältedelen (rubrik → bild → knapp), F-mönster i stegen och funktionerna.
+   60 % havsskum, 30 % salvia och lavendel, 10 % terrakotta på knapparna. */
+:root{
+  --seafoam:#E7EFE9; --sage:#B2C6B5; --sage-soft:#D6E3D9; --lavender:#D2C4DB; --lavender-soft:#E9E1EF;
+  --cta:#F2C19E; --cta-hover:#ECAE83; --forest:#2C3A34; --muted:#56655E; --white:#F9FBFA;
+  --display:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;
+  --body:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--seafoam);color:var(--forest);font-family:var(--body);font-size:16px;line-height:1.6;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;color:var(--forest)}
+h1{font-size:clamp(2.5rem,5.2vw,3.25rem);font-weight:700;line-height:1.08;letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,3vw,1.75rem);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h3{font-size:1.125rem;font-weight:700;line-height:1.3}
+p{margin:0}
+.lead{font-size:1.1875rem;line-height:1.6;color:var(--muted);max-width:34rem}
+
+/* Knappar: terrakotta är enda varma färgen och bara för huvudhandlingen */
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--cta);color:var(--forest);font-family:var(--display);font-weight:800;font-size:1.0625rem;text-decoration:none;padding:15px 26px;border-radius:999px;box-shadow:0 6px 18px rgba(242,193,158,.55);transition:background .15s,transform .15s}
+.cta:hover{background:var(--cta-hover)}
+.cta:active{transform:translateY(1px)}
+.cta:focus-visible,.ghost:focus-visible,nav a:focus-visible{outline:3px solid var(--forest);outline-offset:3px}
+.ghost{display:inline-flex;align-items:center;font-weight:600;color:var(--forest);text-decoration:none;padding:14px 18px;border-radius:999px;border:1.5px solid var(--sage)}
+.ghost:hover{background:var(--sage-soft)}
+
+/* Navigering */
+nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:20px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.0625rem;text-decoration:none}
+.brand .mark{width:36px;height:36px;border-radius:10px;background:var(--forest);display:grid;place-items:center}
+nav .links{display:flex;align-items:center;gap:6px}
+nav .links a.txt{text-decoration:none;font-weight:600;padding:8px 12px;border-radius:999px}
+nav .links a.txt:hover{background:var(--sage-soft)}
+nav .cta{padding:10px 18px;font-size:.9375rem;box-shadow:none}
+
+/* Hjälte (Z): rubrik vänster, telefon höger, knapp under rubriken */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding-block:32px 72px}
+.hero .copy{display:flex;flex-direction:column;gap:22px;min-width:0}
+.hero .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.hero .fine{font-size:.875rem;color:var(--muted)}
+.stage{position:relative;display:grid;place-items:center;min-height:540px}
+.stage::before{content:"";position:absolute;width:88%;aspect-ratio:1;max-width:460px;border-radius:46% 54% 52% 48%/50% 44% 56% 50%;background:var(--lavender)}
+.stage::after{content:"";position:absolute;width:44%;aspect-ratio:1;max-width:230px;right:2%;bottom:6%;border-radius:50%;background:var(--sage)}
+.phone{position:relative;z-index:1;width:min(290px,72vw);border-radius:42px;background:var(--forest);padding:10px;box-shadow:0 30px 60px rgba(44,58,52,.28)}
+.phone img{border-radius:32px;width:100%;aspect-ratio:390/800;object-fit:cover;object-position:top}
+.badge-float{position:absolute;z-index:2;left:-2%;bottom:14%;background:var(--white);border-radius:16px;padding:10px 14px;box-shadow:0 10px 30px rgba(44,58,52,.15);display:flex;gap:10px;align-items:center;font-weight:600;font-size:.9375rem}
+.badge-float .dot{width:12px;height:12px;border-radius:50%;background:#B23A2E}
+
+/* Siffror */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:24px;background:var(--white);border-radius:24px;border:1px solid var(--sage)}
+.stat b{display:block;font-family:var(--display);font-weight:800;font-size:1.75rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.9375rem}
+
+/* Sektioner (F): rubrik och ingress vänsterställda, innehåll under */
+section{padding-block:72px}
+.sechead{display:flex;flex-direction:column;gap:10px;max-width:40rem;margin-bottom:32px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:step}
+.step{background:var(--sage-soft);border-radius:24px;padding:26px;display:flex;flex-direction:column;gap:10px}
+.step:nth-child(2){background:var(--lavender-soft)}
+.step .n{counter-increment:step;width:40px;height:40px;border-radius:50%;background:var(--forest);color:var(--white);font-family:var(--display);font-weight:800;display:grid;place-items:center}
+.step .n::before{content:counter(step)}
+.step p{color:var(--muted)}
+
+.features{display:grid;grid-template-columns:repeat(2,1fr);gap:0 40px}
+.feat{display:grid;grid-template-columns:48px 1fr;gap:16px;padding-block:22px;border-top:1px solid var(--sage)}
+.feat .ic{width:48px;height:48px;border-radius:14px;background:var(--sage-soft);display:grid;place-items:center}
+.feat:nth-child(4n+2) .ic,.feat:nth-child(4n+3) .ic{background:var(--lavender-soft)}
+.feat p{color:var(--muted);margin-top:4px}
+
+.safe{background:var(--lavender);border-radius:28px;padding:32px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+.safe .ic{width:56px;height:56px;border-radius:50%;background:var(--white);display:grid;place-items:center}
+.safe p{max-width:46rem}
+
+.final{background:var(--forest);color:var(--white);border-radius:32px;padding:56px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
+.final h2{color:var(--white)}
+.final p{color:#C9D6CD;max-width:32rem}
+
+footer{padding-block:40px 56px;font-size:.875rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between}
+footer a{color:var(--forest)}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:28px;padding-block:8px 48px}
+  .stage{min-height:auto;padding-block:20px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:1fr}
+  .features{grid-template-columns:1fr}
+  .safe{grid-template-columns:1fr}
+  section{padding-block:52px}
+  nav .links a.txt{display:none}
+}
+@media (prefers-reduced-motion:reduce){.cta{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav aria-label="Huvudmeny">
+    <a class="brand" href="#">
+      <span class="mark"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="4" fill="#F9FBFA"/><circle cx="7.5" cy="12" r="2" fill="#B23A2E"/><circle cx="12" cy="12" r="2" fill="#D18A00"/><circle cx="16.5" cy="12" r="2" fill="#2E7A4F"/></svg></span>
+      Kan jag äta det?
+    </a>
+    <div class="links">
+      <a class="txt" href="#sa-funkar-det">Så funkar det</a>
+      <a class="txt" href="#funktioner">Funktioner</a>
+      <a class="cta" href="app/">Öppna appen</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="copy">
+      <h1>Skanna maten. Se direkt om du kan äta den.</h1>
+      <p class="lead">Appen kollar ingredienslistan mot dina allergier och visar rött, gult eller grönt. Gratis, på svenska och utan konto.</p>
+      <div class="actions">
+        <a class="cta" href="app/">Öppna appen gratis
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" stroke="#2C3A34" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a class="ghost" href="#sa-funkar-det">Så funkar det</a>
+      </div>
+      <p class="fine">Fungerar på iPhone, Android och dator. Lägg den på hemskärmen så blir den en app.</p>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="badge-float"><span class="dot"></span>Ät inte – innehåller mjölk</div>
+      <div class="phone"><img src="app-resultat.png" alt=""></div>
+    </div>
+  </header>
+
+  <div class="stats" role="list">
+    <div class="stat" role="listitem"><b>27 000+</b><span>svenska varor</span></div>
+    <div class="stat" role="listitem"><b>22</b><span>allergener att välja</span></div>
+    <div class="stat" role="listitem"><b>6</b><span>språk på allergikortet</span></div>
+    <div class="stat" role="listitem"><b>0 kr</b><span>inget konto, ingen reklam</span></div>
+  </div>
+
+  <section id="sa-funkar-det">
+    <div class="sechead">
+      <h2>Så funkar det</h2>
+      <p class="lead">Tre steg från hyllan till besked.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="n"></span><h3>Välj dina allergier</h3><p>Bland EU:s 14 allergener och fler vanliga, som ärtor och kiwi. Allergi eller intolerans, och om spår ska räknas.</p></div>
+      <div class="step"><span class="n"></span><h3>Skanna eller sök</h3><p>Rikta kameran mot streckkoden eller skriv varans namn. Appen hittar ingredienserna bland tusentals svenska varor.</p></div>
+      <div class="step"><span class="n"></span><h3>Få besked direkt</h3><p>Rött, gult eller grönt, med det som gav utslag markerat i ingredienslistan.</p></div>
+    </div>
+  </section>
+
+  <section id="funktioner">
+    <div class="sechead">
+      <h2>Allt du behöver i butiken och på restaurangen</h2>
+    </div>
+    <div class="features">
+      <div class="feat"><span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="4" fill="#2C3A34"/><circle cx="7.5" cy="12" r="2" fill="#F26B5B"/><circle cx="12" cy="12" r="2" fill="#F2B84B"/><circle cx="16.5" cy="12" r="2" fill="#6CCB8D"/></svg></span><div><h3>Tydligt trafikljus</h3><p>Ser du rött ska du låta bli. Gult betyder spår eller osäker data.</p></div></div>
+      <div class="feat"><span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="#2C3A34" stroke-width="1.8"/><path d="M7 10h6M7 14h10" stroke="#2C3A34" stroke-width="1.8" stroke-linecap="round"/></svg></span><div><h3>Allergikort på sex språk</h3><p>Visa för personalen på restaurang eller utomlands, på svenska, engelska, tyska, franska, spanska eller italienska.</p></div></div>
+      <div class="feat"><span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="9" r="3" fill="#2C3A34"/><circle cx="16.5" cy="9" r="3" fill="#2C3A34"/><path d="M2.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M11 19c.6-3 2.8-4.6 5.5-4.6S21.4 16 22 19" stroke="#2C3A34" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><div><h3>Dela med familjen</h3><p>Skicka din profil som länk eller QR-kod till den som handlar åt dig. Kolla mot en person eller alla på en gång.</p></div></div>
+      <div class="feat"><span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z" fill="none" stroke="#2C3A34" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4M12 16.8v.2" stroke="#2C3A34" stroke-width="2" stroke-linecap="round"/></svg></span><div><h3>Varning för återkallade varor</h3><p>Livsmedelsverkets återkallelser hämtas varje dag. Rör de dina allergier syns det direkt.</p></div></div>
+      <div class="feat"><span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#2C3A34" stroke-width="1.8"/><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17" stroke="#2C3A34" stroke-width="1.5" fill="none"/></svg></span><div><h3>Svenska först, sex språk till</h3><p>Känner igen allergener även på engelska, danska, norska, finska, tyska och franska.</p></div></div>
+      <div class="feat"><span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2.5" fill="#2C3A34"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="#2C3A34" stroke-width="1.8" fill="none"/></svg></span><div><h3>Dina uppgifter stannar hos dig</h3><p>Allergiprofilen sparas bara i din telefon. Inget konto, ingen inloggning, inget skickas till oss.</p></div></div>
+    </div>
+  </section>
+
+  <div class="safe">
+    <span class="ic"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6z" fill="none" stroke="#2C3A34" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#2C3A34" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <p><b>Ett hjälpmedel, inte en garanti.</b> Datan kommer från Open Food Facts, där användare lägger in varorna, och recept kan ändras. Läs alltid förpackningen. Vid allergisk reaktion: ring 112. Råd finns hos <a href="https://www.1177.se/">1177</a>.</p>
+  </div>
+
+  <section>
+    <div class="final">
+      <h2>Prova nu. Det är gratis.</h2>
+      <p>Öppna appen, välj dina allergier och skanna första varan. Det tar under en minut.</p>
+      <a class="cta" href="app/">Öppna appen</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Data: <a href="https://world.openfoodfacts.org">Open Food Facts</a> (ODbL) och Livsmedelsverket. Råd vid allergisk reaktion: 1177.</span>
+    <span><a href="https://github.com/ddbar78-create/canieat">Källkod på GitHub</a></span>
+  </footer>
+</div>
+</body>
+</html>

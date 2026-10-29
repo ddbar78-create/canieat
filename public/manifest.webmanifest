@@ -2,11 +2,11 @@
  "name": "Kan jag äta det?",
  "short_name": "Kan jag äta?",
  "lang": "sv",
- "start_url": "./",
+ "start_url": "app/",
  "scope": "./",
  "display": "standalone",
- "background_color": "#1F1C44",
- "theme_color": "#1F1C44",
+ "background_color": "#E7EFE9",
+ "theme_color": "#E7EFE9",
  "icons": [
   {
    "src": "icon-192.png",

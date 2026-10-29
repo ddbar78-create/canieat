@@ -13,15 +13,17 @@ En webbapp (PWA) som kollar matvaror mot en personlig allergiprofil. Den fungera
 
 ## Publicering
 
-Appen publiceras från mappen `public/` utan byggsteg. Den fungerar på Cloudflare Pages (byggkommando tomt, output-mapp `public`) och Netlify (`netlify.toml`). `public/_headers` styr cache-inställningar på Cloudflare.
+Webbplatsen publiceras från mappen `public/` utan byggsteg. Startsidan skickar vidare till appen när den öppnas från hemskärmen eller via en delningslänk. Den fungerar på Cloudflare Pages (byggkommando tomt, output-mapp `public`) och Netlify (`netlify.toml`). `public/_headers` styr cache-inställningar på Cloudflare.
 
 ## Struktur
 
 | Sökväg | Innehåll |
 | --- | --- |
 | `src/kan-jag-ata-det.html` | Appens källkod (en fil). Samma fil körs också som sida i Claude. |
-| `tools/build.py` | Bygger `public/` från källan: lägger till manifest, ikoner och service worker. |
-| `public/` | Det som Netlify publicerar. |
+| `src/landing.html` | Startsidan som presenterar appen. |
+| `src/assets/` | Bilder till startsidan. |
+| `tools/build.py` | Bygger `public/`: startsidan i roten och appen i `public/app/` med manifest, ikoner och service worker. |
+| `public/` | Det som Cloudflare Pages publicerar. Startsidan på `/`, appen på `/app/`, data på `/data/`. |
 | `tools/build_db.py` | Bygger den svenska varudatabasen från Open Food Facts export. |
 | `public/data/` | Varudatabasen: sökindex, varor uppdelade på streckkod och status. Skrivs av GitHub Actions. |
 | `.github/workflows/se-db.yml` | Kör `build_db.py` varje måndag och sparar resultatet i repot. |
