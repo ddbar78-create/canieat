@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Feedback – Kan jag äta det?</title>
+<style>
+:root{--bg:#E7EFE9;--surface:#F9FBFA;--ink:#2C3A34;--muted:#56655E;--sage:#B2C6B5;--lav:#D2C4DB;--cta:#F2C19E;--bad:#B23A2E;--warn:#9A5E00;--ok:#2E7A4F}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-left,0px))}
+h1{font:800 1.75rem/1.2 "Plus Jakarta Sans",system-ui,sans-serif;margin:0 0 16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select{font:inherit;padding:10px 12px;border:1.5px solid var(--sage);border-radius:12px;background:#fff;color:var(--ink)}
+button{font:inherit;font-weight:700;padding:10px 16px;border-radius:999px;border:1.5px solid var(--sage);background:var(--surface);color:var(--ink);cursor:pointer}
+button.cta{background:var(--cta);border-color:var(--cta)}
+.item{background:var(--surface);border:1px solid var(--sage);border-radius:16px;padding:14px 16px;margin-top:12px}
+.meta{font-size:.8125rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.tag{font-weight:700;padding:1px 10px;border-radius:999px;background:var(--lav)}
+.v-red{color:var(--bad)}.v-amber{color:var(--warn)}.v-green{color:var(--ok)}
+pre{white-space:pre-wrap;font:inherit;font-size:.875rem;background:var(--bg);border-radius:10px;padding:8px 10px;margin:8px 0 0}
+p{margin:6px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Feedback</h1>
+  <div class="row">
+    <input type="password" id="key" placeholder="Nyckel (FEEDBACK_KEY)" aria-label="Nyckel" style="flex:1 1 240px">
+    <button class="cta" id="load">Visa</button>
+    <select id="filter" aria-label="Filtrera"><option value="">Alla</option><option value="fel_besked">Fel besked</option><option value="data">Fel eller saknad data</option><option value="ide">Idé</option><option value="annat">Annat</option></select>
+  </div>
+  <p id="status" class="meta"></p>
+  <div id="list"></div>
+</div>
+<script>
+const KIND={fel_besked:"Fel besked",data:"Fel eller saknad data",ide:"Idé",annat:"Annat"};
+const VERD={red:"Rött",amber:"Gult",green:"Grönt"};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let items=[];
+try{$("key").value=sessionStorage.getItem("fbkey")||""}catch(e){}
+async function load(){
+  const key=$("key").value.trim(); if(!key){$("status").textContent="Skriv in nyckeln.";return}
+  try{sessionStorage.setItem("fbkey",key)}catch(e){}
+  $("status").textContent="Hämtar…";
+  const r=await fetch("api/feedback",{headers:{authorization:"Bearer "+key}}).catch(()=>null);
+  if(!r){$("status").textContent="Ingen uppkoppling.";return}
+  if(r.status===401){$("status").textContent="Fel nyckel.";return}
+  if(r.status===503){$("status").textContent="Lagringen är inte kopplad ännu (KV-bindningen FEEDBACK saknas).";return}
+  const d=await r.json(); items=d.items||[]; render();
+}
+function render(){
+  const f=$("filter").value, list=items.filter(x=>!f||x.kind===f);
+  $("status").textContent=list.length+" rapporter";
+  $("list").innerHTML=list.map(x=>`<div class="item">
+    <div class="meta"><span class="tag">${esc(KIND[x.kind]||x.kind)}</span><span>${esc(new Date(x.at).toLocaleString("sv-SE"))}</span>${x.verdict?`<span class="v-${esc(x.verdict)}">${esc(VERD[x.verdict]||x.verdict)}</span>`:""}${x.app?`<span>${esc(x.app)}</span>`:""}</div>
+    ${x.product?`<p><b>${esc(x.product)}</b>${x.code?` · <a href="https://world-sv.openfoodfacts.org/product/${esc(x.code)}" target="_blank" rel="noopener">${esc(x.code)}</a>`:""}</p>`:""}
+    ${x.msg?`<p>${esc(x.msg)}</p>`:""}
+    ${x.allergens?`<p class="meta">Allergier: ${esc(x.allergens)}</p>`:""}
+    ${x.ingredients?`<pre>${esc(x.ingredients)}</pre>`:""}
+    <div class="row" style="margin-top:8px"><button data-id="${esc(x.id)}">Ta bort</button></div></div>`).join("");
+  $("list").querySelectorAll("button[data-id]").forEach(b=>b.onclick=async()=>{
+    const r=await fetch("api/feedback?id="+encodeURIComponent(b.dataset.id),{method:"DELETE",headers:{authorization:"Bearer "+$("key").value.trim()}});
+    if(r.ok){items=items.filter(x=>x.id!==b.dataset.id);render()}
+  });
+}
+$("load").onclick=load; $("filter").onchange=render;
+$("key").addEventListener("keydown",e=>{if(e.key==="Enter")load()});
+</script>
+</body>
+</html>

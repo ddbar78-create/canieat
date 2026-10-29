@@ -224,6 +224,11 @@ table.et td:first-child{white-space:nowrap;font-weight:700;font-variant-numeric:
 .acard .who{display:flex;align-items:center;gap:10px}
 .acard .who svg{width:44px;height:44px;flex:0 0 auto}
 
+.offline{margin:0;align-self:flex-start;font-size:.8125rem;font-weight:600;padding:3px 12px;border-radius:999px;background:var(--lavender);color:var(--ink)}
+.linkbtn{align-self:flex-start;color:var(--muted)}
+.sheet{position:fixed;inset:0;z-index:70;background:rgba(44,58,52,.45);display:flex;align-items:flex-end;justify-content:center;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.sheetbox{width:100%;max-width:560px;background:var(--surface);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto}
+.changed{border-left:3px solid var(--warn);padding-left:10px}
 /* ---------- Skog: komponenter ---------- */
 h1{font-family:var(--display);font-weight:800;font-size:2.25rem;line-height:1.1;letter-spacing:-.005em;word-spacing:.04em;color:var(--ink);text-shadow:none}
 h2{font-family:var(--display);font-weight:600}
@@ -278,6 +283,7 @@ a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
     </div>
     <div class="chips" id="profileChips" aria-label="Allergier som appen kollar mot"></div>
     <div class="whobar" id="whoBar" role="group" aria-label="Kolla för" hidden></div>
+    <p class="offline" id="offlineChip" hidden>Offline – appen använder sparad data</p>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -292,6 +298,7 @@ a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
   <section class="view" id="view-kolla">
     <div class="panel importbox" id="importBox" hidden></div>
     <div class="panel banner" id="recallBanner" hidden></div>
+    <div class="panel banner" id="changeBanner" hidden></div>
     <div class="panel" id="searchPanel" hidden>
       <h3>Hitta vara</h3>
       <div class="row">
@@ -442,7 +449,14 @@ a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
     <div class="panel">
       <h3>Om appen</h3>
       <p class="small" id="dbInfo">Varudatabasen laddas när du söker första gången.</p>
+      <p class="small" id="offlineInfo"></p>
       <p class="small muted">Data från <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> (licens ODbL) och Livsmedelsverket. Råd vid allergisk reaktion från 1177. Profilen sparas bara på den här enheten.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Tyck till</h3>
+      <p class="small muted">Saknas något, blev det fel eller har du en idé? Berätta.</p>
+      <div class="row"><button class="btn" id="feedbackOpen">Skicka feedback</button></div>
     </div>
 
     <div class="panel">
@@ -567,6 +581,19 @@ a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
     <video id="scanVideo" playsinline muted></video>
     <p id="scanText">Rikta kameran mot streckkoden</p>
     <button class="btn" id="scanClose">Avbryt</button>
+  </div>
+
+  <div class="sheet" id="fbSheet" hidden role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+    <div class="sheetbox">
+      <h3 id="fbTitle">Skicka feedback</h3>
+      <div class="langs" id="fbKinds" role="group" aria-label="Typ av feedback"></div>
+      <textarea id="fbMsg" maxlength="2000" placeholder="Vad hände? Vad borde stå?" aria-label="Meddelande"></textarea>
+      <label class="check" id="fbProdWrap"><input type="checkbox" id="fbProd" checked> <span id="fbProdTxt">Skicka med varan och ingredienslistan</span></label>
+      <label class="check"><input type="checkbox" id="fbAlg"> <span>Skicka med mina allergier (hjälper oss hitta felet)</span></label>
+      <p class="small muted">Inget namn eller nyckel skickas.</p>
+      <p class="small" id="fbStatus" hidden></p>
+      <div class="row"><button class="btn primary grow" id="fbSend">Skicka</button><button class="btn" id="fbClose">Stäng</button></div>
+    </div>
   </div>
 
   <p class="note">Läs alltid förpackningen. Appen kan missa saker och ersätter inte råd från läkare eller dietist.</p>
@@ -916,6 +943,7 @@ function renderResult(name,text,res){
       (res.lang&&res.lang!=="sv"&&sample?'<div class="row" style="margin-top:8px"><button class="btn" id="translateBtn">Översätt till svenska</button></div>':'')+
       '</div>'+
     '<div class="row listbtns"><button class="btn grow" id="markSafe">Spara som säker</button><button class="btn grow" id="markAvoid">Undvik alltid</button></div>'+
+    '<button class="linkbtn small" id="reportBtn">Fel besked eller fel data? Rapportera</button>'+
     '<div class="row" id="tipsRow"><button class="btn" id="tipsBtn">'+(res.status==="green"?"Tips för den här produkten":"Föreslå alternativ och tips")+'</button></div>'+
     '<div id="tipsBox" class="ai" hidden></div>';
   renderVerdict();
@@ -926,6 +954,7 @@ function renderResult(name,text,res){
   $("markAvoid").textContent=ol==="avoid"?"På undvik-listan (ta bort)":"Undvik alltid";
   $("markSafe").classList.toggle("on-safe",ol==="safe"); $("markAvoid").classList.toggle("on-avoid",ol==="avoid");
   $("markSafe").onclick=()=>setList("safe"); $("markAvoid").onclick=()=>setList("avoid");
+  $("reportBtn").onclick=()=>openFeedback(true);
 }
 
 function renderVerdict(){
@@ -1011,6 +1040,15 @@ function runCheck(save=true,auto=false){
   }
   const key=itemKey(currentCode,name,text), onList=listOf(key);
   if(onList==="avoid") res.findings.unshift({a:{id:"_avoid",name:"Din undvik-lista",level:"allergi"},kind:"red",words:[],msg:"Du har markerat varan som något du ska undvika."});
+  if(currentCode&&changes){
+    const im=changeImpact(currentCode,text);
+    if(im){
+      const order={green:0,amber:1,red:2};
+      if(order[im.before]>order[im.after]) res.findings.unshift({a:{id:"_chg",name:"Ingredienslistan har ändrats",level:"allergi"},kind:"amber",words:[],msg:"Ändrades "+im.date+". Den tidigare versionen gav "+({red:"rött",amber:"gult",green:"grönt"})[im.before]+" för dig, och äldre förpackningar kan finnas kvar i butiken. Läs förpackningen."});
+      else if(im.before!==im.after) res.findings.unshift({a:{id:"_chg",name:"Ingredienslistan har ändrats",level:"allergi"},kind:"amber",words:[],msg:"Ändrades "+im.date+". Varan var tidigare "+({red:"rött",amber:"gult",green:"grönt"})[im.before]+" för dig men är nu "+({red:"rött",amber:"gult",green:"grönt"})[im.after]+". Har du köpt den förut kan receptet vara nytt."});
+      else res.findings.push({a:{id:"_chg",name:"Ingredienslistan har ändrats",level:"intolerans"},kind:"info",words:[],msg:"Ändrades "+im.date+". Jämför med förpackningen."});
+    }
+  }
   const rc=recallFor(currentCode);
   if(rc) res.findings.unshift({a:{id:"_recall",name:"Återkallad vara",level:"allergi"},kind:"red",words:[],msg:rc.title+" (Livsmedelsverket, "+rc.date+")."});
   res.status=res.findings.some(f=>f.kind==="red")?"red":res.findings.some(f=>f.kind==="amber")?"amber":"green";
@@ -1228,12 +1266,16 @@ function cleanIngredients(t){
   }
   return t.replace(/(^|[^\p{L}\d])_+([^_]+?)_+(?=$|[^\p{L}\d])/gu,"$1$2").replace(/\s+/g," ").trim();
 }
-function useProduct(p){
+function productText(p){
   let t=cleanIngredients(p.ingredients_text_sv||p.ingredients_text||"");
-  currentLang=p.ingredients_text_sv?"sv":(p._lang||p.lang||null); translatedFrom=null;
   const al=tagsSv(p.allergens_tags), tr=tagsSv(p.traces_tags);
   if(al.length) t+=(t?(/[.]$/.test(t)?" ":". "):"")+"Allergener enligt databasen: "+al.join(", ")+".";
   if(tr.length) t+=(t?" ":"")+"Kan innehålla spår av: "+tr.join(", ")+".";
+  return t;
+}
+function useProduct(p){
+  let t=productText(p);
+  currentLang=p.ingredients_text_sv?"sv":(p._lang||p.lang||null); translatedFrom=null;
   const name=[p.product_name_sv||p.product_name,p.brands].filter(Boolean).join(" – ");
   $("prodName").value=name; $("exampleBadge").hidden=true; currentCode=p.code||null;
   const st=$("searchStatus");
@@ -1366,7 +1408,7 @@ function loadZXing(){
   if(window.ZXing) return Promise.resolve(window.ZXing);
   if(!zxPromise) zxPromise=new Promise((res,rej)=>{
     const sc=document.createElement("script");
-    sc.src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js";
+    sc.src=standalone?"vendor/zxing-0.21.3.min.js":"https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js";
     sc.onload=()=>window.ZXing?res(window.ZXing):rej(new Error("zxing"));
     sc.onerror=()=>{zxPromise=null;rej(new Error("zxing"))};
     document.head.append(sc);
@@ -1529,7 +1571,7 @@ function moveCode(withKey){
 let qrLibPromise=null;
 function loadQrLib(){
   if(window.qrcode) return Promise.resolve(window.qrcode);
-  if(!qrLibPromise) qrLibPromise=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";sc.onload=()=>window.qrcode?res(window.qrcode):rej(new Error("qr"));sc.onerror=()=>{qrLibPromise=null;rej(new Error("qr"))};document.head.append(sc)});
+  if(!qrLibPromise) qrLibPromise=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src=standalone?"vendor/qrcode-1.4.4.js":"https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";sc.onload=()=>window.qrcode?res(window.qrcode):rej(new Error("qr"));sc.onerror=()=>{qrLibPromise=null;rej(new Error("qr"))};document.head.append(sc)});
   return qrLibPromise;
 }
 async function renderMoveOut(){
@@ -1741,6 +1783,120 @@ function handleSharedLink(){
     renderOthers(); setWho(id);
   };
 }
+
+/* ---------- Offline: hela databasen i telefonen ---------- */
+function setOnlineState(){
+  const off=!navigator.onLine; $("offlineChip").hidden=!off||!standalone;
+}
+window.addEventListener("online",()=>{setOnlineState();flushFeedback();prefetchAllShards()});
+window.addEventListener("offline",setOnlineState);
+let prefetching=false;
+async function prefetchAllShards(){
+  if(!standalone||prefetching||!navigator.onLine) return;
+  const idx=await loadLocalIndex(); if(!idx) return;
+  const done=store.get("kjad.offlineVer","");
+  const info=$("offlineInfo");
+  if(done===idx.updated){info.textContent="Offline: alla varor finns sparade i telefonen.";return}
+  if(navigator.connection&&navigator.connection.saveData){info.textContent="Offline: hämtas när du inte har datasparläge på.";return}
+  prefetching=true; let n=0;
+  const all=[...Array(100).keys()].map(i=>String(i).padStart(2,"0"));
+  try{
+    for(let i=0;i<all.length;i+=4){
+      await Promise.all(all.slice(i,i+4).map(nn=>fetch(DATA+"p/"+nn+".json",{cache:"reload"}).then(r=>{if(r.ok) n++}).catch(()=>{})));
+      info.textContent="Offline: sparar varudatabasen i telefonen, "+Math.round((i+4)/all.length*100)+" %";
+    }
+    await fetch(DATA+"recalls.json").catch(()=>{}); await fetch(DATA+"changes.json").catch(()=>{});
+    if(n>=95){store.set("kjad.offlineVer",idx.updated);info.textContent="Offline: alla varor finns sparade i telefonen."}
+    else info.textContent="Offline: en del av varudatabasen sparades. Resten hämtas nästa gång.";
+  }finally{prefetching=false}
+}
+
+/* ---------- Ändrade ingredienslistor ---------- */
+let changes=null, changesPromise=null;
+function loadChanges(){
+  if(!standalone) return Promise.resolve(null);
+  if(!changesPromise) changesPromise=fetch(DATA+"changes.json").then(r=>r.ok?r.json():null).then(d=>{changes=d&&d.items?d:null;return changes}).catch(()=>{changesPromise=null;return null});
+  return changesPromise;
+}
+const sameText=(a,b)=>norm(a)===norm(b);
+// En ändring som påverkar dig: status före och efter enligt din profil
+function changeImpact(code,newText){
+  const c=changes&&changes.items[code]; if(!c) return null;
+  const before=analyze(c.prev||""), after=analyze(newText);
+  return {date:c.date, before:before.status, after:after.status, prev:c.prev||""};
+}
+// Sparade säkra varor: har de ändrats sedan du sparade dem?
+async function checkSavedChanges(){
+  if(!standalone||!lists.safe.length) return;
+  const seen=store.get("kjad.changeSeen",{}); const hits=[];
+  for(const x of lists.safe.slice(0,40)){
+    if(!x.code) continue;
+    const p=await localProduct(x.code).catch(()=>null); if(!p) continue;
+    const now=productText(p); if(!now||sameText(now,x.text)||seen[x.key]===norm(now)) continue;
+    const r=analyze(now); hits.push({x,now,status:r.status,names:r.findings.filter(f=>f.kind!=="info").map(f=>f.a.name)});
+  }
+  const b=$("changeBanner");
+  const bad=hits.filter(h=>h.status!=="green");
+  const show=bad.length?bad:hits;
+  if(!show.length){b.hidden=true;return}
+  const h=show[0];
+  b.hidden=false;
+  b.style.borderColor=h.status==="green"?"var(--sage)":"var(--bad)";
+  b.innerHTML='<b>'+(h.status==="green"?"En sparad vara har fått ny ingredienslista":"En sparad säker vara passar kanske inte längre")+'</b>'+
+    '<p>'+esc(h.x.name)+(h.names.length?' innehåller nu: '+esc(h.names.join(", ")):' har ändrats men ser fortfarande bra ut.')+(show.length>1?' ('+(show.length-1)+' till)':'')+'</p>'+
+    '<div class="row"><button class="btn primary" id="chgOpen">Visa varan</button><button class="btn" id="chgOk">Jag har sett det</button></div>';
+  $("chgOpen").onclick=()=>{$("prodName").value=h.x.name;$("ingredients").value=h.now;$("exampleBadge").hidden=true;currentCode=h.x.code;currentLang=null;translatedFrom=null;runCheck(false,false);$("result").scrollIntoView({behavior:"smooth",block:"start"})};
+  $("chgOk").onclick=()=>{for(const y of show) seen[y.x.key]=norm(y.now);store.set("kjad.changeSeen",seen);
+    // uppdatera den sparade texten så att samma ändring inte varnar igen
+    for(const y of show){const it=lists.safe.find(z=>z.key===y.x.key); if(it) it.text=y.now}
+    store.set("kjad.lists",lists); b.hidden=true; checkSavedChanges()};
+}
+
+/* ---------- Feedback ---------- */
+const FB_KINDS=[["fel_besked","Fel besked"],["data","Fel eller saknad data"],["ide","Idé"],["annat","Annat"]];
+let fbKind="fel_besked", fbFromResult=false;
+function openFeedback(fromResult){
+  fbFromResult=!!fromResult; fbKind=fromResult?"fel_besked":"ide";
+  $("fbSheet").hidden=false; $("fbStatus").hidden=true; $("fbMsg").value="";
+  $("fbProdWrap").hidden=!(lastCheck&&fromResult); $("fbProd").checked=true;
+  if(lastCheck&&fromResult) $("fbProdTxt").textContent="Skicka med varan ("+(lastCheck.name||"utan namn")+") och ingredienslistan";
+  $("fbAlg").checked=false;
+  renderFbKinds(); setTimeout(()=>$("fbMsg").focus(),50);
+}
+function renderFbKinds(){
+  const box=$("fbKinds"); box.innerHTML="";
+  for(const [k,l] of FB_KINDS){const b=document.createElement("button");b.textContent=l;b.setAttribute("aria-pressed",k===fbKind);b.onclick=()=>{fbKind=k;renderFbKinds()};box.append(b)}
+}
+function fbPayload(){
+  const c=lastCheck, withProd=fbFromResult&&c&&$("fbProd").checked;
+  return {kind:fbKind, msg:$("fbMsg").value.trim(), product:withProd?c.name:"", code:withProd?(c.code||""):"",
+    verdict:withProd?c.res.status:"", ingredients:withProd?c.text.slice(0,2000):"",
+    allergens:$("fbAlg").checked?activeAllergens().map(a=>a.name+(a.level==="intolerans"?" (intolerans)":"")).join(", "):"",
+    app:"web "+(localIdx?localIdx.updated:"")};
+}
+async function postFeedback(body){
+  const r=await fetch(location.pathname.includes("/app/")?"../api/feedback":"api/feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok) throw new Error("http "+r.status);
+}
+async function flushFeedback(){
+  const q=store.get("kjad.fbQueue",[]); if(!q.length||!navigator.onLine) return;
+  const left=[]; for(const b of q){try{await postFeedback(b)}catch(e){left.push(b)}}
+  store.set("kjad.fbQueue",left);
+}
+$("feedbackOpen").onclick=()=>openFeedback(false);
+$("fbClose").onclick=()=>{$("fbSheet").hidden=true};
+$("fbSheet").addEventListener("click",e=>{if(e.target.id==="fbSheet") $("fbSheet").hidden=true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("fbSheet").hidden) $("fbSheet").hidden=true});
+$("fbSend").onclick=async()=>{
+  const body=fbPayload(), st=$("fbStatus"); st.hidden=false;
+  if(!body.msg&&!body.product){st.textContent="Skriv några ord om vad som är fel.";return}
+  $("fbSend").disabled=true; st.innerHTML='<span class="spinner"></span> Skickar…';
+  try{ await postFeedback(body); st.textContent="Tack! Feedbacken är skickad."; setTimeout(()=>{$("fbSheet").hidden=true},1500) }
+  catch(e){
+    const q=store.get("kjad.fbQueue",[]); q.push(body); store.set("kjad.fbQueue",q.slice(-20));
+    st.textContent=navigator.onLine?"Det gick inte att skicka just nu. Feedbacken är sparad och skickas automatiskt senare.":"Du är offline. Feedbacken skickas när du har uppkoppling igen.";
+  }finally{$("fbSend").disabled=false}
+};
 
 /* ---------- Allergikort ---------- */
 const CARD_LANGS=[["sv","Svenska"],["en","English"],["de","Deutsch"],["fr","Français"],["es","Español"],["it","Italiano"]];
@@ -1964,7 +2120,9 @@ if(standalone){
   if(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) $("scanBtn").hidden=false;
   renderAiPanel(); applyAi();
   if("serviceWorker" in navigator && location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
-  setTimeout(()=>loadLocalIndex(),1500);
+  setTimeout(()=>loadLocalIndex().then(()=>{prefetchAllShards();checkSavedChanges()}),1500);
+  loadChanges().then(()=>{if(lastCheck&&lastCheck.code) runCheck(false)});
+  setOnlineState(); setTimeout(flushFeedback,4000);
   loadRecalls().then(()=>{checkRecallBanner(); if(lastCheck&&lastCheck.code) runCheck(false)});
 }
 (async()=>{

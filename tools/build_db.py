@@ -13,6 +13,8 @@ Varor som säljs i Sverige skrivs till:
   <ut>/p/NN.json       {streckkod: [namn, märke, ingredienser, allergener, spår, språk]}
                        uppdelat efter streckkodens två sista siffror
   <ut>/status.json     när det kördes, källa, antal varor, språk och eventuellt fel
+  <ut>/changes.json    varor vars ingredienslista ändrats de senaste 60 dagarna,
+                       med den gamla listan: {updated, items:{streckkod:{date, prev}}}
 
 Användning:
   python3 tools/build_db.py public/data                      # hämtar exporten
@@ -23,7 +25,7 @@ Data från Open Food Facts, licens ODbL: https://world.openfoodfacts.org
 """
 import csv, gzip, html, io, json, os, re, shutil, sys, tempfile, time, urllib.request
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 PARQUET_URL = "https://huggingface.co/datasets/openfoodfacts/product-database/resolve/main/food.parquet"
 CSV_URL = "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz"
@@ -32,6 +34,8 @@ COUNTRY = "en:sweden"
 MAX_NAME = 90
 MAX_INGR = 1500
 MIN_PRODUCTS = int(os.environ.get("MIN_PRODUCTS", "100"))
+CHANGE_DAYS = 60          # hur länge en ändring visas i appen
+CHANGE_MAX_SHARE = 0.15   # ändras fler än så på en gång är det troligen ett formatbyte, inte nya recept
 
 
 def clean(s, n):
@@ -179,6 +183,45 @@ def collect(records):
     return index, shards, langs
 
 
+def norm_ingr(s):
+    """Jämförbar form: små bokstäver, bara bokstäver och siffror."""
+    return re.sub(r"[^0-9a-zåäöæøüéè]+", " ", str(s or "").lower()).strip()
+
+
+def find_changes(out, shards, today, status):
+    """Jämför nya ingredienslistor med förra körningens och uppdaterar changes.json."""
+    path = os.path.join(out, "changes.json")
+    try:
+        items = json.load(open(path, encoding="utf-8")).get("items", {})
+    except Exception:
+        items = {}
+    cutoff = (datetime.fromisoformat(today) - timedelta(days=CHANGE_DAYS)).date().isoformat()
+    items = {k: v for k, v in items.items() if v.get("date", "") >= cutoff}
+    fresh, compared = {}, 0
+    for nn, data in shards.items():
+        try:
+            old = json.load(open(os.path.join(out, "p", nn + ".json"), encoding="utf-8"))
+        except Exception:
+            continue
+        for code, row in data.items():
+            o = old.get(code)
+            if not o or not o[2] or not row[2]:
+                continue
+            compared += 1
+            # Samma språk krävs, annars är det en översättning och inte ett nytt recept
+            if (o[5] or "") != (row[5] or ""):
+                continue
+            if norm_ingr(o[2]) != norm_ingr(row[2]):
+                fresh[code] = {"date": today, "prev": o[2][:800]}
+    share = len(fresh) / compared if compared else 0
+    status["ingredient_changes"] = {"compared": compared, "changed": len(fresh), "share": round(share, 4)}
+    if share > CHANGE_MAX_SHARE:
+        status["ingredient_changes"]["skipped"] = "för många ändringar på en gång"
+    else:
+        items.update(fresh)
+    write_json(path, {"v": 1, "updated": today, "items": items})
+
+
 def main():
     args = sys.argv[1:]
     out = args[0] if args else "public/data"
@@ -225,6 +268,10 @@ def main():
             raise RuntimeError(f"Bara {len(index)} varor mot {prev} förra gången. Behåller den gamla databasen.")
 
         index.sort(key=lambda r: (-r[3], r[1].lower()))
+        try:
+            find_changes(out, shards, status["updated"], status)
+        except Exception as e:  # ändringslistan får aldrig stoppa databasen
+            status["ingredient_changes"] = {"error": f"{type(e).__name__}: {e}"[:300]}
         for nn, data in shards.items():
             write_json(os.path.join(out, "p", nn + ".json"), data)
         write_json(os.path.join(out, "se-index.json"),

@@ -1,5 +1,17 @@
-const C="kjad-v10-root";
+const C="kjad-v11-root", DATA="kjad-data";
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./"])));self.skipWaiting()});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener("fetch",e=>{const u=new URL(e.request.url);if(e.request.method!=="GET"||u.origin!==location.origin)return;
- e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(C).then(c=>c.put(e.request,cp));return r}).catch(()=>caches.match(e.request)))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C&&k!==DATA).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+const put=(name,req,res)=>{if(res&&res.ok){const cp=res.clone();caches.open(name).then(c=>c.put(req,cp))}return res};
+const timeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))]);
+self.addEventListener("fetch",e=>{
+  const r=e.request,u=new URL(r.url);
+  if(r.method!=="GET"||u.origin!==location.origin||u.pathname.startsWith("/api/"))return;
+  if(u.pathname.startsWith("/data/")){
+    const key=u.origin+u.pathname;
+    if(r.cache==="reload"){e.respondWith(fetch(key).then(res=>put(DATA,key,res)).catch(()=>caches.match(key)));return}
+    e.respondWith(caches.match(key).then(hit=>{const net=fetch(key).then(res=>put(DATA,key,res)).catch(()=>hit);return hit||net}));
+    return;
+  }
+  const net=fetch(r).then(res=>put(C,r,res));
+  e.respondWith(timeout(net,3500).catch(()=>caches.match(r,{ignoreSearch:true}).then(hit=>hit||net)));
+});

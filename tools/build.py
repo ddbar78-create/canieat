@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 
 ROOT = "public"
 APP = os.path.join(ROOT, "app")
-VERSION = "kjad-v10"
+VERSION = "kjad-v11"
 os.makedirs(APP, exist_ok=True)
 
 # ---------- Appen ----------
@@ -48,13 +48,33 @@ manifest("./", "./", f"{APP}/manifest.webmanifest")
 # Äldre installationer pekar på /manifest.webmanifest – skicka dem till appen
 manifest("app/", "./", f"{ROOT}/manifest.webmanifest")
 
-SW = '''const C="%s";
+# Service worker:
+#  - appens filer: nätverket först, men högst 3,5 s innan sparad version används (dålig täckning i butik)
+#  - /data/: sparad version direkt och uppdatering i bakgrunden; cache:"reload" hämtar alltid nytt
+#  - /api/: aldrig sparad
+SW = '''const C="%s", DATA="kjad-data";
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(%s)));self.skipWaiting()});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener("fetch",e=>{const u=new URL(e.request.url);if(e.request.method!=="GET"||u.origin!==location.origin)return;
- e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(C).then(c=>c.put(e.request,cp));return r}).catch(()=>caches.match(e.request)))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C&&k!==DATA).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+const put=(name,req,res)=>{if(res&&res.ok){const cp=res.clone();caches.open(name).then(c=>c.put(req,cp))}return res};
+const timeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))]);
+self.addEventListener("fetch",e=>{
+  const r=e.request,u=new URL(r.url);
+  if(r.method!=="GET"||u.origin!==location.origin||u.pathname.startsWith("/api/"))return;
+  if(u.pathname.startsWith("/data/")){
+    const key=u.origin+u.pathname;
+    if(r.cache==="reload"){e.respondWith(fetch(key).then(res=>put(DATA,key,res)).catch(()=>caches.match(key)));return}
+    e.respondWith(caches.match(key).then(hit=>{const net=fetch(key).then(res=>put(DATA,key,res)).catch(()=>hit);return hit||net}));
+    return;
+  }
+  const net=fetch(r).then(res=>put(C,r,res));
+  e.respondWith(timeout(net,3500).catch(()=>caches.match(r,{ignoreSearch:true}).then(hit=>hit||net)));
+});
 '''
-open(f"{APP}/sw.js", "w").write(SW % (VERSION, '["./","./index.html","./manifest.webmanifest","./icon-192.png"]'))
+open(f"{APP}/sw.js", "w").write(SW % (VERSION, '["./","./index.html","./manifest.webmanifest","./icon-192.png","./vendor/zxing-0.21.3.min.js","./vendor/qrcode-1.4.4.js"]'))
+# Bibliotek för skanning och QR-koder ligger i appen så att de fungerar offline
+os.makedirs(f"{APP}/vendor", exist_ok=True)
+for f in os.listdir("src/vendor"):
+    shutil.copy(f"src/vendor/{f}", f"{APP}/vendor/{f}")
 # Service worker på roten finns kvar för äldre installationer (nätverk först)
 open(f"{ROOT}/sw.js", "w").write(SW % (VERSION + "-root", '["./"]'))
 
@@ -72,5 +92,6 @@ for n in (180, 192, 512):
 
 # ---------- Startsidan ----------
 shutil.copy("src/landing.html", f"{ROOT}/index.html")
+shutil.copy("src/feedback-admin.html", f"{ROOT}/feedback-admin.html")
 shutil.copy("src/assets/app-resultat.png", f"{ROOT}/app-resultat.png")
 print(sorted(os.listdir(ROOT)), sorted(os.listdir(APP)))

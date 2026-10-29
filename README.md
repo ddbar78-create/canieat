@@ -32,18 +32,46 @@ Webbplatsen publiceras från mappen `public/` utan byggsteg. Startsidan skickar 
 
 ## Varudatabasen
 
-Varje måndag hämtar GitHub Actions Open Food Facts CSV-export och plockar ut varor som säljs i Sverige.
+Varje måndag hämtar GitHub Actions Open Food Facts export (Parquet, med CSV som reserv) och plockar ut varor som säljs i Sverige.
 Appen söker först där och går bara ut till Open Food Facts API när en vara saknas.
 Det tar bort API:ets gräns på 10 sökningar per minut och gör sökningen snabb.
 Se `public/data/status.json` för senaste körning.
 
 Data från [Open Food Facts](https://world.openfoodfacts.org), licens [ODbL](https://opendatacommons.org/licenses/odbl/1-0/).
 
+## Offline
+
+Appen sparar sina filer och hela varudatabasen i telefonen första gången den öppnas med uppkoppling
+(ungefär 10 MB). Sedan fungerar sök, kontroll, listor och allergikort utan nät. Kameraskanning och
+QR-koder använder bibliotek som ligger i `src/vendor/` (ZXing, Apache 2.0, och qrcode-generator, MIT).
+Det som kräver nät är Claude-funktionerna och sökning hos Open Food Facts för varor som saknas i databasen.
+
+## Ändrade ingredienslistor
+
+`tools/build_db.py` jämför varje veckas ingredienslistor med förra veckans och skriver
+`public/data/changes.json` med den gamla listan i 60 dagar. Appen visar då en rad i resultatet,
+och en varning om en sparad säker vara har fått ett nytt recept som inte passar profilen.
+Ändras över 15 % av listorna samma vecka räknas det som ett formatbyte och sparas inte.
+
+## Feedback
+
+Knappen "Rapportera" i resultatet och "Tyck till" under Info skickar till `functions/api/feedback.js`
+(en Cloudflare Pages Function) som sparar i Cloudflare KV. Inget namn eller nyckel skickas; allergier
+bara om användaren kryssar i det. Utan uppkoppling sparas feedbacken i telefonen och skickas senare.
+
+Inställning i Cloudflare (gratisplanen räcker):
+1. Storage & Databases → KV → Create namespace, till exempel `canieat-feedback`.
+2. Pages-projektet → Settings → Bindings → Add → KV namespace. Namn: `FEEDBACK`, välj namespacet.
+3. Settings → Variables and Secrets → Add, typ Secret. Namn: `FEEDBACK_KEY`, ett långt eget lösenord.
+4. Gör en ny deploy (Deployments → Retry deployment), eller pusha något.
+
+Läs feedbacken på `/feedback-admin.html` med lösenordet från steg 3.
+
 ## Ändra appen
 
 1. Redigera `src/kan-jag-ata-det.html`.
 2. Kör `node tests/analyze.test.js` och kontrollera att alla fall är godkända.
 3. Kör `python3 tools/build.py` (kräver Pillow).
-4. Committa och pusha. Netlify publicerar automatiskt.
+4. Committa och pusha. Cloudflare Pages publicerar automatiskt.
 
 Appen ersätter inte förpackningens märkning eller råd från läkare eller dietist.
