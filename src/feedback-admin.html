@@ -47,7 +47,8 @@ async function load(){
   const r=await fetch("api/feedback",{headers:{authorization:"Bearer "+key}}).catch(()=>null);
   if(!r){$("status").textContent="Ingen uppkoppling.";return}
   if(r.status===401){$("status").textContent="Fel nyckel.";return}
-  if(r.status===503){$("status").textContent="Lagringen är inte kopplad ännu (KV-bindningen FEEDBACK saknas).";return}
+  if(r.status===429){$("status").textContent="För många fel försök. Vänta en kvart och försök igen.";return}
+  if(r.status===503){const e=(await r.json().catch(()=>({}))).error;$("status").textContent=e==="no_key"?"Nyckeln FEEDBACK_KEY saknas eller är kortare än 8 tecken i Cloudflare.":"Lagringen är inte kopplad ännu (KV-bindningen FEEDBACK saknas).";return}
   const d=await r.json(); items=d.items||[]; render();
 }
 function render(){

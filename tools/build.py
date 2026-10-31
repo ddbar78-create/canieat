@@ -96,4 +96,56 @@ for n in (180, 192, 512):
 shutil.copy("src/landing.html", f"{ROOT}/index.html")
 shutil.copy("src/feedback-admin.html", f"{ROOT}/feedback-admin.html")
 shutil.copy("src/assets/app-resultat.png", f"{ROOT}/app-resultat.png")
+
+# ---------- Säkerhetsrubriker (_headers för Cloudflare Pages) ----------
+# Content Security Policy: bara våra egna skript får köras. De inbäddade skripten
+# tillåts med sin exakta hash, så en ändrad eller injicerad kod blockeras av webbläsaren.
+import base64, hashlib, re
+def script_hashes(path):
+    html = open(path, encoding="utf8").read()
+    blocks = re.findall(r"<script>(.*?)</script>", html, flags=re.S)
+    return " ".join("'sha256-%s'" % base64.b64encode(hashlib.sha256(b.encode("utf8")).digest()).decode() for b in blocks)
+
+COMMON = ("default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; "
+          "manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; ")
+CSP = {
+    "app": COMMON + "script-src 'self' %s; worker-src 'self'; "
+           "connect-src 'self' https://world.openfoodfacts.org https://se.openfoodfacts.org https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com; "
+           "img-src 'self' data: blob: https://*.openfoodfacts.org; media-src 'self' blob:" % script_hashes(f"{APP}/index.html"),
+    "landing": COMMON + "script-src %s; worker-src 'self'; connect-src 'self'; img-src 'self' data:" % script_hashes(f"{ROOT}/index.html"),
+    "admin": COMMON + "script-src %s; connect-src 'self'; img-src 'self'" % script_hashes(f"{ROOT}/feedback-admin.html"),
+}
+SECURITY = """  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"""
+headers = f"""# Skapas av tools/build.py – ändra där, inte här.
+/*
+{SECURITY}
+
+/app/*
+  Content-Security-Policy: {CSP["app"]}
+
+/
+  Content-Security-Policy: {CSP["landing"]}
+
+/index.html
+  Content-Security-Policy: {CSP["landing"]}
+
+/feedback-admin.html
+  Content-Security-Policy: {CSP["admin"]}
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
+/sw.js
+  Cache-Control: no-cache
+
+/app/sw.js
+  Cache-Control: no-cache
+
+/data/*
+  Cache-Control: public, max-age=3600
+"""
+open(f"{ROOT}/_headers", "w", encoding="utf8").write(headers)
 print(sorted(os.listdir(ROOT)), sorted(os.listdir(APP)))

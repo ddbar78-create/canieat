@@ -903,7 +903,20 @@ function addSafetyChecks(res,name,text){
 
 /* ---------- Rendering ---------- */
 const $ = id=>document.getElementById(id);
-const esc = s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// Länkar från extern data får bara gå till kända, säkra adresser
+const safeLink=(u,hosts)=>{try{const x=new URL(String(u));return x.protocol==="https:"&&hosts.some(h=>x.hostname===h||x.hostname.endsWith("."+h))?x.href:"#"}catch(e){return "#"}};
+const okStatus=s=>["red","amber","green"].includes(s)?s:"amber";
+// Vilka allergier försvinner om en profil ersätts med en annan? Skydd mot manipulerade koder och länkar.
+function lostAllergies(oldP,newLevels,newCustom){
+  const lost=[];
+  for(const a of ALLERGENS){const o=(oldP.levels||{})[a.id], n=newLevels[a.id];
+    if(o==="allergi"&&n!=="allergi") lost.push(a.name+(n==="intolerans"?" (blir intolerans)":""));
+    else if(o==="intolerans"&&!n) lost.push(a.name);}
+  for(const c of (oldP.custom||[])) if(!newCustom.includes(c)) lost.push(c);
+  return lost;
+}
+const lostWarning=lost=>lost.length?'<p class="small" style="color:var(--bad);font-weight:700">Obs! Det här tar bort: '+esc(lost.join(", "))+'. Ta bara emot om du är säker på att det stämmer.</p>':"";
 
 function renderChips(){
   const el=$("profileChips"); el.innerHTML="";
@@ -1032,7 +1045,7 @@ function renderHistory(){
   $("histPanel").hidden=!history.length; const ul=$("hist"); ul.innerHTML="";
   history.forEach((h,i)=>{
     const li=document.createElement("li"); const b=document.createElement("button");
-    b.innerHTML='<span class="dot '+h.status+'"></span><span>'+esc(h.name||h.text.slice(0,40)+"…")+'</span><time>'+new Date(h.at).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})+'</time>';
+    b.innerHTML='<span class="dot '+okStatus(h.status)+'"></span><span>'+esc(h.name||h.text.slice(0,40)+"…")+'</span><time>'+new Date(h.at).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})+'</time>';
     b.onclick=()=>{$("prodName").value=h.name||"";$("ingredients").value=h.text;$("exampleBadge").hidden=true;currentCode=h.code||null;currentLang=h.lang||null;translatedFrom=null;runCheck(false,true)};
     li.append(b); ul.append(li);
   });
@@ -1628,6 +1641,8 @@ function receiveMove(text){
   box.innerHTML='<b>Ta emot det här?</b>'+
     '<p class="small">Allergier: '+esc(names.concat(custom).join(", ")||"inga")+'</p>'+
     '<p class="small">API-nyckel: '+(data.k?"ja (slutar på …"+esc(String(data.k).slice(-4))+")":"nej")+'</p>'+
+    (profile.example?"":lostWarning(lostAllergies(profile,levels,custom)))+
+    (data.k&&store.get("kjad.apikey","")&&store.get("kjad.apikey","")!==String(data.k)?'<p class="small" style="color:var(--bad)">Din nuvarande nyckel byts ut.</p>':"")+
     '<p class="small muted">Det ersätter profilen'+(data.k?" och nyckeln":"")+' på den här enheten.</p>'+
     '<div class="row"><button class="btn primary" id="moveAccept">Ta emot</button><button class="btn" id="moveCancel">Avbryt</button></div>';
   $("moveCancel").onclick=()=>{box.hidden=true};
@@ -1814,6 +1829,7 @@ function handleSharedLink(){
   const existing=(d.uid&&others.find(o=>o.uid===d.uid))||others.find(o=>!o.uid&&(o.origName||o.name)===d.name&&d.name);
   const shown=existing?existing.name:who;
   box.innerHTML='<div class="head">'+avatarSvg(d.avatar,44)+'<b>'+esc(who)+' har delat sin allergiprofil</b></div>'+profileSummary(d)+
+    (existing?lostWarning(lostAllergies(existing,d.levels,d.custom)):"")+
     '<input type="text" id="impName" maxlength="30" aria-label="Namn på profilen" placeholder="Namn på profilen">'+
     '<div class="row"><button class="btn primary grow" id="impYes">'+(existing?"Uppdatera":"Spara")+' profilen</button><button class="btn" id="impNo">Avbryt</button></div>';
   $("impName").value=shown;
@@ -1990,7 +2006,7 @@ const CARD_A={
  kokos:{sv:"Kokos",en:"Coconut",de:"Kokosnuss",fr:"Noix de coco",es:"Coco",it:"Cocco"},
  majs:{sv:"Majs",en:"Corn (maize)",de:"Mais",fr:"Maïs",es:"Maíz",it:"Mais"}
 };
-let cardLang=store.get("kjad.cardLang","sv");
+let cardLang=store.get("kjad.cardLang","sv"); if(!["sv","en","de","fr","es","it"].includes(cardLang)) cardLang="sv";
 function renderCard(){
   const L=$("cardLangs"); L.innerHTML="";
   for(const [code,label] of CARD_LANGS){
@@ -2140,7 +2156,7 @@ async function renderRecalls(){
   if(!items.length){info.textContent="Inga återkallelser just nu.";return}
   for(const r of items){
     const li=document.createElement("li"), hits=recallHits(r);
-    li.innerHTML='<time>'+esc(r.date||"")+'</time><a href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a>'+(r.desc?'<span class="small muted">'+esc(r.desc)+'</span>':'')+(hits.length?'<span class="hitchip">Rör din profil: '+esc(hits.join(", "))+'</span>':'');
+    li.innerHTML='<time>'+esc(r.date||"")+'</time><a href="'+esc(safeLink(r.link,["livsmedelsverket.se"]))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a>'+(r.desc?'<span class="small muted">'+esc(r.desc)+'</span>':'')+(hits.length?'<span class="hitchip">Rör din profil: '+esc(hits.join(", "))+'</span>':'');
     ul.append(li);
   }
   info.textContent="Uppdaterad "+(d.updated||"")+". Källa: Livsmedelsverket.";
@@ -2154,7 +2170,7 @@ async function checkRecallBanner(){
   if(!r){b.hidden=true;return}
   b.hidden=false;
   b.innerHTML='<b>Återkallelse som rör din profil ('+esc(recallHits(r).join(", "))+')</b>'+
-    '<p><a href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a></p>'+
+    '<p><a href="'+esc(safeLink(r.link,["livsmedelsverket.se"]))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a></p>'+
     '<div class="row"><button class="btn" id="recallAll">Visa alla</button><button class="btn" id="recallOk">Jag har sett den</button></div>';
   $("recallAll").onclick=()=>show("info");
   $("recallOk").onclick=()=>{seen.push(r.link);store.set("kjad.recallSeen",seen.slice(-200));checkRecallBanner()};

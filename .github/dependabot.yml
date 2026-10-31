@@ -1,0 +1,7 @@
+# Påminner med en pull request när GitHub Actions som jobben använder får säkerhetsuppdateringar.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

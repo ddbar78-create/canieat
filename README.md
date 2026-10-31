@@ -75,3 +75,7 @@ Läs feedbacken på `/feedback-admin.html` med lösenordet från steg 3.
 4. Committa och pusha. Cloudflare Pages publicerar automatiskt.
 
 Appen ersätter inte förpackningens märkning eller råd från läkare eller dietist.
+
+## Säkerhet
+
+Se [SECURITY.md](SECURITY.md) för hur appen, datan och feedbackfunktionen skyddas, och vilka inställningar ägaren gör.

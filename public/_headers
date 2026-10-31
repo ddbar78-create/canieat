@@ -1,3 +1,25 @@
+# Skapas av tools/build.py – ändra där, inte här.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+
+/app/*
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'sha256-dmg8ldrDCOw9hdAPfdxsnJWiT+yow8vQDxgavNHrwFk='; worker-src 'self'; connect-src 'self' https://world.openfoodfacts.org https://se.openfoodfacts.org https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: blob: https://*.openfoodfacts.org; media-src 'self' blob:
+
+/
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'sha256-rK5fazlAUs6I4gj3TqpsomeERv/z+TI015akblLCXhE='; worker-src 'self'; connect-src 'self'; img-src 'self' data:
+
+/index.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'sha256-rK5fazlAUs6I4gj3TqpsomeERv/z+TI015akblLCXhE='; worker-src 'self'; connect-src 'self'; img-src 'self' data:
+
+/feedback-admin.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'sha256-T3wk4/4vQ1Wj8vgLdQAcPCHz91giFNAXCwBnPUX1brI='; connect-src 'self'; img-src 'self'
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
 /sw.js
   Cache-Control: no-cache
 
