@@ -20,6 +20,11 @@
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
 
+/feedback-admin
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'sha256-T3wk4/4vQ1Wj8vgLdQAcPCHz91giFNAXCwBnPUX1brI='; connect-src 'self'; img-src 'self'
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
 /sw.js
   Cache-Control: no-cache
 

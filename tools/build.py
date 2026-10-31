@@ -138,6 +138,11 @@ headers = f"""# Skapas av tools/build.py – ändra där, inte här.
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
 
+/feedback-admin
+  Content-Security-Policy: {CSP["admin"]}
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
 /sw.js
   Cache-Control: no-cache
 
