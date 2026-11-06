@@ -295,6 +295,7 @@ details.rec summary::-webkit-details-marker{display:none}
 .rbadge.ok{background:var(--ok-soft);color:var(--ok)}
 .rbadge.swap{background:var(--warn-soft);color:var(--warn)}
 .rbadge.no{background:var(--bad-soft);color:var(--bad)}
+.rec .rbody .btn{align-self:flex-start}
 .rec .rbody{display:flex;flex-direction:column;gap:10px;padding-top:12px}
 .ilist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .ilist li{padding-left:14px;position:relative;line-height:1.45}
@@ -537,7 +538,15 @@ details.rec summary::-webkit-details-marker{display:none}
       </div>
     </div>
     <div id="matRest" hidden>
-      <div class="panel" id="restPanel"><p class="small muted">Restaurangkedjor kommer i nästa steg.</p></div>
+      <div class="panel" id="restPanel">
+        <div>
+          <h3>Restaurangkedjor</h3>
+          <p class="small muted">Alla restauranger måste kunna berätta vilka allergener maten innehåller. Fråga alltid personalen innan du beställer, eftersom recept och leverantörer byts.</p>
+        </div>
+        <input type="text" id="restSearch" placeholder="Sök kedja eller typ av mat" aria-label="Sök restaurangkedja" inputmode="search">
+        <div class="reclist" id="restList"></div>
+        <p class="small muted">Länkarna går till kedjornas egna sidor och kontrollerades i november 2026.</p>
+      </div>
     </div>
     <div class="panel" id="matFraga" hidden>
       <h3>Fråga om en rätt eller situation</h3>
@@ -1201,9 +1210,10 @@ function matSub(t){
   document.querySelectorAll("#matTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sub===t));
   $("matRecept").hidden=t!=="recept"; $("matRest").hidden=t!=="rest"; $("matFraga").hidden=t!=="fraga";
   if(t==="recept") renderRecipes();
+  if(t==="rest") renderRest();
 }
 document.querySelectorAll("#matTabs button").forEach(b=>b.onclick=()=>matSub(b.dataset.sub));
-function renderMat(){ if(matTab==="recept") renderRecipes(); }
+function renderMat(){ if(matTab==="recept") renderRecipes(); if(matTab==="rest") renderRest(); }
 
 let recipes=null, recipesPromise=null, recCat="alla";
 function loadRecipes(){
@@ -1298,6 +1308,78 @@ function recHtml(m){
     +(notes.length?'<p class="rnote">'+esc(notes.join(" "))+'</p>':"")
     +'<p class="label">Gör så här</p><ol class="steps">'+r.steg.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ol></div></details>';
 }
+
+/* ---------- Mat: restaurangkedjor ---------- */
+// Kedjor i Sverige med länk till deras egen allergeninformation (kontrollerad november 2026).
+// Ingen länk = kedjan har ingen svensk allergensida som vi hittat; fråga i restaurangen.
+const CHAINS=[
+  ["McDonald's","burgare","https://www.mcdonalds.com/se/sv-se/kundservice/FAQ/Var-hittar-jag-vad-maten-innehaller.html"],
+  ["Max","burgare","https://www.max.se/maten/meny/"],
+  ["Burger King","burgare","https://burgerking.se/Matsakerhet"],
+  ["Sibylla","korv","https://www.sibylla.se/var-mat/allergener/"],
+  ["Bastard Burgers","burgare","https://bastardburgers.com/se/faq-mat/"],
+  ["Frasses","burgare","https://frasses.se/",1],
+  ["Five Guys","burgare",""],
+  ["KFC","kyckling",""],
+  ["Pizza Hut","pizza","https://www.pizzahut.se/kostinfo"],
+  ["Domino's","pizza","https://www.dominos.se/side/allergener"],
+  ["Vapiano","italienskt",""],
+  ["Chop Chop","asiatiskt","https://chopchop.se/",1],
+  ["Sushi Yama","sushi","https://sushiyama.se/meny/"],
+  ["Taco Bar","texmex","https://tacobar.se/allergiguide/"],
+  ["Subway","smorgas","https://www.subway.com/sv-se/menunutrition/menu/menunutritionfaqs"],
+  ["Espresso House","kaffe","https://espressohouse.com/allergen-och-naringsinformation"],
+  ["Waynes Coffee","kaffe","https://www.waynescoffee.se/",1],
+  ["Joe & the Juice","kaffe","https://www.joejuice.com/",1],
+  ["Pressbyrån","korv","https://www.pressbyran.se/",1],
+  ["7-Eleven","korv","https://7-eleven.se/innehall/"],
+  ["O'Learys","grill","https://olearys.se/",1],
+  ["Texas Longhorn","grill","https://www.texaslonghorn.se/",1],
+  ["Pinchos","tapas","https://pinchos.se/dynamicSolo?slug=allergens"],
+  ["IKEA restaurang","husman","https://www.ikea.com/se/sv/customer-service/knowledge/articles/28f9855b-fg6e-4f18-gdbb-623ef118e4g9.html"],
+].map(([namn,typ,url,home])=>({namn,typ,url,home}));
+const CHAIN_HOSTS=["mcdonalds.com","max.se","burgerking.se","sibylla.se","bastardburgers.com","frasses.se","pizzahut.se","dominos.se","chopchop.se","sushiyama.se","tacobar.se","subway.com","espressohouse.com","waynescoffee.se","joejuice.com","pressbyran.se","7-eleven.se","olearys.se","texaslonghorn.se","pinchos.se","ikea.com"];
+const TYP_NAMN={burgare:"Hamburgare",korv:"Korv och kiosk",kyckling:"Kyckling",pizza:"Pizza",italienskt:"Italienskt",asiatiskt:"Asiatiskt",sushi:"Sushi",texmex:"Tex-mex",smorgas:"Smörgåsar",kaffe:"Kafé",grill:"Grill och sportbar",tapas:"Tapas",husman:"Husmanskost"};
+// Var allergenerna brukar gömma sig i varje sorts kök
+const RISKS={
+  burgare:{gluten:"Bröd och panering. Pommes kan friteras i samma olja som panerat.",sesam:"Sesamfrön på hamburgerbröd.",mjolk:"Ost, dressingar och ibland brödet.",laktos:"Ost, dressingar och shakes.",agg:"Majonnäs, aioli och bearnaise.",senap:"Dressingar och hamburgerdressing.",soja:"Vegobiffar och bröd.",selleri:"Kryddblandningar och såser.",fisk:"Fiskburgare kan friteras i samma olja."},
+  korv:{mjolk:"Korv kan innehålla mjölkprotein, och mos görs ofta med mjölk och smör.",laktos:"Mos och ost.",gluten:"Bröd, tunnbröd och en del korv.",senap:"Senap och dressingar.",selleri:"Kryddor i korv.",agg:"Räksallad och dressingar.",krafdjur:"Räksallad.",sesam:"Bröd med frön."},
+  kyckling:{gluten:"Paneringen.",mjolk:"Panering, coleslaw och såser.",laktos:"Coleslaw och såser.",agg:"Majonnäs och coleslaw.",selleri:"Kryddblandningen i paneringen.",senap:"Såser och dressingar.",soja:"Panering och friteringsolja."},
+  pizza:{gluten:"Pizzabotten. Glutenfri botten kan bakas i samma ugn.",mjolk:"Ost och ibland i botten.",laktos:"Ost.",fisk:"Ansjovis och tonfisk.",krafdjur:"Räkor och musslor.",notter:"Pesto kan innehålla pinjenötter eller cashew.",selleri:"Tomatsås och kryddmix.",agg:"Bearnaise och kebabsås.",senap:"Kebabsås och dressingar."},
+  italienskt:{gluten:"Pasta, bröd och panering.",agg:"Färsk pasta och carbonara.",mjolk:"Ost, grädde och smör i såser.",laktos:"Grädde och ost.",notter:"Pesto och desserter.",fisk:"Ansjovis i såser och caesardressing.",krafdjur:"Skaldjurspasta.",selleri:"Soffritto och buljong.",sulfit:"Vin i såser."},
+  asiatiskt:{soja:"Soja finns i nästan alla såser.",gluten:"Sojasås, ostronsås och friterad panering.",jordnot:"Jordnötter, jordnötsolja och sataysås.",notter:"Cashewnötter.",sesam:"Sesamolja och sesamfrön.",fisk:"Fisksås.",krafdjur:"Ostronsås och räkor.",agg:"Äggnudlar och friteringssmet.",selleri:"Buljong i såser."},
+  sushi:{fisk:"Fisk, fiskrom och dashi.",krafdjur:"Räkor, krabba och surimi.",soja:"Sojasås och edamame.",gluten:"Vanlig sojasås, tempura och surimi.",sesam:"Sesamfrön på rullar.",agg:"Omelett (tamago) och majonnäs.",senap:"Kryddig majonnäs."},
+  texmex:{gluten:"Vetetortillas och kryddblandningar.",mjolk:"Ost, gräddfil och queso.",laktos:"Ost och gräddfil.",majs:"Majstortillas och nachochips.",selleri:"Tacokrydda kan innehålla selleri.",agg:"Dressingar.",soja:"Vegofärs."},
+  smorgas:{gluten:"Bröd och wraps.",mjolk:"Ost, bröd och dressingar.",laktos:"Ost och dressingar.",agg:"Majonnäs och dressingar.",senap:"Dressingar.",soja:"Bröd och vegopålägg.",sesam:"Bröd med frön.",fisk:"Tonfisk."},
+  kaffe:{mjolk:"Mjölk i drycker och i de flesta bakverk.",laktos:"Mjölk i drycker och bakverk.",notter:"Mandelmassa, hasselnötssirap och mandeldryck.",gluten:"Bakverk och smörgåsar.",agg:"Bakverk.",soja:"Sojadryck. Samma mjölkskummare används ofta till alla drycker.",sesam:"Bröd med frön.",kokos:"Kokosdryck och bakverk."},
+  grill:{gluten:"Panering, bröd och redda såser.",mjolk:"Bearnaise, smör och gratänger.",laktos:"Bearnaise, smör och gratänger.",agg:"Bearnaise och aioli.",selleri:"Såser och fond.",senap:"Dressingar och marinader.",sulfit:"Vin i såser.",fisk:"Fritös som delas med fisk."},
+  tapas:{gluten:"Bröd och friterat.",mjolk:"Ost, aioli och desserter.",agg:"Aioli och tortilla.",fisk:"Ansjovis och fisk.",krafdjur:"Räkor och bläckfisk.",notter:"Romescosås och desserter.",sulfit:"Vin och torkad frukt."},
+  husman:{mjolk:"Gräddsås, potatismos och smör.",laktos:"Gräddsås och potatismos.",gluten:"Köttbullar, sås och bröd.",agg:"Köttbullar och bakverk.",selleri:"Fond i såser.",senap:"Dressingar."},
+};
+let restQuery="";
+function renderRest(){
+  const act=activeAllergens(), q=restQuery.trim().toLowerCase();
+  const list=CHAINS.filter(c=>!q||c.namn.toLowerCase().includes(q)||(TYP_NAMN[c.typ]||"").toLowerCase().includes(q));
+  $("restList").innerHTML=list.length?list.map(c=>{
+    const risks=act.map(a=>[a,(RISKS[c.typ]||{})[a.id]]).filter(x=>x[1]);
+    const n=risks.length;
+    const body=(act.length
+        ? (n?'<p class="label">Fråga särskilt om</p><ul class="ilist">'+risks.map(([a,t])=>'<li class="ck"><b>'+esc(a.name)+'</b><span class="why">'+esc(t)+'</span></li>').join("")+'</ul>'
+            :'<p class="small muted">Inga vanliga gömställen för dina allergener i den här sortens kök. Fråga ändå personalen.</p>')
+        : '<p class="small muted">Välj allergier under Profil så visas vad du ska fråga om.</p>')
+      +(c.url?(c.home?'<p class="small muted">Kedjan har ingen samlad allergensida. Allergener står ibland vid varje rätt på menyn, annars fråga i restaurangen.</p>':"")+'<a class="btn" href="'+esc(safeLink(c.url,CHAIN_HOSTS))+'" target="_blank" rel="noopener noreferrer">'+esc(c.namn)+(c.home?'s webbplats ↗':'s allergeninfo ↗')+'</a>'
+             :'<p class="small muted">Vi har inte hittat någon svensk allergensida. Be att få se allergenlistan i restaurangen.</p>')
+      +'<button class="btn" data-ask="'+esc(c.namn)+'">Fråga Claude om '+esc(c.namn)+'</button>';
+    return '<details class="rec"><summary><span class="rtxt"><span class="rname">'+esc(c.namn)+'</span><span class="rmeta">'+esc(TYP_NAMN[c.typ]||"")+'</span></span>'
+      +(act.length?'<span class="rbadge '+(n?"swap":"ok")+'">'+(n?n+(n===1?" sak":" saker")+" att fråga om":"Fråga ändå")+'</span>':"")
+      +'</summary><div class="rbody">'+body+'</div></details>';
+  }).join(""):'<p class="small muted">Ingen kedja matchar sökningen.</p>';
+  $("restList").querySelectorAll("[data-ask]").forEach(b=>b.onclick=()=>{
+    $("question").value="Jag ska äta på "+b.dataset.ask+". Vad på menyn passar mig, vad ska jag undvika och vad ska jag fråga personalen om?";
+    matSub("fraga"); $("question").focus();
+  });
+}
+$("restSearch").addEventListener("input",e=>{restQuery=e.target.value;renderRest()});
 
 /* ---------- Kolla ett eget recept ---------- */
 // Allmänna byten för klistrade recept. a = vad bytet själv innehåller.
