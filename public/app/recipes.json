@@ -1,0 +1,2094 @@
+{
+ "v": 1,
+ "recipes": [
+  {
+   "id": "kottbullar",
+   "namn": "Köttbullar med potatismos",
+   "kat": "middag",
+   "tid": 45,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "500 g nötfärs"
+    },
+    {
+     "t": "1 dl ströbröd",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "1 dl glutenfritt ströbröd",
+       "a": []
+      },
+      {
+       "t": "1 dl majsmjöl",
+       "a": [
+        "majs"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1,5 dl mjölk",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "1,5 dl havredryck",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "1,5 dl sojadryck",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "1,5 dl risdryck",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 ägg",
+     "a": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "1 msk potatismjöl rört i 3 msk vatten",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 gul lök, finhackad"
+    },
+    {
+     "t": "1 tsk salt och lite svartpeppar"
+    },
+    {
+     "t": "smör till stekning",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "rapsolja till stekning",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 kg mjölig potatis"
+    },
+    {
+     "t": "2 dl mjölk till moset",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havredryck",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojadryck",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "2 dl risdryck",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 msk smör till moset",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 msk mjölkfritt margarin",
+       "a": []
+      },
+      {
+       "t": "2 msk rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "lingonsylt"
+    }
+   ],
+   "steg": [
+    "Blanda ströbröd och mjölk och låt svälla i 5 minuter.",
+    "Blanda i färs, ägg, lök, salt och peppar. Rulla små bullar.",
+    "Stek bullarna i flera omgångar tills de är genomstekta.",
+    "Koka potatisen mjuk, häll av och mosa med mjölk och smör. Smaka av med salt.",
+    "Servera med lingonsylt."
+   ]
+  },
+  {
+   "id": "kottfarssas",
+   "namn": "Spaghetti med köttfärssås",
+   "kat": "middag",
+   "tid": 40,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "500 g nötfärs"
+    },
+    {
+     "t": "1 gul lök"
+    },
+    {
+     "t": "2 vitlöksklyftor"
+    },
+    {
+     "t": "1 morot, riven"
+    },
+    {
+     "t": "1 stjälk blekselleri",
+     "a": [
+      "selleri"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över blekselleri",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "2 burkar krossade tomater"
+    },
+    {
+     "t": "2 msk tomatpuré"
+    },
+    {
+     "t": "1 tärning köttbuljong",
+     "kolla": [
+      "selleri",
+      "gluten"
+     ]
+    },
+    {
+     "t": "1 tsk torkad oregano"
+    },
+    {
+     "t": "400 g spaghetti av durumvete",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "400 g glutenfri spaghetti",
+       "a": []
+      },
+      {
+       "t": "400 g risnudlar",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "riven parmesan",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över osten",
+       "utan": true
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Fräs lök, vitlök, morot och selleri i lite olja.",
+    "Bryn färsen i samma panna.",
+    "Tillsätt tomater, tomatpuré, buljong och oregano. Låt puttra i 20 minuter.",
+    "Koka spaghettin enligt förpackningen.",
+    "Servera med riven ost."
+   ]
+  },
+  {
+   "id": "lasagne",
+   "namn": "Lasagne",
+   "kat": "middag",
+   "tid": 75,
+   "port": 6,
+   "ingr": [
+    {
+     "t": "500 g nötfärs"
+    },
+    {
+     "t": "1 gul lök"
+    },
+    {
+     "t": "2 burkar krossade tomater"
+    },
+    {
+     "t": "1 tärning köttbuljong",
+     "kolla": [
+      "selleri",
+      "gluten"
+     ]
+    },
+    {
+     "t": "12 lasagneplattor",
+     "a": [
+      "gluten"
+     ],
+     "kolla": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "12 glutenfria lasagneplattor",
+       "a": []
+      },
+      {
+       "t": "2 zucchini i tunna skivor",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "3 msk smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "3 msk mjölkfritt margarin",
+       "a": []
+      },
+      {
+       "t": "3 msk rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "3 msk vetemjöl",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "2 msk majsstärkelse",
+       "a": [
+        "majs"
+       ]
+      },
+      {
+       "t": "2 msk potatismjöl",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "6 dl mjölk",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "6 dl havredryck",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "6 dl sojadryck",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "6 dl risdryck",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 dl riven ost",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 dl mjölkfri riven ost",
+       "a": []
+      },
+      {
+       "t": "Hoppa över osten",
+       "utan": true
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Gör en köttfärssås av färs, lök, tomater och buljong. Låt puttra i 15 minuter.",
+    "Smält smöret, vispa i mjölet och späd med mjölken under omrörning. Låt sjuda till en tjock sås.",
+    "Varva sås, plattor och vit sås i en ugnsform. Toppa med ost.",
+    "Grädda i 225 °C i cirka 35 minuter."
+   ]
+  },
+  {
+   "id": "kycklingcurry",
+   "namn": "Kycklinggryta med curry och ris",
+   "kat": "middag",
+   "tid": 30,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "600 g kycklingfilé"
+    },
+    {
+     "t": "1 gul lök"
+    },
+    {
+     "t": "1 röd paprika"
+    },
+    {
+     "t": "1 msk currypulver",
+     "kolla": [
+      "senap",
+      "selleri"
+     ]
+    },
+    {
+     "t": "4 dl kokosmjölk",
+     "a": [
+      "kokos"
+     ],
+     "byt": [
+      {
+       "t": "4 dl havregrädde",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "4 dl sojagrädde",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "4 dl kokosgrädde",
+       "a": [
+        "kokos"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 dl vatten"
+    },
+    {
+     "t": "1 tärning hönsbuljong",
+     "kolla": [
+      "selleri",
+      "gluten"
+     ]
+    },
+    {
+     "t": "3 dl jasminris"
+    },
+    {
+     "t": "färsk koriander"
+    }
+   ],
+   "steg": [
+    "Skär kycklingen i bitar och bryn den i lite olja.",
+    "Tillsätt lök, paprika och curry och fräs en minut.",
+    "Häll på kokosmjölk, vatten och buljong. Låt puttra i 15 minuter.",
+    "Koka riset och servera med koriander."
+   ]
+  },
+  {
+   "id": "tacos",
+   "namn": "Tacos",
+   "kat": "middag",
+   "tid": 30,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "500 g nötfärs"
+    },
+    {
+     "t": "1 påse tacokrydda",
+     "kolla": [
+      "gluten",
+      "selleri"
+     ]
+    },
+    {
+     "t": "8 tortillabröd av vete",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "8 majstortillas",
+       "a": [
+        "majs"
+       ]
+      },
+      {
+       "t": "salladsblad att rulla in i",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl riven ost",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över osten",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "2 dl gräddfil",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havrefraiche",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojafraiche",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "Hoppa över gräddfilen",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "1 burk majs",
+     "a": [
+      "majs"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över majsen",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "tomat, gurka, isbergssallad"
+    },
+    {
+     "t": "tacosås",
+     "kolla": [
+      "selleri"
+     ]
+    }
+   ],
+   "steg": [
+    "Bryn färsen och tillsätt tacokrydda och vatten enligt påsen.",
+    "Skär grönsakerna.",
+    "Värm bröden och låt alla bygga sina tacos."
+   ]
+  },
+  {
+   "id": "ugnslax",
+   "namn": "Lax i ugn med potatis och dillsås",
+   "kat": "middag",
+   "tid": 35,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "600 g laxfilé",
+     "a": [
+      "fisk"
+     ]
+    },
+    {
+     "t": "1 citron"
+    },
+    {
+     "t": "salt och peppar"
+    },
+    {
+     "t": "800 g fast potatis"
+    },
+    {
+     "t": "2 dl crème fraiche",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havrefraiche",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojafraiche",
+       "a": [
+        "soja"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 dl hackad dill"
+    }
+   ],
+   "steg": [
+    "Lägg laxen i en ugnsform, salta och pressa över citron.",
+    "Grädda i 175 °C i cirka 20 minuter.",
+    "Koka potatisen.",
+    "Rör ihop crème fraiche och dill till en kall sås."
+   ]
+  },
+  {
+   "id": "stroganoff",
+   "namn": "Korv Stroganoff",
+   "kat": "middag",
+   "tid": 25,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "600 g falukorv",
+     "kolla": [
+      "mjolk",
+      "soja",
+      "senap"
+     ]
+    },
+    {
+     "t": "1 gul lök"
+    },
+    {
+     "t": "2 msk tomatpuré"
+    },
+    {
+     "t": "1 msk senap",
+     "a": [
+      "senap"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över senapen",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "2 dl matlagningsgrädde",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havregrädde",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojagrädde",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "2 dl kokosgrädde",
+       "a": [
+        "kokos"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "3 dl ris"
+    }
+   ],
+   "steg": [
+    "Skär korven i strimlor och bryn den med löken.",
+    "Rör ner tomatpuré och senap.",
+    "Häll på grädden och låt sjuda i 5 minuter.",
+    "Servera med ris."
+   ]
+  },
+  {
+   "id": "pyttipanna",
+   "namn": "Pyttipanna med stekt ägg",
+   "kat": "middag",
+   "tid": 30,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "800 g kokt potatis"
+    },
+    {
+     "t": "400 g kokt eller stekt kött, eller korv"
+    },
+    {
+     "t": "2 gula lökar"
+    },
+    {
+     "t": "2 msk smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 msk rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "4 ägg",
+     "a": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över äggen",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "inlagda rödbetor"
+    }
+   ],
+   "steg": [
+    "Tärna potatis, kött och lök.",
+    "Stek allt gyllene i smöret, i omgångar.",
+    "Stek äggen och lägg ovanpå.",
+    "Servera med rödbetor."
+   ]
+  },
+  {
+   "id": "kycklingwok",
+   "namn": "Kycklingwok med nudlar",
+   "kat": "middag",
+   "tid": 25,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "500 g kycklingfilé"
+    },
+    {
+     "t": "1 påse wokgrönsaker"
+    },
+    {
+     "t": "250 g äggnudlar",
+     "a": [
+      "gluten",
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "250 g risnudlar",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "3 msk kinesisk soja",
+     "a": [
+      "soja",
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "3 msk tamari",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "3 msk kokosaminos",
+       "a": [
+        "kokos"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 msk sesamolja",
+     "a": [
+      "sesam"
+     ],
+     "byt": [
+      {
+       "t": "1 msk rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 msk riven ingefära"
+    },
+    {
+     "t": "2 vitlöksklyftor"
+    },
+    {
+     "t": "1 dl cashewnötter",
+     "a": [
+      "notter"
+     ],
+     "byt": [
+      {
+       "t": "1 dl rostade solroskärnor",
+       "a": []
+      },
+      {
+       "t": "Hoppa över nötterna",
+       "utan": true
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Koka nudlarna och spola dem i kallt vatten.",
+    "Woka kycklingen het, ta upp den.",
+    "Woka grönsaker, ingefära och vitlök.",
+    "Vänd ner kyckling, nudlar, soja och olja. Toppa med nötter."
+   ]
+  },
+  {
+   "id": "linsgryta",
+   "namn": "Linsgryta med kokos",
+   "kat": "middag",
+   "tid": 35,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "3 dl röda linser",
+     "a": [
+      "linser"
+     ],
+     "byt": [
+      {
+       "t": "2 burkar kikärtor",
+       "a": [
+        "kikartor"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 gul lök"
+    },
+    {
+     "t": "2 vitlöksklyftor"
+    },
+    {
+     "t": "1 msk riven ingefära"
+    },
+    {
+     "t": "1 msk currypulver",
+     "kolla": [
+      "senap",
+      "selleri"
+     ]
+    },
+    {
+     "t": "1 burk krossade tomater"
+    },
+    {
+     "t": "4 dl kokosmjölk",
+     "a": [
+      "kokos"
+     ],
+     "byt": [
+      {
+       "t": "4 dl havregrädde",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "4 dl sojagrädde",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "4 dl kokosgrädde",
+       "a": [
+        "kokos"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "3 dl vatten"
+    },
+    {
+     "t": "1 tärning grönsaksbuljong",
+     "kolla": [
+      "selleri",
+      "gluten"
+     ]
+    },
+    {
+     "t": "bladspenat"
+    }
+   ],
+   "steg": [
+    "Fräs lök, vitlök, ingefära och curry.",
+    "Tillsätt linser, tomater, kokosmjölk, vatten och buljong.",
+    "Låt koka i cirka 20 minuter tills linserna är mjuka.",
+    "Rör ner spenaten och servera med ris eller bröd."
+   ]
+  },
+  {
+   "id": "artsoppa",
+   "namn": "Ärtsoppa",
+   "kat": "middag",
+   "tid": 120,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "500 g torkade gula ärtor",
+     "a": [
+      "artor"
+     ]
+    },
+    {
+     "t": "2 liter vatten"
+    },
+    {
+     "t": "1 gul lök"
+    },
+    {
+     "t": "500 g rimmat fläsk"
+    },
+    {
+     "t": "1 tsk timjan"
+    },
+    {
+     "t": "1 tsk mejram"
+    },
+    {
+     "t": "senap till servering",
+     "a": [
+      "senap"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över senapen",
+       "utan": true
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Blötlägg ärtorna över natten och häll av vattnet.",
+    "Koka ärtorna i nytt vatten med lök, fläsk och kryddor i cirka 1,5 timme.",
+    "Ta upp fläsket, skär det i bitar och lägg tillbaka.",
+    "Servera med senap."
+   ]
+  },
+  {
+   "id": "purjosoppa",
+   "namn": "Potatis- och purjolökssoppa",
+   "kat": "middag",
+   "tid": 30,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "800 g potatis"
+    },
+    {
+     "t": "2 purjolökar"
+    },
+    {
+     "t": "2 msk smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 msk rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 liter vatten"
+    },
+    {
+     "t": "2 tärningar grönsaksbuljong",
+     "kolla": [
+      "selleri",
+      "gluten"
+     ]
+    },
+    {
+     "t": "2 dl matlagningsgrädde",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havregrädde",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojagrädde",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "2 dl kokosgrädde",
+       "a": [
+        "kokos"
+       ]
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Fräs purjolöken mjuk i smöret.",
+    "Tillsätt potatis i bitar, vatten och buljong. Koka i 15 minuter.",
+    "Mixa soppan slät och rör ner grädden.",
+    "Smaka av med salt och peppar."
+   ]
+  },
+  {
+   "id": "fiskgratang",
+   "namn": "Fiskgratäng med räkor",
+   "kat": "middag",
+   "tid": 50,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "600 g torskfilé",
+     "a": [
+      "fisk"
+     ]
+    },
+    {
+     "t": "150 g skalade räkor",
+     "a": [
+      "krafdjur"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över räkorna",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "1 kg potatis"
+    },
+    {
+     "t": "2 dl mjölk",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havredryck",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojadryck",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "2 dl risdryck",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 msk smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 msk mjölkfritt margarin",
+       "a": []
+      },
+      {
+       "t": "2 msk rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 dl crème fraiche",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havrefraiche",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojafraiche",
+       "a": [
+        "soja"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 dl riven ost",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över osten",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "1 citron"
+    },
+    {
+     "t": "dill"
+    }
+   ],
+   "steg": [
+    "Koka potatisen och mosa den med mjölk och smör.",
+    "Lägg fisken i en ugnsform och strö över räkorna.",
+    "Rör ihop crème fraiche, dill och citron och bred över fisken.",
+    "Spritsa eller klicka moset runt kanten, strö över ost och grädda i 200 °C i 25 minuter."
+   ]
+  },
+  {
+   "id": "ugnskyckling",
+   "namn": "Kyckling med ugnsrostade rotfrukter",
+   "kat": "middag",
+   "tid": 50,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "8 kycklingklubbor"
+    },
+    {
+     "t": "4 morötter"
+    },
+    {
+     "t": "2 rödbetor"
+    },
+    {
+     "t": "600 g potatis"
+    },
+    {
+     "t": "3 msk olivolja"
+    },
+    {
+     "t": "1 citron"
+    },
+    {
+     "t": "färsk timjan"
+    },
+    {
+     "t": "salt och peppar"
+    }
+   ],
+   "steg": [
+    "Skär rotfrukterna i bitar och lägg dem i en långpanna.",
+    "Lägg kycklingen ovanpå och ringla över olja och citronsaft. Krydda.",
+    "Rosta i 200 °C i cirka 40 minuter tills kycklingen är genomstekt."
+   ]
+  },
+  {
+   "id": "chili",
+   "namn": "Chili med bönor och linser",
+   "kat": "middag",
+   "tid": 40,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "1 gul lök"
+    },
+    {
+     "t": "2 vitlöksklyftor"
+    },
+    {
+     "t": "1 röd paprika"
+    },
+    {
+     "t": "2 burkar kidneybönor"
+    },
+    {
+     "t": "1 dl röda linser",
+     "a": [
+      "linser"
+     ],
+     "byt": [
+      {
+       "t": "1 burk svarta bönor",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 burkar krossade tomater"
+    },
+    {
+     "t": "1 msk chilipulver"
+    },
+    {
+     "t": "1 tsk spiskummin"
+    },
+    {
+     "t": "1 msk kakao"
+    },
+    {
+     "t": "1 dl gräddfil till servering",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "1 dl havrefraiche",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "1 dl sojafraiche",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "Hoppa över gräddfilen",
+       "utan": true
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Fräs lök, vitlök och paprika.",
+    "Tillsätt kryddor, kakao, linser, bönor och tomater.",
+    "Låt puttra i 25 minuter.",
+    "Servera med gräddfil och ris."
+   ]
+  },
+  {
+   "id": "risotto",
+   "namn": "Svamprisotto",
+   "kat": "middag",
+   "tid": 40,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "3 dl arborioris"
+    },
+    {
+     "t": "250 g champinjoner"
+    },
+    {
+     "t": "1 schalottenlök"
+    },
+    {
+     "t": "1 dl torrt vitt vin",
+     "a": [
+      "sulfit"
+     ],
+     "byt": [
+      {
+       "t": "1 dl buljong extra och 1 msk citronsaft",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 liter grönsaksbuljong",
+     "kolla": [
+      "selleri",
+      "gluten"
+     ]
+    },
+    {
+     "t": "2 msk smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 msk olivolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl riven parmesan",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 msk näringsjäst",
+       "a": []
+      },
+      {
+       "t": "Hoppa över osten",
+       "utan": true
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Fräs lök och svamp i hälften av smöret.",
+    "Tillsätt riset och fräs tills det blir blankt. Häll på vinet.",
+    "Tillsätt varm buljong lite i taget under omrörning, cirka 20 minuter.",
+    "Rör ner resten av smöret och osten."
+   ]
+  },
+  {
+   "id": "havregrot",
+   "namn": "Havregrynsgröt",
+   "kat": "frukost",
+   "tid": 5,
+   "port": 1,
+   "ingr": [
+    {
+     "t": "1 dl havregryn",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "1 dl glutenfria havregryn",
+       "a": []
+      },
+      {
+       "t": "1 dl hirsflingor",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 dl vatten"
+    },
+    {
+     "t": "en nypa salt"
+    },
+    {
+     "t": "mjölk till servering",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "havredryck till servering",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "sojadryck till servering",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "risdryck till servering",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "bär eller äppelmos"
+    }
+   ],
+   "steg": [
+    "Koka upp gryn, vatten och salt.",
+    "Låt sjuda i 3 minuter under omrörning.",
+    "Servera med mjölk och bär."
+   ]
+  },
+  {
+   "id": "omelett",
+   "namn": "Omelett",
+   "kat": "frukost",
+   "tid": 10,
+   "port": 1,
+   "ingr": [
+    {
+     "t": "3 ägg",
+     "a": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "1 dl kikärtsmjöl rört med 1,5 dl vatten",
+       "a": [
+        "kikartor"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "2 msk mjölk",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 msk vatten",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "smör till stekning",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "rapsolja till stekning",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "skinka, tomat eller spenat"
+    },
+    {
+     "t": "salt och peppar"
+    }
+   ],
+   "steg": [
+    "Vispa ägg och mjölk lätt och krydda.",
+    "Häll i en het panna med smör.",
+    "Lägg på fyllningen och vik ihop när ytan stelnat."
+   ]
+  },
+  {
+   "id": "smoothie",
+   "namn": "Bärsmoothie",
+   "kat": "frukost",
+   "tid": 5,
+   "port": 2,
+   "ingr": [
+    {
+     "t": "2 dl frysta blåbär eller hallon"
+    },
+    {
+     "t": "1 banan"
+    },
+    {
+     "t": "2 dl naturell yoghurt",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "2 dl havreyoghurt",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "2 dl sojayoghurt",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "2 dl kokosyoghurt",
+       "a": [
+        "kokos"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 dl vatten"
+    }
+   ],
+   "steg": [
+    "Mixa allt slätt.",
+    "Späd med mer vatten om den är för tjock."
+   ]
+  },
+  {
+   "id": "chiapudding",
+   "namn": "Chiapudding",
+   "kat": "frukost",
+   "tid": 5,
+   "port": 2,
+   "ingr": [
+    {
+     "t": "4 msk chiafrön"
+    },
+    {
+     "t": "3 dl havredryck",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "3 dl risdryck",
+       "a": []
+      },
+      {
+       "t": "3 dl kokosdryck",
+       "a": [
+        "kokos"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 tsk honung"
+    },
+    {
+     "t": "färska bär"
+    }
+   ],
+   "steg": [
+    "Rör ihop chiafrön, dryck och honung.",
+    "Låt stå i kylen minst 2 timmar eller över natten.",
+    "Toppa med bär."
+   ]
+  },
+  {
+   "id": "pannkakor",
+   "namn": "Pannkakor",
+   "kat": "fika",
+   "tid": 30,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "2,5 dl vetemjöl",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "2,5 dl glutenfri mjölmix",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "6 dl mjölk",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "6 dl havredryck",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "6 dl sojadryck",
+       "a": [
+        "soja"
+       ]
+      },
+      {
+       "t": "6 dl risdryck",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "3 ägg",
+     "a": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "3 msk potatismjöl och 1 dl extra dryck",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "en nypa salt"
+    },
+    {
+     "t": "2 msk smält smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "2 msk rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "sylt"
+    }
+   ],
+   "steg": [
+    "Vispa mjölet med hälften av mjölken till en slät smet.",
+    "Vispa i resten av mjölken, äggen, salt och smör.",
+    "Grädda tunna pannkakor i en het panna.",
+    "Servera med sylt."
+   ]
+  },
+  {
+   "id": "kladdkaka",
+   "namn": "Kladdkaka",
+   "kat": "fika",
+   "tid": 35,
+   "port": 8,
+   "ingr": [
+    {
+     "t": "100 g smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "100 g mjölkfritt margarin",
+       "a": []
+      },
+      {
+       "t": "100 g rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 ägg",
+     "a": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "1 dl äppelmos",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2,5 dl socker"
+    },
+    {
+     "t": "4 msk kakao"
+    },
+    {
+     "t": "1 tsk vaniljsocker"
+    },
+    {
+     "t": "1,5 dl vetemjöl",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "1,5 dl glutenfri mjölmix",
+       "a": []
+      },
+      {
+       "t": "1 dl mandelmjöl",
+       "a": [
+        "notter"
+       ]
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Smält smöret.",
+    "Rör ner övriga ingredienser.",
+    "Häll i en smord form och grädda i 175 °C i cirka 20 minuter. Kakan ska vara kladdig i mitten."
+   ]
+  },
+  {
+   "id": "bananbrod",
+   "namn": "Bananbröd",
+   "kat": "fika",
+   "tid": 70,
+   "port": 10,
+   "ingr": [
+    {
+     "t": "3 mogna bananer"
+    },
+    {
+     "t": "2 ägg",
+     "a": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "2 msk chiafrön rörda i 6 msk vatten",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl socker"
+    },
+    {
+     "t": "75 g smält smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "0,75 dl rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "3 dl vetemjöl",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "3 dl glutenfri mjölmix",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 tsk bakpulver"
+    },
+    {
+     "t": "1 tsk kanel"
+    },
+    {
+     "t": "1 dl hackade valnötter",
+     "a": [
+      "notter"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över nötterna",
+       "utan": true
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Mosa bananerna och rör ner ägg, socker och smör.",
+    "Blanda i torra ingredienser och nötter.",
+    "Häll i en smord avlång form och grädda i 175 °C i cirka 50 minuter."
+   ]
+  },
+  {
+   "id": "chokladbollar",
+   "namn": "Chokladbollar",
+   "kat": "fika",
+   "tid": 20,
+   "port": 20,
+   "ingr": [
+    {
+     "t": "100 g smör, rumsvarmt",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "100 g mjölkfritt margarin",
+       "a": []
+      },
+      {
+       "t": "100 g rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl socker"
+    },
+    {
+     "t": "1 tsk vaniljsocker"
+    },
+    {
+     "t": "3 msk kakao"
+    },
+    {
+     "t": "3 dl havregryn",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "3 dl glutenfria havregryn",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 msk kallt kaffe"
+    },
+    {
+     "t": "kokosflingor att rulla i",
+     "a": [
+      "kokos"
+     ],
+     "byt": [
+      {
+       "t": "pärlsocker att rulla i",
+       "a": []
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Blanda allt utom kokosen till en jämn smet.",
+    "Rulla bollar och rulla dem i kokos.",
+    "Låt stå kallt en stund."
+   ]
+  },
+  {
+   "id": "smulpaj",
+   "namn": "Äppelsmulpaj",
+   "kat": "fika",
+   "tid": 40,
+   "port": 6,
+   "ingr": [
+    {
+     "t": "5 äpplen"
+    },
+    {
+     "t": "1 tsk kanel"
+    },
+    {
+     "t": "100 g smör",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "100 g mjölkfritt margarin",
+       "a": []
+      },
+      {
+       "t": "100 g rapsolja",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl vetemjöl",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "1 dl glutenfri mjölmix",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl havregryn",
+     "a": [
+      "gluten"
+     ],
+     "byt": [
+      {
+       "t": "1 dl glutenfria havregryn",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl socker"
+    },
+    {
+     "t": "vaniljsås eller glass",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "kolla": [
+      "agg"
+     ],
+     "byt": [
+      {
+       "t": "havrebaserad vaniljsås",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "sojabaserad vaniljsås",
+       "a": [
+        "soja"
+       ]
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Skiva äpplena i en ugnsform och strö över kanel.",
+    "Nyp ihop smör, mjöl, havregryn och socker till en smulig deg.",
+    "Strö över äpplena och grädda i 200 °C i cirka 25 minuter."
+   ]
+  },
+  {
+   "id": "hummus",
+   "namn": "Hummus med grönsaksstavar",
+   "kat": "mellanmal",
+   "tid": 10,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "1 burk kikärtor",
+     "a": [
+      "kikartor"
+     ],
+     "byt": [
+      {
+       "t": "1 burk vita bönor",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "2 msk tahini",
+     "a": [
+      "sesam"
+     ],
+     "byt": [
+      {
+       "t": "2 msk olivolja extra",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 vitlöksklyfta"
+    },
+    {
+     "t": "1 citron"
+    },
+    {
+     "t": "3 msk olivolja"
+    },
+    {
+     "t": "salt och spiskummin"
+    },
+    {
+     "t": "morötter, gurka och paprika i stavar"
+    }
+   ],
+   "steg": [
+    "Häll av kikärtorna men spara lite spad.",
+    "Mixa allt slätt och späd med spadet.",
+    "Servera med grönsaksstavar."
+   ]
+  },
+  {
+   "id": "guacamole",
+   "namn": "Guacamole",
+   "kat": "mellanmal",
+   "tid": 10,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "2 mogna avokador"
+    },
+    {
+     "t": "1 lime"
+    },
+    {
+     "t": "0,5 rödlök"
+    },
+    {
+     "t": "1 tomat"
+    },
+    {
+     "t": "färsk koriander"
+    },
+    {
+     "t": "salt"
+    },
+    {
+     "t": "majschips",
+     "a": [
+      "majs"
+     ],
+     "byt": [
+      {
+       "t": "grönsaksstavar",
+       "a": []
+      }
+     ]
+    }
+   ],
+   "steg": [
+    "Mosa avokadon med limesaft.",
+    "Rör ner finhackad lök, tomat och koriander.",
+    "Smaka av med salt."
+   ]
+  },
+  {
+   "id": "potatissallad",
+   "namn": "Potatissallad",
+   "kat": "mellanmal",
+   "tid": 30,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "800 g fast potatis"
+    },
+    {
+     "t": "1 dl majonnäs",
+     "a": [
+      "agg"
+     ],
+     "kolla": [
+      "senap"
+     ],
+     "byt": [
+      {
+       "t": "1 dl äggfri majonnäs",
+       "a": []
+      }
+     ]
+    },
+    {
+     "t": "1 dl crème fraiche",
+     "a": [
+      "mjolk",
+      "laktos"
+     ],
+     "byt": [
+      {
+       "t": "1 dl havrefraiche",
+       "a": [
+        "gluten"
+       ]
+      },
+      {
+       "t": "1 dl sojafraiche",
+       "a": [
+        "soja"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "1 rödlök"
+    },
+    {
+     "t": "gräslök"
+    },
+    {
+     "t": "salt och peppar"
+    }
+   ],
+   "steg": [
+    "Koka potatisen, låt svalna och skär i bitar.",
+    "Rör ihop majonnäs, crème fraiche, lök och gräslök.",
+    "Vänd ner potatisen och smaka av."
+   ]
+  },
+  {
+   "id": "quinoasallad",
+   "namn": "Quinoasallad med feta",
+   "kat": "mellanmal",
+   "tid": 25,
+   "port": 4,
+   "ingr": [
+    {
+     "t": "2 dl quinoa"
+    },
+    {
+     "t": "1 gurka"
+    },
+    {
+     "t": "200 g körsbärstomater"
+    },
+    {
+     "t": "1 rödlök"
+    },
+    {
+     "t": "150 g fetaost",
+     "a": [
+      "mjolk"
+     ],
+     "byt": [
+      {
+       "t": "Hoppa över fetaosten",
+       "utan": true
+      }
+     ]
+    },
+    {
+     "t": "2 msk pumpakärnor"
+    },
+    {
+     "t": "1 citron"
+    },
+    {
+     "t": "3 msk olivolja"
+    }
+   ],
+   "steg": [
+    "Koka quinoan och låt svalna.",
+    "Hacka grönsakerna.",
+    "Blanda allt och smaka av med citron, olja och salt."
+   ]
+  }
+ ]
+}

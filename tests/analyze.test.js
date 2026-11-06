@@ -23,6 +23,9 @@ const cases = [
   ["Farine de blé, sucre, beurre, œufs, noisettes, lait de coco, sel.", "", "fr", ["Gluten","Mjölk","Ägg","Nötter","Kokos"], []],
   ["Eau, sucre, lait de coco, noix de coco, sel, maltodextrine.", "", "fr", ["Kokos"], ["Mjölk","Gluten","Nötter"]],
   ["Tarwebloem, suiker, boter, eieren, zout.", "", "nl", [], []],
+  ["Nötfärs, lök, salt, peppar och nötbuljong.", "", "sv", [], ["Nötter"]],
+  ["Havregrädde, kokosgrädde, sojayoghurt och vatten.", "", "sv", ["Kokos"], ["Mjölk"]],
+  ["Gräddfil, gurka, vitlök och salt.", "", "sv", ["Mjölk"], []],
 ];
 let fail = 0;
 for (const [text, hint, lang, must, mustNot] of cases) {

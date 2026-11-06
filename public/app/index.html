@@ -278,6 +278,36 @@ mark{border-radius:4px}
 .note{border-top-color:var(--sage)}
 a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
 .small{line-height:1.55}
+/* Mat: recept */
+.subtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.subtabs button{padding:10px 8px;font-size:.9375rem}
+#view-mat>div:not(.subtabs){display:flex;flex-direction:column;gap:14px}
+.recshow{display:flex;gap:8px;align-items:center;color:var(--muted)}
+.reclist{display:flex;flex-direction:column}
+details.rec{border-top:1px solid var(--line);padding-block:12px}
+details.rec:first-child{border-top:0;padding-top:0}
+details.rec summary{cursor:pointer;list-style:none;display:flex;gap:12px;align-items:center}
+details.rec summary::-webkit-details-marker{display:none}
+.rec .rname{font-weight:700;font-family:var(--display);line-height:1.3}
+.rec .rmeta{font-size:.8125rem;color:var(--muted)}
+.rec .rtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rbadge{flex:0 0 auto;font-size:.75rem;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.rbadge.ok{background:var(--ok-soft);color:var(--ok)}
+.rbadge.swap{background:var(--warn-soft);color:var(--warn)}
+.rbadge.no{background:var(--bad-soft);color:var(--bad)}
+.rec .rbody{display:flex;flex-direction:column;gap:10px;padding-top:12px}
+.ilist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ilist li{padding-left:14px;position:relative;line-height:1.45}
+.ilist li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--sage)}
+.ilist li.sw::before{background:var(--warn)}
+.ilist li.no::before{background:var(--bad)}
+.ilist li.ck::before{background:var(--lavender)}
+.ilist s{color:var(--muted)}
+.ilist .new{font-weight:700}
+.ilist .why{display:block;font-size:.8125rem;color:var(--muted)}
+.ilist li.no .why{color:var(--bad)}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;line-height:1.5}
+.rnote{font-size:.875rem;background:var(--lavender-soft);border-radius:12px;padding:10px 12px}
 </style>
 
 <div class="wrap">
@@ -299,7 +329,7 @@ a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
     <button role="tab" id="tab-kolla" aria-selected="true" data-view="kolla">Kolla</button>
     <button role="tab" id="tab-kort" aria-selected="false" data-view="kort">Kort</button>
     <button role="tab" id="tab-info" aria-selected="false" data-view="info">Info</button>
-    <button role="tab" id="tab-fraga" aria-selected="false" data-view="fraga">Fråga</button>
+    <button role="tab" id="tab-mat" aria-selected="false" data-view="mat">Mat</button>
     <button role="tab" id="tab-profil" aria-selected="false" data-view="profil">Profil</button>
   </nav>
 
@@ -479,9 +509,37 @@ a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
     </div>
   </section>
 
-  <!-- FRÅGA -->
-  <section class="view" id="view-fraga" hidden>
-    <div class="panel">
+  <!-- MAT: recept, restauranger, fråga -->
+  <section class="view" id="view-mat" hidden>
+    <div class="langs subtabs" id="matTabs" role="group" aria-label="Mat">
+      <button data-sub="recept" aria-pressed="true">Recept</button>
+      <button data-sub="rest" aria-pressed="false">Restauranger</button>
+      <button data-sub="fraga" aria-pressed="false">Fråga</button>
+    </div>
+    <div id="matRecept">
+      <div class="panel">
+        <div>
+          <h3>Recept som passar</h3>
+          <p class="small muted" id="recFor">Utgår från din profil. Byten visas direkt i ingredienslistan.</p>
+        </div>
+        <div class="langs" id="recCats" role="group" aria-label="Typ av recept"></div>
+        <label class="small recshow"><input type="checkbox" id="recShowAll"> Visa även recept som inte passar</label>
+        <div class="reclist" id="recList"><p class="small muted">Laddar recept …</p></div>
+      </div>
+      <div class="panel">
+        <div>
+          <h3>Kolla ett eget recept</h3>
+          <p class="small muted">Klistra in ingredienserna, en per rad. Appen markerar vad du behöver byta.</p>
+        </div>
+        <textarea id="recPaste" style="min-height:120px" placeholder="3 dl vetemjöl&#10;2 ägg&#10;5 dl mjölk&#10;smör till stekning"></textarea>
+        <button class="btn primary" id="recPasteBtn">Kolla receptet</button>
+        <div id="recPasteOut" hidden></div>
+      </div>
+    </div>
+    <div id="matRest" hidden>
+      <div class="panel" id="restPanel"><p class="small muted">Restaurangkedjor kommer i nästa steg.</p></div>
+    </div>
+    <div class="panel" id="matFraga" hidden>
       <h3>Fråga om en rätt eller situation</h3>
       <p class="small muted">Till exempel restaurangbesök, recept eller vad man kan byta ut. Svaret utgår från din profil.</p>
       <label class="field">Din fråga
@@ -625,18 +683,18 @@ const ALLERGENS = [
   maybe:[{t:"lecitin",why:"Lecitin (E322) kommer ofta från soja om källan inte anges.",unless:/(solros|raps|ägg)lecitin|lecitin(er)?\s*\((solros|raps|ägg)/},
          {t:"e322",why:"E322 är lecitin, som ofta kommer från soja om källan inte anges.",unless:/(solros|raps|ägg)lecitin|e322\s*\((solros|raps|ägg)/}]},
  {id:"mjolk",name:"Mjölk",sub:"vassle, kasein, grädde, smör …",
-  terms:["mjölk","grädde","smör","vassle","kasein","laktos","laktalbumin","laktoglobulin","yoghurt","kvarg","kesella","mascarpone","ricotta","mozzarella","parmesan","cheddar","halloumi","gouda","brie","kefir","skyr","keso","ghee","mjölkprotein","whey","milk","butter","cream","cheese",{t:"ost",edge:1},{t:"crème",edge:1},{t:"creme",edge:1}],
-  excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","kakaosmör","jordnötssmör","sheasmör","mandelsmör","laktosfri","ostron","cocoa butter"]},
- {id:"notter",name:"Nötter",sub:"mandel, hasselnöt, cashew …",terms:["mandel","hasselnöt","valnöt","cashew","pekan","paranöt","pistage","pistasch","macadamia","queenslandsnöt","marsipan","nougat","pralin","gianduja","frangipane","almond","hazelnut","walnut","cashew","pecan","pistachio",{t:"nöt",edge:1},{t:"nötter",edge:1}],excl:["jordnöt","muskotnöt","muskot","kokos"]},
+  terms:["mjölk","grädde","smör","vassle","kasein","laktos","laktalbumin","laktoglobulin","yoghurt","kvarg","kesella","mascarpone","ricotta","mozzarella","parmesan","cheddar","halloumi","gouda","brie","kefir","skyr","keso","ghee","mjölkprotein","whey","milk","butter","cream","cheese","gräddfil",{t:"ost",edge:1},{t:"crème",edge:1},{t:"creme",edge:1}],
+  excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","kakaosmör","jordnötssmör","sheasmör","mandelsmör","laktosfri","ostron","cocoa butter","havregrädde","sojagrädde","kokosgrädde","havreyoghurt","sojayoghurt","kokosyoghurt","havrefraiche","sojafraiche","växtbaserad"]},
+ {id:"notter",name:"Nötter",sub:"mandel, hasselnöt, cashew …",terms:["mandel","hasselnöt","valnöt","cashew","pekan","paranöt","pistage","pistasch","macadamia","queenslandsnöt","marsipan","nougat","pralin","gianduja","frangipane","almond","hazelnut","walnut","cashew","pecan","pistachio",{t:"nöt",edge:1},{t:"nötter",edge:1}],excl:["jordnöt","muskotnöt","muskot","kokos","nötkött","nötfärs","nötbuljong","nötfond","nötstek","nötfett","nöttalg","nötfilé","nötytterfilé","nötinnanlår","nötbog","nötskav","nötkorv"]},
  {id:"selleri",name:"Selleri",sub:"rotselleri, sellerisalt …",terms:["selleri","celeriac","celery"],excl:[]},
  {id:"senap",name:"Senap",sub:"senapsfrö, senapsmjöl …",terms:["senap","dijon","mustard"],excl:[]},
  {id:"sesam",name:"Sesamfrön",sub:"sesamolja, tahini …",terms:["sesam","tahini","tahin","halva","gomasio","sesame"],excl:[]},
- {id:"sulfit",name:"Svaveldioxid och sulfiter",sub:"E220–E228",terms:["svaveldioxid","sulfit","sulphit","e220","e221","e222","e223","e224","e225","e226","e227","e228"],excl:[]},
+ {id:"sulfit",name:"Svaveldioxid och sulfiter",sub:"E220–E228",terms:["svaveldioxid","sulfit","sulphit","rödvin","vitvin","vitt vin",{t:"vin",exact:1},"e220","e221","e222","e223","e224","e225","e226","e227","e228"],excl:[]},
  {id:"lupin",name:"Lupin",sub:"lupinmjöl …",terms:["lupin","lupine"],excl:[]},
  {id:"blotdjur",name:"Blötdjur",sub:"musslor, bläckfisk, ostron …",terms:["blötdjur","mussl","ostron","bläckfisk","snäck","kalmar","snigl","escargot","calamar","oyster"],excl:[]},
  {id:"laktos",name:"Laktos",sub:"intolerans mot mjölksocker",group:"more",extra:1,
-  terms:["mjölk","grädde","vassle","laktos","yoghurt","kvarg","kesella","glass","whey","milk","cream"],
-  excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","laktosfri"],lactoseFree:1},
+  terms:["mjölk","grädde","gräddfil","vassle","laktos","yoghurt","kvarg","kesella","glass","whey","milk","cream","fraiche",{t:"crème",edge:1},{t:"creme",edge:1}],
+  excl:["kokosmjölk","havremjölk","mandelmjölk","sojamjölk","rismjölk","mjölksyra","laktosfri","havregrädde","sojagrädde","kokosgrädde","havreyoghurt","sojayoghurt","kokosyoghurt","havrefraiche","sojafraiche","växtbaserad"],lactoseFree:1},
  {id:"artor",name:"Ärtor",sub:"ärtprotein, ärtmjöl …",group:"more",terms:["ärtprotein","ärtmjöl","ärtfiber","ärtstärkelse","sockerärt","pea protein",{t:"ärt",edge:1}],excl:["kikärt"]},
  {id:"linser",name:"Linser",sub:"röda linser, linsmjöl …",group:"more",terms:["lentil",{t:"lins",edge:1}],excl:[]},
  {id:"kikartor",name:"Kikärtor",sub:"hummus, kikärtsmjöl …",group:"more",terms:["kikärt","hummus","chickpea","garbanzo","besan"],excl:[]},
@@ -1124,15 +1182,187 @@ $("customAdd").onclick=()=>{
 $("customInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("customAdd").click()}});
 
 /* ---------- Flikar ---------- */
-const VIEWS=["kolla","kort","info","fraga","profil"];
+const VIEWS=["kolla","kort","info","mat","profil"];
 function show(v){
+  if(v==="fraga"){v="mat";matSub("fraga")}
   for(const x of VIEWS){$("view-"+x).hidden=x!==v;$("tab-"+x).setAttribute("aria-selected",x===v)}
   if(v==="kort") renderCard();
   if(v==="info") renderInfo();
+  if(v==="mat") renderMat();
   window.scrollTo(0,0);
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>show(b.dataset.view));
-const startHash=(location.hash||"").slice(1); if(VIEWS.includes(startHash)) setTimeout(()=>show(startHash),0);
+const startHash=(location.hash||"").slice(1); if(VIEWS.includes(startHash)||startHash==="fraga") setTimeout(()=>show(startHash),0);
+
+/* ---------- Mat: recept ---------- */
+let matTab="recept";
+function matSub(t){
+  matTab=t;
+  document.querySelectorAll("#matTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sub===t));
+  $("matRecept").hidden=t!=="recept"; $("matRest").hidden=t!=="rest"; $("matFraga").hidden=t!=="fraga";
+  if(t==="recept") renderRecipes();
+}
+document.querySelectorAll("#matTabs button").forEach(b=>b.onclick=()=>matSub(b.dataset.sub));
+function renderMat(){ if(matTab==="recept") renderRecipes(); }
+
+let recipes=null, recipesPromise=null, recCat="alla";
+function loadRecipes(){
+  if(!recipesPromise) recipesPromise=fetch("recipes.json").then(r=>r.ok?r.json():null)
+    .then(d=>{recipes=d&&Array.isArray(d.recipes)?d.recipes:[];return recipes})
+    .catch(()=>{recipesPromise=null;return null});
+  return recipesPromise;
+}
+// "-fri"-ord släcker träffar från ordlistan: "glutenfritt ströbröd" innehåller inte gluten
+const FRI={gluten:/glutenfri/,mjolk:/mjölkfri|vegansk/,agg:/äggfri|vegansk/,notter:/nötfri/,soja:/sojafri/,laktos:/laktosfri|mjölkfri/};
+// Vilka av profilens allergener finns på raden? Märkningen i receptet plus appens egen ordlista.
+function lineHits(t,explicit,act){
+  const ids=new Set(act.map(a=>a.id)), hits=new Map(), maybe=[];
+  for(const id of (explicit||[])) if(ids.has(id)) hits.set(id,act.find(a=>a.id===id));
+  const low=t.toLowerCase();
+  for(const f of analyze(t).findings){
+    if(f.kind==="info"||f.trace) continue;
+    if(FRI[f.a.id]&&FRI[f.a.id].test(low)) continue;
+    if(f.msg) maybe.push(f); else hits.set(f.a.id,f.a);
+  }
+  return {hits:[...hits.values()],maybe};
+}
+// Ett recept mot profilen: rad för rad, med första bytet som passar
+function matchRecipe(r,act){
+  let swaps=0, fails=[], rows=[];
+  for(const ing of r.ingr){
+    const {hits,maybe}=lineHits(ing.t,ing.a,act);
+    const kolla=act.filter(a=>(ing.kolla||[]).includes(a.id));
+    const row={ing,hits,maybe,kolla};
+    if(hits.length){
+      for(const alt of (ing.byt||[])){
+        if(alt.utan){row.alt=alt;break}
+        const h=lineHits(alt.t,alt.a,act);
+        if(!h.hits.length){row.alt=alt;row.altMaybe=h.maybe;break}
+      }
+      if(row.alt) swaps++; else fails.push(...hits);
+    }
+    rows.push(row);
+  }
+  const status=fails.length?"no":swaps?"swap":"ok";
+  return {r,rows,status,swaps,fails:[...new Map(fails.map(a=>[a.id,a])).values()]};
+}
+const REC_CATS=[["alla","Alla"],["middag","Middag"],["frukost","Frukost"],["fika","Fika"],["mellanmal","Mellanmål"]];
+const REC_BADGE={ok:"Passar",swap:"Passar med byten",no:"Passar inte"};
+function renderRecipes(){
+  if(!recipes){
+    loadRecipes().then(d=>{ if(d) renderRecipes(); else $("recList").innerHTML='<p class="small muted">Recepten kunde inte laddas. Kontrollera anslutningen och försök igen.</p>'});
+    return;
+  }
+  const act=activeAllergens();
+  $("recFor").textContent=act.length
+    ? "För "+whoLabel()+": "+act.map(a=>a.name.toLowerCase()).join(", ")+". Byten visas direkt i ingredienslistan."
+    : "Välj allergier under Profil, så visas bara recept som passar och vad du behöver byta.";
+  $("recCats").innerHTML=REC_CATS.map(([k,n])=>'<button data-cat="'+k+'" aria-pressed="'+(k===recCat)+'">'+n+'</button>').join("");
+  $("recCats").querySelectorAll("button").forEach(b=>b.onclick=()=>{recCat=b.dataset.cat;renderRecipes()});
+  const all=recipes.filter(r=>recCat==="alla"||r.kat===recCat).map(r=>matchRecipe(r,act));
+  const order={ok:0,swap:1,no:2};
+  all.sort((a,b)=>order[a.status]-order[b.status]||a.swaps-b.swaps);
+  const showAll=$("recShowAll").checked, list=all.filter(m=>showAll||m.status!=="no");
+  const hidden=all.length-list.length;
+  $("recList").innerHTML=(list.length?list.map(recHtml).join(""):'<p class="small muted">Inga recept i den här gruppen passar just nu.</p>')
+    +(hidden&&!showAll?'<p class="small muted" style="padding-top:10px">'+hidden+' recept passar inte och är dolda.</p>':"");
+}
+$("recShowAll").onchange=renderRecipes;
+function whoLabel(){
+  if(activeWho==="all") return "alla";
+  const o=others.find(x=>x.id===activeWho);
+  return o?(o.name||"den delade profilen"):(profile.name||"dig");
+}
+const och=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" och "+a[a.length-1];
+const KAT_NAMN={middag:"Middag",frukost:"Frukost",fika:"Fika",mellanmal:"Mellanmål"};
+function recHtml(m){
+  const r=m.r, notes=[];
+  const items=m.rows.map(row=>{
+    const ing=row.ing;
+    if(row.hits.length&&row.alt){
+      const why=och(row.hits.map(a=>a.name.toLowerCase()));
+      if(row.alt.utan) return '<li class="sw"><s>'+esc(ing.t)+'</s> <span class="new">'+esc(row.alt.t)+'</span><span class="why">Innehåller '+esc(why)+'</span></li>';
+      return '<li class="sw"><s>'+esc(ing.t)+'</s> → <span class="new">'+esc(row.alt.t)+'</span><span class="why">Byte för '+esc(why)+'</span></li>';
+    }
+    if(row.hits.length) return '<li class="no">'+esc(ing.t)+'<span class="why">Innehåller '+esc(och(row.hits.map(a=>a.name.toLowerCase())))+' och saknar byte</span></li>';
+    const ck=row.kolla.map(a=>a.name.toLowerCase()).concat(row.maybe.map(f=>f.a.name.toLowerCase()));
+    if(ck.length) return '<li class="ck">'+esc(ing.t)+'<span class="why">Kolla förpackningen: kan innehålla '+esc([...new Set(ck)].join(", "))+'</span></li>';
+    return '<li>'+esc(ing.t)+'</li>';
+  }).join("");
+  if(m.swaps) notes.push("Använd bytena ovan när du följer stegen.");
+  if(m.status==="no") notes.push("Receptet innehåller "+och(m.fails.map(a=>a.name.toLowerCase()))+", och det går inte att byta ut enkelt.");
+  const meta=[KAT_NAMN[r.kat]||"",r.tid?r.tid+" min":"",r.port?r.port+" portioner":""].filter(Boolean).join(" · ");
+  return '<details class="rec"><summary><span class="rtxt"><span class="rname">'+esc(r.namn)+'</span><span class="rmeta">'+esc(meta)
+    +(m.swaps?' · '+m.swaps+(m.swaps===1?" byte":" byten"):"")+'</span></span><span class="rbadge '+m.status+'">'+REC_BADGE[m.status]+'</span></summary>'
+    +'<div class="rbody"><p class="label">Ingredienser</p><ul class="ilist">'+items+'</ul>'
+    +(notes.length?'<p class="rnote">'+esc(notes.join(" "))+'</p>':"")
+    +'<p class="label">Gör så här</p><ol class="steps">'+r.steg.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ol></div></details>';
+}
+
+/* ---------- Kolla ett eget recept ---------- */
+// Allmänna byten för klistrade recept. a = vad bytet själv innehåller.
+const GEN_SWAPS=[
+  {re:/smör|margarin/,alts:[["mjölkfritt margarin",[]],["rapsolja",[]]]},
+  {re:/grädde|gräddfil|fraiche|crème|creme/,alts:[["havregrädde eller havrefraiche",["gluten"]],["sojagrädde",["soja"]],["kokosgrädde",["kokos"]]]},
+  {re:/yoghurt|kvarg|kesella|filmjölk/,alts:[["sojayoghurt",["soja"]],["havreyoghurt",["gluten"]],["kokosyoghurt",["kokos"]]]},
+  {re:/ost|parmesan|mozzarella|fetaost/,alts:[["mjölkfri ost",[]],["hoppa över osten",[]]]},
+  {re:/mjölk|vassle/,alts:[["risdryck",[]],["havredryck",["gluten"]],["sojadryck",["soja"]]]},
+  {re:/ströbröd|skorpmjöl/,alts:[["glutenfritt ströbröd",[]],["krossade majsflingor",["majs"]]]},
+  {re:/pasta|spaghetti|makaroner|lasagne|nudlar|tagliatelle|penne/,alts:[["glutenfri pasta",[]],["risnudlar",[]]]},
+  {re:/couscous|bulgur/,alts:[["quinoa",[]],["ris",[]]]},
+  {re:/mjöl|vete|dinkel|råg|korn|havre/,alts:[["glutenfri mjölmix",[]],["potatismjöl (för redning)",[]]]},
+  {re:/bröd|tortilla|pitabröd/,alts:[["glutenfritt bröd",[]],["majstortillas",["majs"]]]},
+  {re:/ägg/,alts:[["1 msk potatismjöl rört i 3 msk vatten, per styck",[]],["3 msk kikärtsspad (aquafaba), per styck",["kikartor"]]]},
+  {re:/soja|tamari/,alts:[["kokosaminos",["kokos"]],["glutenfri tamari",["soja"]]]},
+  {re:/jordnöt|nöt|mandel|cashew|hassel|valnöt|pekan|pistage/,alts:[["solrosfrön",[]],["pumpafrön",[]]]},
+  {re:/sesam|tahini/,alts:[["solrosfrösmör",[]],["hoppa över",[]]]},
+  {re:/räk|krabb|hummer|kräft|musslor|bläckfisk/,alts:[["kyckling",[]],["hoppa över",[]]]},
+  {re:/fisk|lax|torsk|sej|tonfisk|ansjovis/,alts:[["kyckling",[]],["tofu",["soja"]]]},
+  {re:/selleri/,alts:[["fänkål",[]],["hoppa över",[]]]},
+  {re:/senap/,alts:[["hoppa över",[]]]},
+  {re:/vin/,alts:[["buljong med en skvätt citron",[]]]},
+  {re:/kokos/,alts:[["havregrädde",["gluten"]],["sojagrädde",["soja"]]]},
+  {re:/majs/,alts:[["potatismjöl",[]]]},
+];
+const GEN_KOLLA=[
+  {re:/buljong|fond/,ids:["selleri","gluten","mjolk"]},
+  {re:/korv|bacon|skinka/,ids:["mjolk","gluten","senap"]},
+  {re:/kryddmix|tacokrydd|currypasta|sås|dressing|ketchup/,ids:["gluten","selleri","senap","soja"]},
+  {re:/choklad|kakao/,ids:["mjolk","notter","soja"]},
+  {re:/havre/,ids:["gluten"]},
+];
+function genAlt(t,act){
+  const low=t.toLowerCase();
+  for(const g of GEN_SWAPS){
+    if(!g.re.test(low)) continue;
+    const ok=g.alts.filter(([alt,a])=>!lineHits(alt,a,act).hits.length).map(x=>x[0]);
+    if(ok.length) return ok;
+  }
+  return null;
+}
+$("recPasteBtn").onclick=()=>{
+  const out=$("recPasteOut"), act=activeAllergens();
+  const lines=$("recPaste").value.split(/\n|;/).map(x=>x.replace(/^[\s•*\-–]+/,"").trim()).filter(Boolean).slice(0,80);
+  out.hidden=false;
+  if(!lines.length){out.innerHTML='<p class="small muted">Klistra in minst en ingrediens.</p>';return}
+  if(!act.length){out.innerHTML='<p class="small muted">Välj allergier under Profil först.</p>';return}
+  let bad=0, nofix=0;
+  const items=lines.map(t=>{
+    const {hits,maybe}=lineHits(t,[],act), low=t.toLowerCase();
+    if(hits.length){
+      bad++; const alt=genAlt(t,act), why=och(hits.map(a=>a.name.toLowerCase()));
+      if(!alt) nofix++;
+      return '<li class="'+(alt?"sw":"no")+'">'+esc(t)+'<span class="why">Innehåller '+esc(why)+'. '+(alt?'Prova: '+esc(alt.join(" eller ")):'Hoppa över eller fråga under Fråga.')+'</span></li>';
+    }
+    const ck=new Set(maybe.map(f=>f.a.name.toLowerCase()));
+    for(const g of GEN_KOLLA) if(g.re.test(low)) for(const a of act) if(g.ids.includes(a.id)) ck.add(a.name.toLowerCase());
+    if(ck.size) return '<li class="ck">'+esc(t)+'<span class="why">Kolla förpackningen: kan innehålla '+esc([...ck].join(", "))+'</span></li>';
+    return '<li>'+esc(t)+'</li>';
+  }).join("");
+  const head=!bad?'<p class="rbadge ok" style="align-self:flex-start">Inget att byta enligt din profil</p>'
+    :'<p class="rbadge '+(nofix?"no":"swap")+'" style="align-self:flex-start">'+bad+(bad===1?" rad":" rader")+' behöver bytas</p>';
+  out.innerHTML='<div class="rbody" style="display:flex;flex-direction:column;gap:10px">'+head+'<ul class="ilist">'+items+'</ul><p class="small muted">Bytena är förslag. Läs alltid förpackningen på det du köper.</p></div>';
+};
 
 /* ---------- Claude: foto, tips, frågor ---------- */
 let sample=null;
@@ -1810,6 +2040,7 @@ function setWho(w){
   renderChips(); renderWho();
   if(lastCheck) runCheck(false);
   if(!$("view-kort").hidden) renderCard();
+  if(!$("view-mat").hidden) renderMat();
 }
 function renderWho(){
   const bar=$("whoBar"); bar.hidden=!others.length; bar.innerHTML=""; if(!others.length) return;

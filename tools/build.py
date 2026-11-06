@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 
 ROOT = "public"
 APP = os.path.join(ROOT, "app")
-VERSION = "kjad-v12"
+VERSION = "kjad-v13"
 os.makedirs(APP, exist_ok=True)
 
 # ---------- Appen ----------
@@ -72,7 +72,9 @@ self.addEventListener("fetch",e=>{
   e.respondWith(timeout(net,3500).catch(()=>caches.match(r,{ignoreSearch:true}).then(hit=>hit||net)));
 });
 '''
-open(f"{APP}/sw.js", "w").write(SW % (VERSION, '["./","./index.html","./manifest.webmanifest","./icon-192.png","./vendor/zxing-0.21.3.min.js","./vendor/qrcode-1.4.4.js"]'))
+open(f"{APP}/sw.js", "w").write(SW % (VERSION, '["./","./index.html","./manifest.webmanifest","./icon-192.png","./recipes.json","./vendor/zxing-0.21.3.min.js","./vendor/qrcode-1.4.4.js"]'))
+# Receptbanken följer med appen och fungerar offline
+shutil.copy("src/recipes.json", f"{APP}/recipes.json")
 # Bibliotek för skanning och QR-koder ligger i appen så att de fungerar offline
 os.makedirs(f"{APP}/vendor", exist_ok=True)
 for f in os.listdir("src/vendor"):
