@@ -1,11 +1,11 @@
 // Regressionstest för allergenmatchningen. Kör: node tests/analyze.test.js
 const fs = require("fs");
 const html = fs.readFileSync(__dirname + "/../src/kan-jag-ata-det.html", "utf8");
-let js = html.split("<script>")[1].split("/* ---------- Extra säkerhetskontroller")[0];
-js = js.replace(/let profile = [^\n]+/, 'let profile={levels:{mjolk:"allergi",gluten:"allergi",agg:"allergi",notter:"allergi",fisk:"allergi",jordnot:"allergi",kokos:"allergi"},custom:[]};')
+const src = html.split("<script>")[1].split("/* ---------- Extra säkerhetskontroller")[0];
+const makeAnalyze = prof => new Function(src.replace(/let profile = [^\n]+/, "let profile=" + JSON.stringify(prof) + ";")
        .replace(/let history[^\n]+/, "")
-       .replace("const store = {", "const localStorage={getItem(){return null},setItem(){}};const store = {");
-const analyze = new Function(js + "; return analyze;")();
+       .replace("const store = {", "const localStorage={getItem(){return null},setItem(){}};const store = {") + "; return analyze;")();
+const analyze = makeAnalyze({levels:{mjolk:"allergi",gluten:"allergi",agg:"allergi",notter:"allergi",fisk:"allergi",jordnot:"allergi",kokos:"allergi"},custom:[]});
 
 // [text, språkkod från databasen, förväntat språk, allergener som MÅSTE hittas, allergener som INTE får hittas]
 const cases = [
@@ -37,5 +37,28 @@ for (const [text, hint, lang, must, mustNot] of cases) {
   for (const m of mustNot) if (found.has(m)) errs.push(`felaktig träff ${m}`);
   if (errs.length) { fail++; console.log("FEL:", text.slice(0, 50), "→", errs.join("; ")); }
 }
+// Sorter: bara cashew och pistage bland nötterna, bara räkor bland kräftdjuren
+const sortAnalyze = makeAnalyze({levels:{notter:"allergi",krafdjur:"allergi"},types:{notter:["cashew","pistage"],krafdjur:["rakor"]},custom:[]});
+const sortCases = [
+  // [text, förväntat besked, beskrivning]
+  ["Socker, hasselnötter, kakao.", "green", "hasselnöt när bara cashew och pistage är valda"],
+  ["Ris, cashewnötter, salt.", "red", "cashew"],
+  ["Choklad med pistage och mandel.", "red", "pistage bland andra nötter"],
+  ["Socker, nötter, kakao.", "amber", "bara 'nötter' utan sort"],
+  ["Socker, nötter (hasselnöt), kakao.", "green", "nötter med sorten utskriven"],
+  ["Socker, kakao. Kan innehålla spår av nötter.", "amber", "spår av nötter utan sort"],
+  ["Socker, kakao. Kan innehålla spår av mandel.", "green", "spår av en annan sort"],
+  ["Pasta med krabba och hummer.", "green", "kräftdjur som inte är räkor"],
+  ["Räksallad med majonnäs.", "red", "räkor"],
+  ["Shrimp, rice, soy sauce.", "red", "räkor på engelska"],
+  ["Marsipan, socker.", "green", "marsipan räknas som mandel"],
+];
+let sfail = 0;
+for (const [text, want, what] of sortCases) {
+  const r = sortAnalyze(text, "");
+  if (r.status !== want) { sfail++; console.log("FEL sort:", what, "→", r.status, "väntade", want); }
+}
+fail += sfail;
+console.log(sfail ? `${sfail} sortfall misslyckades` : `Alla ${sortCases.length} sortfall godkända`);
 console.log(fail ? `${fail} av ${cases.length} fall misslyckades` : `Alla ${cases.length} fall godkända`);
 process.exit(fail ? 1 : 0);

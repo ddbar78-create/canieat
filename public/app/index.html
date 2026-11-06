@@ -279,6 +279,8 @@ mark{border-radius:4px}
 a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
 .small{line-height:1.55}
 /* Mat: recept */
+.alg .types{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
+.alg .types .langs button{font-size:.8125rem;padding:5px 11px}
 .subtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
 .subtabs button{padding:10px 8px;font-size:.9375rem}
 #view-mat>div:not(.subtabs){display:flex;flex-direction:column;gap:14px}
@@ -872,6 +874,48 @@ const ICON_OTHER=`<circle cx="12" cy="12" r="8" fill="#A0A7B8"/><path d="M12 7.5
 const algIcon=(id,size)=>`<svg class="aicon" viewBox="0 0 24 24" width="${size||20}" height="${size||20}" aria-hidden="true" focusable="false">${ICONS[id]||ICON_OTHER}</svg>`;
 const iconFor=(a,size)=>a&&a.id&&!String(a.id).startsWith("_")?algIcon(a.custom?"_egen":a.id,size):"";
 
+/* ---------- Sorter: välj vilka nötter, kräftdjur och blötdjur man inte tål ----------
+   s = ordstammar på flera språk som pekar ut sorten. Ord för gruppen i stort ("nötter", "nuts",
+   "skaldjur") räknas som okänd sort och ger "var försiktig" om ingen sort nämns bredvid.
+   c = namnet på allergikortet: en, de, fr, es, it */
+const ALG_TYPES={
+  notter:[
+    {id:"mandel",name:"Mandel",s:["mandel","mandl","almond","manteli","amande","marsipan","marzipan","marcipan","massepain","marsipaani","frangipane","almendra","mandorl"],c:["almonds","Mandeln","amandes","almendras","mandorle"]},
+    {id:"hassel",name:"Hasselnöt",s:["hasselnöt","hasselnød","hasselnøtt","hazelnut","haselnuss","haselnüsse","noisette","hasselpähkin","gianduja","avellan","nocciol"],c:["hazelnuts","Haselnüsse","noisettes","avellanas","nocciole"]},
+    {id:"valnot",name:"Valnöt",s:["valnöt","valnød","valnøtt","walnut","walnuss","walnüsse","saksanpähkin"],c:["walnuts","Walnüsse","noix","nueces","noci"]},
+    {id:"cashew",name:"Cashew",s:["cashew","cajou","anacard"],c:["cashews","Cashewkerne","noix de cajou","anacardos","anacardi"]},
+    {id:"pekan",name:"Pekannöt",s:["pekan","pecan","pécan","pekaani"],c:["pecans","Pekannüsse","noix de pécan","pacanas","noci pecan"]},
+    {id:"para",name:"Paranöt",s:["paranöt","paranød","paranøtt","paranuss","brazil","parapähkin","brésil"],c:["Brazil nuts","Paranüsse","noix du Brésil","nueces de Brasil","noci del Brasile"]},
+    {id:"pistage",name:"Pistage",s:["pistage","pistasch","pistachio","pistacie","pistasj","pistazie","pistaasi","pistache","pistach"],c:["pistachios","Pistazien","pistaches","pistachos","pistacchi"]},
+    {id:"macadamia",name:"Macadamia",s:["macadamia","makadamia","queensland"],c:["macadamia nuts","Macadamianüsse","noix de macadamia","macadamias","noci di macadamia"]},
+  ],
+  krafdjur:[
+    {id:"rakor",name:"Räkor",s:["räk","shrimp","prawn","rejer","reker","garnele","crevette","katkarap","gamba"],c:["shrimp","Garnelen","crevettes","gambas","gamberi"]},
+    {id:"krabba",name:"Krabba",s:["krabb","crab","krabbe","crabe","taskurap","cangrejo","granchi"],c:["crab","Krabbe","crabe","cangrejo","granchio"]},
+    {id:"hummer",name:"Hummer",s:["hummer","lobster","homard","langust","languste","langouste","hummeri","bogavante","astice","aragost"],c:["lobster","Hummer","homard","bogavante","astice"]},
+    {id:"krafta",name:"Kräftor",s:["kräft","crayfish","écrevisse","langoustine","scampi","jokirap","signalkräft","kreps","flusskrebs","cigala","scampi"],c:["crayfish and langoustine","Flusskrebse und Kaisergranat","écrevisses et langoustines","cangrejos de río y cigalas","gamberi di fiume e scampi"]},
+    {id:"krill",name:"Krill",s:["krill","krilli"],c:["krill","Krill","krill","kril","krill"]},
+  ],
+  blotdjur:[
+    {id:"musslor",name:"Musslor",s:["mussl","mussel","clam","scallop","musling","blåskjell","muschel","moule","simpuk","kammussl","pilgrim","mejillon","almeja","cozz","vongol","capesant"],c:["mussels and clams","Muscheln","moules et palourdes","mejillones y almejas","cozze e vongole"]},
+    {id:"ostron",name:"Ostron",s:["ostron","oyster","østers","auster","huître","huitre","osteri","ostra","ostrich"],c:["oysters","Austern","huîtres","ostras","ostriche"]},
+    {id:"blackfisk",name:"Bläckfisk",s:["bläckfisk","kalmar","calamar","squid","octopus","cuttlefish","blæksprutte","blekksprut","tintenfisch","poulpe","seiche","mustekala","kalmari","pulpo","sepia","polpo","totan"],c:["squid and octopus","Tintenfisch","calmar et poulpe","calamar y pulpo","calamari e polpo"]},
+    {id:"snackor",name:"Snäckor",s:["snäck","snigl","snail","escargot","snegle","schnecke","etana","caracol","lumac"],c:["snails","Schnecken","escargots","caracoles","lumache"]},
+  ],
+};
+const CARD_TYPE_LANG=["en","de","fr","es","it"];
+function typeOfWord(id,w){const lw=String(w).toLowerCase(); for(const t of ALG_TYPES[id]||[]) if(t.s.some(st=>lw.includes(st))) return t.id; return null}
+const typeNames=(id,list,lang)=>list.map(x=>{const t=(ALG_TYPES[id]||[]).find(y=>y.id===x); if(!t) return x; const i=CARD_TYPE_LANG.indexOf(lang); return i>=0?t.c[i]:t.name.toLowerCase()}).join(", ");
+// Bara giltiga sorter, och bara om det inte är alla (inget val = alla sorter)
+function cleanTypes(t,levels){
+  const out={};
+  for(const id in ALG_TYPES){const v=(t||{})[id];
+    if(levels[id]&&Array.isArray(v)){const ok=[...new Set(v.filter(x=>ALG_TYPES[id].some(y=>y.id===x)))];
+      if(ok.length&&ok.length<ALG_TYPES[id].length) out[id]=ok}}
+  return out;
+}
+const algName=(a,p)=>a.name+(((p&&p.types)||{})[a.id]?" ("+typeNames(a.id,p.types[a.id])+")":"");
+
 /* ---------- Matchning ---------- */
 let others=store.get("kjad.others",[]);
 let activeWho=store.get("kjad.who","me");
@@ -882,12 +926,16 @@ function whoProfiles(){
 }
 const traceStrict=id=>whoProfiles().some(p=>p.traces&&p.traces[id]);
 function activeAllergens(){
-  const levels={}, custom=[];
+  const levels={}, custom=[], types={};
   for(const p of whoProfiles()){
     for(const [id,v] of Object.entries(p.levels||{})) if(v==="allergi"||(v==="intolerans"&&levels[id]!=="allergi")) levels[id]=v;
     for(const c of (p.custom||[])) if(!custom.includes(c)) custom.push(c);
+    // Sorter: om någon tål ingen sort alls gäller alla; annars alla valda sorter tillsammans
+    for(const [id,v] of Object.entries(p.levels||{})){ if(v!=="allergi"&&v!=="intolerans") continue;
+      const t=((p.types||{})[id]); if(!t) types[id]=null; else if(types[id]!==null) types[id]=[...new Set([...(types[id]||[]),...t])]; }
   }
-  const list = ALLERGENS.filter(a=>levels[a.id]).map(a=>({...a,level:levels[a.id]}));
+  const list = ALLERGENS.filter(a=>levels[a.id]).map(a=>{const t=types[a.id]&&types[a.id].length<(ALG_TYPES[a.id]||[]).length?types[a.id]:null;
+    return {...a,level:levels[a.id],types:t,name:t?a.name+" ("+typeNames(a.id,t)+")":a.name}});
   for(const c of custom) list.push({id:"c:"+c,name:c,terms:[c.toLowerCase()],excl:[],level:"allergi",custom:1});
   return list;
 }
@@ -916,14 +964,25 @@ function analyze(text,langHint){
     const a=fx.t?{...base,terms:base.terms.concat(fx.t),excl:base.excl.concat(fx.x||[])}:base;
     const skip=phraseRanges(lower,fx.p);
     const lactoseFree = a.lactoseFree && /laktosfri|lactose[- ]free|laktosefri|laktoositon|laktosefrei|sans lactose/.test(lower);
-    let contains=[], traces=[];
+    let contains=[], traces=[], gen=[], specC=false, specT=false;
     for(const wd of words){
       if(skip.some(([s0,e0])=>wd.s>=s0&&wd.e<=e0)) continue;
       if(matchWord(wd.w,a)){
         const inTrace = traceStart>=0 && wd.s>=traceStart && wd.s<traceEnd;
+        if(a.types){
+          const ty=typeOfWord(a.id,wd.w);
+          if(ty){ if(inTrace) specT=true; else specC=true; if(!a.types.includes(ty)) continue; }
+          else { gen.push({wd,inTrace}); continue; }
+        }
         (inTrace?traces:contains).push(text.slice(wd.s,wd.e));
         marks.push({s:wd.s,e:wd.e,a,inTrace});
       }
+    }
+    // Bara "nötter" eller "skaldjur" utan sort: kan vara en sort man inte tål. Står en sort bredvid gäller den.
+    let unknownSort=[];
+    for(const {wd,inTrace} of gen){
+      if(inTrace){ if(!specT){traces.push(text.slice(wd.s,wd.e));marks.push({s:wd.s,e:wd.e,a,inTrace})} }
+      else if(!specC){ unknownSort.push(text.slice(wd.s,wd.e)); marks.push({s:wd.s,e:wd.e,a,maybe:1}) }
     }
     // havre och liknande "kanske"
     let maybe=[];
@@ -938,6 +997,7 @@ function analyze(text,langHint){
     if(contains.length) findings.push({a,kind:a.level==="allergi"?"red":"amber",words:uniq(contains)});
     if(traces.length) findings.push({a,kind:a.level==="allergi"?(traceStrict(a.id)?"red":"amber"):"info",words:uniq(traces),trace:1});
     for(const mb of maybe) findings.push({a,kind:"amber",words:[mb.t],msg:mb.why});
+    if(unknownSort.length&&!contains.length) findings.push({a,kind:"amber",words:uniq(unknownSort),msg:"Sorten står inte. Det kan vara "+typeNames(a.id,a.types)+". Fråga eller läs mer hos tillverkaren."});
   }
   const status = findings.some(f=>f.kind==="red")?"red":findings.some(f=>f.kind==="amber")?"amber":"green";
   return {status,findings,marks,lang};
@@ -975,8 +1035,12 @@ const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":
 const safeLink=(u,hosts)=>{try{const x=new URL(String(u));return x.protocol==="https:"&&hosts.some(h=>x.hostname===h||x.hostname.endsWith("."+h))?x.href:"#"}catch(e){return "#"}};
 const okStatus=s=>["red","amber","green"].includes(s)?s:"amber";
 // Vilka allergier försvinner om en profil ersätts med en annan? Skydd mot manipulerade koder och länkar.
-function lostAllergies(oldP,newLevels,newCustom){
+function lostAllergies(oldP,newLevels,newCustom,newTypes){
   const lost=[];
+  // Färre sorter än förut räknas också som att allergier försvinner
+  for(const id in ALG_TYPES){const a=ALLERGENS.find(x=>x.id===id), o=(oldP.levels||{})[id], nt=(newTypes||{})[id];
+    if(o&&newLevels[id]&&nt){const ot=(oldP.types||{})[id]||ALG_TYPES[id].map(t=>t.id), gone=ot.filter(x=>!nt.includes(x));
+      if(gone.length) lost.push(a.name+": "+typeNames(id,gone))}}
   for(const a of ALLERGENS){const o=(oldP.levels||{})[a.id], n=newLevels[a.id];
     if(o==="allergi"&&n!=="allergi") lost.push(a.name+(n==="intolerans"?" (blir intolerans)":""));
     else if(o==="intolerans"&&!n) lost.push(a.name);}
@@ -1168,6 +1232,18 @@ function renderProfile(){
       seg.append(b);
     }
     row.append(seg);
+    if(ALG_TYPES[a.id]&&cur!=="av"){
+      const chosen=(profile.types||{})[a.id]||[];
+      const box=document.createElement("div"); box.className="types";
+      box.innerHTML='<p class="small muted">Vilka sorter? Utan val gäller alla.</p>';
+      const g=document.createElement("div"); g.className="langs"; g.setAttribute("role","group"); g.setAttribute("aria-label","Sorter av "+a.name);
+      const setT=list=>{profile.types=profile.types||{}; const ok=cleanTypes({[a.id]:list},{[a.id]:1})[a.id]; if(ok) profile.types[a.id]=ok; else delete profile.types[a.id];
+        saveProfile();renderProfile();if(lastCheck) runCheck(false)};
+      const all=document.createElement("button"); all.textContent="Alla sorter"; all.setAttribute("aria-pressed",!chosen.length); all.onclick=()=>setT([]); g.append(all);
+      for(const t of ALG_TYPES[a.id]){const b=document.createElement("button"); b.textContent=t.name; b.setAttribute("aria-pressed",chosen.includes(t.id));
+        b.onclick=()=>setT(chosen.includes(t.id)?chosen.filter(x=>x!==t.id):chosen.concat(t.id)); g.append(b);}
+      box.append(g); row.append(box);
+    }
     if(cur==="allergi"){
       const lab=document.createElement("label"); lab.className="check trace";
       lab.innerHTML='<input type="checkbox"'+((profile.traces&&profile.traces[a.id])?" checked":"")+'> <span>Undvik även spår ("kan innehålla")</span>';
@@ -1948,12 +2024,12 @@ function receiveMove(text){
     if(!data||data.v!==1||!data.p) throw 0;
   }catch(e){st.textContent="Det där är ingen kod från Kan jag äta det? Visa koden på den andra enheten igen.";box.hidden=true;return}
   const levels=data.p.levels||{}, custom=Array.isArray(data.p.custom)?data.p.custom.map(String).slice(0,50):[];
-  const names=ALLERGENS.filter(a=>levels[a.id]&&levels[a.id]!=="av").map(a=>a.name+(levels[a.id]==="intolerans"?" (intolerans)":""));
+  const names=ALLERGENS.filter(a=>levels[a.id]&&levels[a.id]!=="av").map(a=>algName(a,{types:cleanTypes(data.p.types,levels)})+(levels[a.id]==="intolerans"?" (intolerans)":""));
   st.hidden=true; box.hidden=false;
   box.innerHTML='<b>Ta emot det här?</b>'+
     '<p class="small">Allergier: '+esc(names.concat(custom).join(", ")||"inga")+'</p>'+
     '<p class="small">API-nyckel: '+(data.k?"ja (slutar på …"+esc(String(data.k).slice(-4))+")":"nej")+'</p>'+
-    (profile.example?"":lostWarning(lostAllergies(profile,levels,custom)))+
+    (profile.example?"":lostWarning(lostAllergies(profile,levels,custom,cleanTypes(data.p.types,levels))))+
     (data.k&&store.get("kjad.apikey","")&&store.get("kjad.apikey","")!==String(data.k)?'<p class="small" style="color:var(--bad)">Din nuvarande nyckel byts ut.</p>':"")+
     '<p class="small muted">Det ersätter profilen'+(data.k?" och nyckeln":"")+' på den här enheten.</p>'+
     '<div class="row"><button class="btn primary" id="moveAccept">Ta emot</button><button class="btn" id="moveCancel">Avbryt</button></div>';
@@ -1962,7 +2038,7 @@ function receiveMove(text){
     const clean={}; for(const a of ALLERGENS){const v=levels[a.id]; if(v==="allergi"||v==="intolerans") clean[a.id]=v}
     const tr={}; for(const k in (data.p.traces||{})) if(clean[k]==="allergi"&&data.p.traces[k]) tr[k]=true;
     const av=AVATARS.some(a=>a.id===data.p.avatar)?data.p.avatar:(profile.avatar||"uggla");
-    profile={levels:clean,custom,traces:tr,name:String(data.p.name||"").slice(0,30),avatar:av,example:false}; store.set("kjad.profile",profile); renderAvatar();
+    profile={levels:clean,custom,traces:tr,types:cleanTypes(data.p.types,clean),name:String(data.p.name||"").slice(0,30),avatar:av,example:false}; store.set("kjad.profile",profile); renderAvatar();
     if(data.k && /^sk-ant-/.test(String(data.k))) store.set("kjad.apikey",String(data.k));
     renderChips(); renderProfile(); renderAiPanel(); applyAi();
     box.hidden=true; $("moveIn").hidden=true; st.hidden=false;
@@ -2067,17 +2143,17 @@ $("headAvatar").onclick=()=>show("profil");
 const SHARE_KEY="dela=";
 function shareCode(){
   if(!profile.uid){profile.uid=Math.random().toString(36).slice(2,10);store.set("kjad.profile",profile)}
-  const d={v:1,u:profile.uid,n:profile.name||"",a:profile.avatar||"uggla",l:profile.example?{}:profile.levels,c:profile.custom||[],t:profile.traces||{}};
+  const d={v:1,u:profile.uid,n:profile.name||"",a:profile.avatar||"uggla",l:profile.example?{}:profile.levels,c:profile.custom||[],t:profile.traces||{},s:profile.example?{}:(profile.types||{})};
   return b64enc(JSON.stringify(d));
 }
 function shareUrl(){ return location.origin+location.pathname+"#"+SHARE_KEY+shareCode() }
 function cleanShared(d){
   const levels={}; for(const a of ALLERGENS){const v=(d.l||{})[a.id]; if(v==="allergi"||v==="intolerans") levels[a.id]=v}
   const traces={}; for(const k in (d.t||{})) if(levels[k]==="allergi"&&d.t[k]) traces[k]=true;
-  return {uid:String(d.u||"").slice(0,16),name:String(d.n||"").slice(0,30),avatar:AVATARS.some(a=>a.id===d.a)?d.a:"uggla",levels,custom:Array.isArray(d.c)?d.c.map(String).slice(0,50):[],traces};
+  return {uid:String(d.u||"").slice(0,16),name:String(d.n||"").slice(0,30),avatar:AVATARS.some(a=>a.id===d.a)?d.a:"uggla",levels,custom:Array.isArray(d.c)?d.c.map(String).slice(0,50):[],traces,types:cleanTypes(d.s,levels)};
 }
 function profileSummary(p){
-  const parts=ALLERGENS.filter(a=>p.levels[a.id]).map(a=>'<span class="chip '+p.levels[a.id]+'">'+algIcon(a.id,16)+esc(a.name+(p.levels[a.id]==="intolerans"?" (intolerans)":""))+'</span>');
+  const parts=ALLERGENS.filter(a=>p.levels[a.id]).map(a=>'<span class="chip '+p.levels[a.id]+'">'+algIcon(a.id,16)+esc(algName(a,p)+(p.levels[a.id]==="intolerans"?" (intolerans)":""))+'</span>');
   for(const c of p.custom||[]) parts.push('<span class="chip allergi">'+algIcon("_egen",16)+esc(c)+'</span>');
   return '<div class="chips">'+(parts.join("")||'<span class="small muted">Inga allergier valda</span>')+'</div>';
 }
@@ -2142,7 +2218,7 @@ function handleSharedLink(){
   const existing=(d.uid&&others.find(o=>o.uid===d.uid))||others.find(o=>!o.uid&&(o.origName||o.name)===d.name&&d.name);
   const shown=existing?existing.name:who;
   box.innerHTML='<div class="head">'+avatarSvg(d.avatar,44)+'<b>'+esc(who)+' har delat sin allergiprofil</b></div>'+profileSummary(d)+
-    (existing?lostWarning(lostAllergies(existing,d.levels,d.custom)):"")+
+    (existing?lostWarning(lostAllergies(existing,d.levels,d.custom,d.types)):"")+
     '<input type="text" id="impName" maxlength="30" aria-label="Namn på profilen" placeholder="Namn på profilen">'+
     '<div class="row"><button class="btn primary grow" id="impYes">'+(existing?"Uppdatera":"Spara")+' profilen</button><button class="btn" id="impNo">Avbryt</button></div>';
   $("impName").value=shown;
@@ -2329,7 +2405,8 @@ function renderCard(){
   }
   const t=CARD_T[cardLang]||CARD_T.sv;
   const act=activeAllergens();
-  const name=a=>a.custom?a.name:((CARD_A[a.id]||{})[cardLang]||a.name);
+  const name=a=>{if(a.custom) return a.name; const full=(CARD_A[a.id]||{})[cardLang]||a.name;
+    return a.types?full.replace(/\s*\(.*\)\s*$/,"")+": "+typeNames(a.id,a.types,cardLang):full};
   const al=act.filter(a=>a.level==="allergi"), it=act.filter(a=>a.level==="intolerans");
   const box=$("cardBox");
   if(!act.length){box.innerHTML='<p class="small">Välj dina allergier under <b>Profil</b> först, så fylls kortet i.</p>';$("cardFull").hidden=true;return}

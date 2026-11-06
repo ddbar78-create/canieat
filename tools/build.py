@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 
 ROOT = "public"
 APP = os.path.join(ROOT, "app")
-VERSION = "kjad-v13"
+VERSION = "kjad-v14"
 os.makedirs(APP, exist_ok=True)
 
 # ---------- Appen ----------

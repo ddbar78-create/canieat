@@ -1,4 +1,4 @@
-const C="kjad-v13-root", DATA="kjad-data", FONTS="kjad-fonts";
+const C="kjad-v14-root", DATA="kjad-data", FONTS="kjad-fonts";
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./"])));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C&&k!==DATA&&k!==FONTS).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 const put=(name,req,res)=>{if(res&&res.ok){const cp=res.clone();caches.open(name).then(c=>c.put(req,cp))}return res};
