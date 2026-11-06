@@ -53,9 +53,26 @@ const sortCases = [
   ["Shrimp, rice, soy sauce.", "red", "räkor på engelska"],
   ["Marsipan, socker.", "green", "marsipan räknas som mandel"],
 ];
+// Gluten: bara vete (veteallergi), och bara havre
+const wheat = makeAnalyze({levels:{gluten:"allergi"},types:{gluten:["vete"]},custom:[]});
+const oats = makeAnalyze({levels:{gluten:"allergi"},types:{gluten:["havre"]},custom:[]});
+const celiac = makeAnalyze({levels:{gluten:"allergi"},custom:[]});
+for (const c of [
+  [wheat, "Rågmjöl, vatten, salt.", "green", "råg vid veteallergi"],
+  [wheat, "Vetemjöl, vatten, salt.", "red", "vete vid veteallergi"],
+  [wheat, "Dinkelmjöl, honung.", "red", "dinkel är vete"],
+  [wheat, "Havregryn, russin.", "amber", "havre kan vara förorenad med vete"],
+  [wheat, "Socker, gluten, salt.", "amber", "bara 'gluten' utan sädesslag"],
+  [wheat, "Rye flour, water, salt.", "green", "råg på engelska"],
+  [oats, "Havregryn, russin.", "red", "havre vid havreallergi"],
+  [oats, "Glutenfri havre, russin.", "red", "glutenfri havre är ändå havre"],
+  [oats, "Vetemjöl, vatten.", "green", "vete vid bara havreallergi"],
+  [celiac, "Havregryn, russin.", "amber", "celiaki: havre som förut"],
+  [celiac, "Rågmjöl, vatten.", "red", "celiaki: råg som förut"],
+]) sortCases.push([c[1], c[2], c[3], c[0]]);
 let sfail = 0;
-for (const [text, want, what] of sortCases) {
-  const r = sortAnalyze(text, "");
+for (const [text, want, what, fn] of sortCases) {
+  const r = (fn || sortAnalyze)(text, "");
   if (r.status !== want) { sfail++; console.log("FEL sort:", what, "→", r.status, "väntade", want); }
 }
 fail += sfail;

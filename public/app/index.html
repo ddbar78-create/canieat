@@ -879,6 +879,12 @@ const iconFor=(a,size)=>a&&a.id&&!String(a.id).startsWith("_")?algIcon(a.custom?
    "skaldjur") räknas som okänd sort och ger "var försiktig" om ingen sort nämns bredvid.
    c = namnet på allergikortet: en, de, fr, es, it */
 const ALG_TYPES={
+  gluten:[
+    {id:"vete",name:"Vete",s:["vete","dinkel","spelt","kamut","emmer","enkorn","durum","semolina","bulgur","couscous","seitan","mannagryn","graham","panko","farina","matzo","frikeh","triticale","wheat","hvede","hvete","vehnä","speltti","weizen","grieß","griess","blé","froment","épeautre","semoule","semulje","mannasuurimo","trigo","frumento"],c:["wheat","Weizen","blé","trigo","frumento"]},
+    {id:"rag",name:"Råg",s:["råg","rye","rug","ruis","rukii","roggen","seigle","centeno","segale"],c:["rye","Roggen","seigle","centeno","segale"]},
+    {id:"korn",name:"Korn",s:["korn","barley","byg","ohra","gerste","orge","malt","mallas","maltaa","malz","cebada","orzo"],c:["barley","Gerste","orge","cebada","orzo"]},
+    {id:"havre",name:"Havre",s:["havre","oat","kaura","hafer","avoine","avena"],c:["oats","Hafer","avoine","avena","avena"]},
+  ],
   notter:[
     {id:"mandel",name:"Mandel",s:["mandel","mandl","almond","manteli","amande","marsipan","marzipan","marcipan","massepain","marsipaani","frangipane","almendra","mandorl"],c:["almonds","Mandeln","amandes","almendras","mandorle"]},
     {id:"hassel",name:"Hasselnöt",s:["hasselnöt","hasselnød","hasselnøtt","hazelnut","haselnuss","haselnüsse","noisette","hasselpähkin","gianduja","avellan","nocciol"],c:["hazelnuts","Haselnüsse","noisettes","avellanas","nocciole"]},
@@ -903,6 +909,7 @@ const ALG_TYPES={
     {id:"snackor",name:"Snäckor",s:["snäck","snigl","snail","escargot","snegle","schnecke","etana","caracol","lumac"],c:["snails","Schnecken","escargots","caracoles","lumache"]},
   ],
 };
+const OATS=["havre","oat","kaura","hafer","avoine","avena"];
 const CARD_TYPE_LANG=["en","de","fr","es","it"];
 function typeOfWord(id,w){const lw=String(w).toLowerCase(); for(const t of ALG_TYPES[id]||[]) if(t.s.some(st=>lw.includes(st))) return t.id; return null}
 const typeNames=(id,list,lang)=>list.map(x=>{const t=(ALG_TYPES[id]||[]).find(y=>y.id===x); if(!t) return x; const i=CARD_TYPE_LANG.indexOf(lang); return i>=0?t.c[i]:t.name.toLowerCase()}).join(", ");
@@ -935,7 +942,10 @@ function activeAllergens(){
       const t=((p.types||{})[id]); if(!t) types[id]=null; else if(types[id]!==null) types[id]=[...new Set([...(types[id]||[]),...t])]; }
   }
   const list = ALLERGENS.filter(a=>levels[a.id]).map(a=>{const t=types[a.id]&&types[a.id].length<(ALG_TYPES[a.id]||[]).length?types[a.id]:null;
-    return {...a,level:levels[a.id],types:t,name:t?a.name+" ("+typeNames(a.id,t)+")":a.name}});
+    const x={...a,level:levels[a.id],types:t,name:t?a.name+" ("+typeNames(a.id,t)+")":a.name};
+    // Den som inte tål havre själv: havre ger "ät inte", inte bara "kan vara förorenad"
+    if(a.id==="gluten"&&t&&t.includes("havre")){x.terms=a.terms.concat(OATS);x.maybe=[];x.oats=1}
+    return x});
   for(const c of custom) list.push({id:"c:"+c,name:c,terms:[c.toLowerCase()],excl:[],level:"allergi",custom:1});
   return list;
 }
@@ -986,7 +996,8 @@ function analyze(text,langHint){
     }
     // havre och liknande "kanske"
     let maybe=[];
-    for(const mt of (fx.m||[])) if(!(a.maybe||[]).some(x=>x.t===mt)) a.maybe=(a.maybe||[]).concat([{t:mt,why:"Havre kan vara förorenad med gluten om den inte är märkt glutenfri."}]);
+    if(a.oats) for(const mt of (fx.m||[])) a.terms=a.terms.concat([mt]);
+    else for(const mt of (fx.m||[])) if(!(a.maybe||[]).some(x=>x.t===mt)) a.maybe=(a.maybe||[]).concat([{t:mt,why:"Havre kan vara förorenad med gluten om den inte är märkt glutenfri."}]);
     for(const mb of (a.maybe||[])){
       if(lower.includes(mb.t) && !(mb.unless&&mb.unless.test(lower))){
         maybe.push(mb);
@@ -1303,7 +1314,13 @@ const FRI={gluten:/glutenfri/,mjolk:/mjölkfri|vegansk/,agg:/äggfri|vegansk/,no
 // Vilka av profilens allergener finns på raden? Märkningen i receptet plus appens egen ordlista.
 function lineHits(t,explicit,act){
   const ids=new Set(act.map(a=>a.id)), hits=new Map(), maybe=[];
-  for(const id of (explicit||[])) if(ids.has(id)) hits.set(id,act.find(a=>a.id===id));
+  for(const id of (explicit||[])) if(ids.has(id)){
+    const a=act.find(x=>x.id===id);
+    // Med valda sorter: raden räknas inte om den bara nämner andra sorter ("havredryck" för den som bara inte tål vete)
+    if(a.types){const tys=(t.toLowerCase().match(/[a-zåäöéèüæø]+/g)||[]).map(w=>typeOfWord(id,w)).filter(Boolean);
+      if(tys.length&&!tys.some(x=>a.types.includes(x))) continue;}
+    hits.set(id,a);
+  }
   const low=t.toLowerCase();
   for(const f of analyze(t).findings){
     if(f.kind==="info"||f.trace) continue;
@@ -1368,7 +1385,8 @@ function recHtml(m){
     if(row.hits.length&&row.alt){
       const why=och(row.hits.map(a=>a.name.toLowerCase()));
       if(row.alt.utan) return '<li class="sw"><s>'+esc(ing.t)+'</s> <span class="new">'+esc(row.alt.t)+'</span><span class="why">Innehåller '+esc(why)+'</span></li>';
-      return '<li class="sw"><s>'+esc(ing.t)+'</s> → <span class="new">'+esc(row.alt.t)+'</span><span class="why">Byte för '+esc(why)+'</span></li>';
+      const am=(row.altMaybe||[]).map(f=>f.msg).filter(Boolean)[0];
+      return '<li class="sw"><s>'+esc(ing.t)+'</s> → <span class="new">'+esc(row.alt.t)+'</span><span class="why">Byte för '+esc(why)+(am?'. '+esc(am)+' Välj en som är märkt glutenfri.':'')+'</span></li>';
     }
     if(row.hits.length) return '<li class="no">'+esc(ing.t)+'<span class="why">Innehåller '+esc(och(row.hits.map(a=>a.name.toLowerCase())))+' och saknar byte</span></li>';
     const ck=row.kolla.map(a=>a.name.toLowerCase()).concat(row.maybe.map(f=>f.a.name.toLowerCase()));
