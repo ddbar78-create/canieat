@@ -23,6 +23,13 @@ Appen ger besked om mat för personer med allergier. Fel besked kan vara farligt
 - Efter 10 fel försök på 15 minuter spärras IP-adressen
 - Storleksgränser på alla fält
 
+## Delad inköpslista (`functions/api/list.js`)
+
+- Listan nås bara med sitt id: 22 slumpmässiga tecken som inte går att gissa
+- Inga allergiprofiler sparas på servern, bara raderna och valda varor
+- Tar bara emot anrop från appens egen webbplats, med storleksgränser och högst 300 rader
+- Skriver bara till KV när något ändrats, och listan raderas efter 120 dagar utan ändringar
+
 ## Skydd i GitHub
 
 - GitHub Actions är låsta till exakta versioner (commit-hash) och har bara de behörigheter de behöver

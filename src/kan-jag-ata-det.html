@@ -287,6 +287,7 @@ a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
 .sscan.red{background:var(--bad-soft);border-color:var(--bad)}
 .sbig{font-family:var(--display);font-size:1.5rem}
 .sscan.green .sbig{color:var(--ok)}.sscan.amber .sbig{color:var(--warn)}.sscan.red .sbig{color:var(--bad)}
+.shopshare{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
 /* Mat: recept */
 .alg .types{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
 .alg .types .langs button{font-size:.8125rem;padding:5px 11px}
@@ -530,6 +531,7 @@ details.rec summary::-webkit-details-marker{display:none}
       <button data-sub="fraga" aria-pressed="false">Fråga</button>
     </div>
     <div id="matHandla" hidden>
+      <div class="panel importbox" id="shopJoin" hidden></div>
       <div class="panel">
         <div>
           <h3>Inköpslista</h3>
@@ -544,6 +546,7 @@ details.rec summary::-webkit-details-marker{display:none}
         <div id="shopScanOut" class="sscan" hidden></div>
         <div id="shopList"></div>
         <button class="btn" id="shopClear" hidden style="align-self:flex-start">Rensa avbockade</button>
+        <div id="shopShareBox" class="shopshare" hidden></div>
       </div>
     </div>
     <div id="matRecept">
@@ -1517,7 +1520,6 @@ $("restSearch").addEventListener("input",e=>{restQuery=e.target.value;renderRest
    Varje rad kan kopplas till en vara ur databasen som passar profilen, så att man
    i butiken vet vilken vara man ska ta och slipper läsa förpackningen på plats. */
 let shop=store.get("kjad.shop",[]); if(!Array.isArray(shop)) shop=[];
-const saveShop=()=>store.set("kjad.shop",shop);
 const shopOpen=new Set();
 // "1,5 dl havredryck" → "havredryck", "1 gul lök, finhackad" → "lök"
 function shopQuery(t){
@@ -1542,18 +1544,116 @@ const keepProduct=p=>({code:p.code,product_name:p.product_name_sv||p.product_nam
 const SHOP_TXT={green:"Passar",amber:"Var försiktig",red:"Passar inte",unknown:"Ingredienser saknas"};
 function shopAdd(texts){
   for(const t of texts.map(x=>String(x).trim()).filter(Boolean).slice(0,60))
-    if(!shop.some(x=>!x.done&&(x.t.toLowerCase()===t.toLowerCase()||shopQuery(x.t)===shopQuery(t)))) shop.push({id:Math.random().toString(36).slice(2,9),t:t.slice(0,80),done:false,p:null});
+    if(!shop.some(x=>!x.d&&!x.done&&(x.t.toLowerCase()===t.toLowerCase()||shopQuery(x.t)===shopQuery(t)))) shop.push({id:Math.random().toString(36).slice(2,9),t:t.slice(0,80),done:false,p:null});
   saveShop(); renderShop();
 }
 let shopChecked=new Set();
+/* ---------- Delad inköpslista ----------
+   Listan kan delas mellan telefoner via /api/list. Varje rad har en tidsstämpel (u);
+   senaste ändringen vinner, och borttagna rader blir en markering (d) som når alla telefoner. */
+let shopShare=store.get("kjad.shopShare",null); if(!shopShare||!/^[A-Za-z0-9_-]{22}$/.test(shopShare.id||"")) shopShare=null;
+const shopSig=x=>JSON.stringify([x.t,x.done,x.p&&x.p.code,x.p&&x.p.ingredients_text,x.changed||false,x.d||0]);
+let shopSyncText="Delad lista";
+let shopSnap=new Map(shop.map(x=>[x.id,shopSig(x)])), shopDirty=false, shopTimer=null, shopSyncing=false;
+function saveShop(){
+  const now=Date.now(), ids=new Set();
+  for(const x of shop){ids.add(x.id); const sg=shopSig(x); if(shopSnap.get(x.id)!==sg){x.u=now;shopDirty=true}}
+  for(const id of shopSnap.keys()) if(!ids.has(id)){shop.push({id,d:1,u:now});shopDirty=true}
+  const old=now-30*86400000; shop=shop.filter(x=>!(x.d&&x.u<old));
+  shopSnap=new Map(shop.map(x=>[x.id,shopSig(x)]));
+  store.set("kjad.shop",shop);
+  if(shopDirty&&shopShare){clearTimeout(shopTimer);shopTimer=setTimeout(syncShop,1500)}
+}
+function mergeShop(a,b){
+  const m=new Map();
+  for(const x of [...a,...b]){const o=m.get(x.id); if(!o||(x.u||0)>(o.u||0)) m.set(x.id,x)}
+  return [...m.values()];
+}
+function applyRemote(items){
+  const merged=mergeShop(shop,items);
+  const changed=JSON.stringify(merged.map(shopSig))!==JSON.stringify(shop.map(shopSig))||merged.length!==shop.length;
+  shop=merged; shopSnap=new Map(shop.map(x=>[x.id,shopSig(x)])); store.set("kjad.shop",shop);
+  if(changed&&!$("matHandla").hidden) renderShop();
+}
+async function syncShop(){
+  if(!shopShare||!standalone||!navigator.onLine||shopSyncing) return;
+  shopSyncing=true;
+  try{
+    const url="/api/list?id="+encodeURIComponent(shopShare.id);
+    const r=shopDirty
+      ? await fetch(url,{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({items:shop})})
+      : await fetch(url,{cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    const d=await r.json(); if(r.ok) shopDirty=false;
+    if(Array.isArray(d.items)) applyRemote(d.items);
+    shopShare.at=Date.now(); store.set("kjad.shopShare",shopShare);
+    shopSyncText="Delad lista · uppdaterad "+new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){ shopSyncText="Delad lista · kunde inte synka just nu, försöker igen"; }
+  if($("shopSync")) $("shopSync").textContent=shopSyncText;
+  finally{ shopSyncing=false }
+}
+// Hämta ändringar från den andra telefonen medan Handla är öppen
+setInterval(()=>{ if(shopShare&&!document.hidden&&!$("matHandla").hidden&&!$("view-mat").hidden) syncShop() },15000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&shopShare) syncShop() });
+window.addEventListener("online",()=>{ if(shopShare) syncShop() });
+const shopShareUrl=()=>location.origin+location.pathname+"#lista="+shopShare.id;
+function newListId(){const b=new Uint8Array(16);crypto.getRandomValues(b);return btoa(String.fromCharCode(...b)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"").slice(0,22)}
+function renderShopShare(){
+  const box=$("shopShareBox"); if(!standalone){box.hidden=true;return}
+  box.hidden=false;
+  if(!shopShare){
+    box.innerHTML='<p class="small muted">Dela listan med någon annan, så ser ni samma lista och bockningar på båda telefonerna.</p><button class="btn" id="shopShareBtn">Dela listan</button>';
+    $("shopShareBtn").onclick=async()=>{shopShare={id:newListId()};store.set("kjad.shopShare",shopShare);shopDirty=true;await syncShop();renderShopShare();shareShopLink()};
+    return;
+  }
+  box.innerHTML='<p class="small muted" id="shopSync">'+esc(shopSyncText)+'</p>'
+    +'<div class="row"><button class="btn" id="shopShareAgain">Bjud in</button><button class="btn" id="shopShareQr">Visa QR-kod</button><button class="btn" id="shopLeave">Sluta dela</button></div>'
+    +'<p class="small muted" id="shopShareSt" hidden></p><canvas id="shopQr" hidden style="max-width:220px;border-radius:12px"></canvas>';
+  $("shopShareAgain").onclick=shareShopLink;
+  $("shopShareQr").onclick=async()=>{
+    const c=$("shopQr"); if(!c.hidden){c.hidden=true;return}
+    try{const qrcode=await loadQrLib(); const qr=qrcode(0,"M"); qr.addData(shopShareUrl()); qr.make();
+      const n=qr.getModuleCount(), q=4, sz=6; c.width=c.height=(n+q*2)*sz; const g=c.getContext("2d");
+      g.fillStyle="#fff"; g.fillRect(0,0,c.width,c.height); g.fillStyle="#000";
+      for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(qr.isDark(r,k)) g.fillRect((k+q)*sz,(r+q)*sz,sz,sz);
+      c.hidden=false}catch(e){const s=$("shopShareSt");s.hidden=false;s.textContent="QR-koden gick inte att skapa utan uppkoppling."}
+  };
+  $("shopLeave").onclick=()=>{shopShare=null;store.set("kjad.shopShare",null);renderShopShare()};
+  syncShop();
+}
+async function shareShopLink(){
+  const url=shopShareUrl(), st=$("shopShareSt"); if(st){st.hidden=false}
+  try{ if(navigator.share){await navigator.share({title:"Inköpslista",text:"Öppna länken för att dela inköpslistan i Kan jag äta det?",url}); if(st) st.textContent="Inbjudan skickad."; return} }
+  catch(e){ if(e&&e.name==="AbortError"){if(st) st.hidden=true;return} }
+  try{await navigator.clipboard.writeText(url); if(st) st.textContent="Länken är kopierad. Skicka den till den du vill dela med."}
+  catch(e){ if(st) st.innerHTML='Kopiera länken: <span class="codebox">'+esc(url)+'</span>' }
+}
+// Någon har skickat en länk till sin lista
+function handleListLink(){
+  const h=location.hash.slice(1); if(!h.startsWith("lista=")) return;
+  try{window.history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+  const id=h.slice(6); show("mat"); matSub("handla");
+  const box=$("shopJoin"); box.hidden=false;
+  if(!/^[A-Za-z0-9_-]{22}$/.test(id)){box.innerHTML='<p>Länken går inte att läsa. Be om en ny inbjudan.</p>';return}
+  if(shopShare&&shopShare.id===id){box.innerHTML='<p>Du är redan med i den här listan.</p>';setTimeout(()=>{box.hidden=true},3000);return}
+  const mine=shop.filter(x=>!x.d).length;
+  box.innerHTML='<b>Gå med i en delad inköpslista?</b><p class="small">'+(mine?'Dina '+mine+' rader läggs till i den delade listan.':'Ni ser samma lista och bockningar på båda telefonerna.')
+    +(shopShare?' Du lämnar din nuvarande delade lista.':'')+'</p><div class="row"><button class="btn primary" id="joinYes">Gå med</button><button class="btn" id="joinNo">Avbryt</button></div>';
+  $("joinNo").onclick=()=>{box.hidden=true};
+  $("joinYes").onclick=async()=>{shopShare={id};store.set("kjad.shopShare",shopShare);shopDirty=shop.length>0;box.hidden=true;await syncShop();renderShop()};
+}
+window.addEventListener("hashchange",()=>{if(location.hash.startsWith("#lista=")) handleListLink()});
+
 function renderShop(){
   const act=activeAllergens();
   $("shopFor").textContent=act.length?"Varorna kollas mot "+whoLabel()+": "+act.map(a=>a.name.toLowerCase()).join(", ")+"."
     :"Välj allergier under Profil, så letar appen fram varor som passar.";
-  $("shopClear").hidden=!shop.some(x=>x.done);
+  renderShopShare();
+  const live=shop.filter(x=>!x.d);
+  $("shopClear").hidden=!live.some(x=>x.done);
   const box=$("shopList");
-  if(!shop.length){box.innerHTML='<p class="small muted">Listan är tom. Skriv något ovan, eller lägg till ingredienserna från ett recept.</p>';return}
-  const order=[...shop.filter(x=>!x.done),...shop.filter(x=>x.done)];
+  if(!live.length){box.innerHTML='<p class="small muted">Listan är tom. Skriv något ovan, eller lägg till ingredienserna från ett recept.</p>';return}
+  const order=[...live.filter(x=>!x.done),...live.filter(x=>x.done)];
   box.innerHTML=order.map(x=>{
     let pick="";
     if(x.p){
@@ -1573,7 +1673,7 @@ function renderShop(){
   box.querySelectorAll("[data-find]").forEach(b=>b.onclick=()=>{const id=b.dataset.find; if(shopOpen.has(id)){shopOpen.delete(id);renderShop()} else {shopOpen.add(id);renderShop();shopFind(id)}});
   for(const id of shopOpen) if($("sf-"+id)&&!$("sf-"+id).innerHTML) shopFind(id);
   // Har varan ändrats i databasen sedan den valdes?
-  for(const x of shop) if(x.p&&x.p.code&&!shopChecked.has(x.id)){
+  for(const x of live) if(x.p&&x.p.code&&!shopChecked.has(x.id)){
     shopChecked.add(x.id);
     localProduct(x.p.code).then(p=>{
       if(!p||!p.ingredients_text||p.ingredients_text===x.p.ingredients_text) return;
@@ -1618,7 +1718,7 @@ async function shopScanned(code){
   let p=null; try{p=await getProduct(code)}catch(e){}
   if(!p){out.innerHTML='<p>Varan finns inte i databasen. Läs förpackningen.</p>';return}
   const v=quickVerdict(p), nm=[p.product_name_sv||p.product_name,p.brands].filter(Boolean).join(" · ");
-  const hit=shop.find(x=>!x.done&&x.p&&x.p.code===code);
+  const hit=shop.find(x=>!x.d&&!x.done&&x.p&&x.p.code===code);
   if(hit&&v.status==="green"){hit.done=true;saveShop();renderShop()}
   const st=v.status==="unknown"?"amber":v.status;
   out.className="sscan "+st;
@@ -2749,7 +2849,7 @@ $("checkBtn").onclick=()=>runCheck(true,true);
 if(activeWho!=="me"&&activeWho!=="all"&&!others.some(o=>o.id===activeWho)) activeWho="me";
 renderChips(); renderProfile(); renderAvatar(); renderOthers(); renderWho(); renderHistory(); renderLists(); runCheck(false);
 if(!standalone){ $("sharePanel").hidden=true; $("fbHead").hidden=true; }
-handleSharedLink();
+handleSharedLink(); handleListLink();
 window.addEventListener("hashchange",()=>{if(location.hash.startsWith("#"+SHARE_KEY)){show("kolla");handleSharedLink();window.scrollTo(0,0)}});
 
 // Sök visas när sidan körs som fristående fil/webbsida (inne i Claude blockeras nätet)
