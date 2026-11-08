@@ -278,11 +278,36 @@ mark{border-radius:4px}
 .note{border-top-color:var(--sage)}
 a{color:var(--ink);text-decoration-color:var(--sage);text-underline-offset:3px}
 .small{line-height:1.55}
+/* Mat: inköpslista */
+.sitem{border-top:1px solid var(--line);padding-block:10px;display:flex;flex-direction:column;gap:6px}
+.sitem:first-child{border-top:0;padding-top:0}
+.srow{display:flex;gap:10px;align-items:center;cursor:pointer}
+.srow input{width:22px;height:22px;flex:0 0 auto;accent-color:var(--forest)}
+.stxt{font-weight:600}
+.sitem.done .stxt{text-decoration:line-through;color:var(--muted);font-weight:400}
+.sitem.done .spick{opacity:.6}
+.spick{display:flex;gap:8px;align-items:flex-start;margin-left:32px;font-size:.9375rem;line-height:1.4}
+.spick .dot,.slist .dot{margin-top:.4em;flex:0 0 auto}
+.why{display:block;font-size:.8125rem;color:var(--muted)}
+.sbtns{display:flex;gap:14px;margin-left:32px}
+.linkbtn{background:none;border:0;padding:2px 0;font:inherit;font-size:.875rem;font-weight:700;color:var(--forest);text-decoration:underline;cursor:pointer}
+.linkbtn.muted{color:var(--muted);font-weight:400}
+.sfind{margin-left:32px;display:flex;flex-direction:column;gap:6px;background:var(--seafoam-soft,rgba(231,239,233,.6));border-radius:12px;padding:10px 12px}
+.slist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.slist li{display:flex;gap:8px;align-items:center}
+.slist .sname{flex:1;min-width:0;font-size:.9375rem;line-height:1.35}
+.slist .btn{padding:6px 14px;font-size:.875rem}
+.sscan{display:flex;flex-direction:column;gap:6px;border-radius:16px;padding:14px;border:2px solid var(--line)}
+.sscan.green{background:var(--ok-soft);border-color:var(--ok)}
+.sscan.amber{background:var(--warn-soft);border-color:var(--warn)}
+.sscan.red{background:var(--bad-soft);border-color:var(--bad)}
+.sbig{font-family:var(--display);font-size:1.5rem}
+.sscan.green .sbig{color:var(--ok)}.sscan.amber .sbig{color:var(--warn)}.sscan.red .sbig{color:var(--bad)}
 /* Mat: recept */
 .alg .types{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
 .alg .types .langs button{font-size:.8125rem;padding:5px 11px}
-.subtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
-.subtabs button{padding:10px 8px;font-size:.9375rem}
+.subtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.subtabs button{padding:10px 4px;font-size:.875rem}
 #view-mat>div:not(.subtabs){display:flex;flex-direction:column;gap:14px}
 .recshow{display:flex;gap:8px;align-items:center;color:var(--muted)}
 .reclist{display:flex;flex-direction:column}
@@ -515,9 +540,27 @@ details.rec summary::-webkit-details-marker{display:none}
   <!-- MAT: recept, restauranger, fråga -->
   <section class="view" id="view-mat" hidden>
     <div class="langs subtabs" id="matTabs" role="group" aria-label="Mat">
+      <button data-sub="handla" aria-pressed="false">Handla</button>
       <button data-sub="recept" aria-pressed="true">Recept</button>
       <button data-sub="rest" aria-pressed="false">Restauranger</button>
       <button data-sub="fraga" aria-pressed="false">Fråga</button>
+    </div>
+    <div id="matHandla" hidden>
+      <div class="panel">
+        <div>
+          <h3>Inköpslista</h3>
+          <p class="small muted">Skriv vad du ska köpa. Appen letar fram varor som passar, så du vet vad du ska ta i butiken och slipper läsa alla förpackningar där.</p>
+          <p class="small muted" id="shopFor"></p>
+        </div>
+        <div class="row">
+          <input type="text" id="shopInput" placeholder="T.ex. havredryck, pasta" aria-label="Lägg till i inköpslistan" style="flex:1 1 160px">
+          <button class="btn primary" id="shopAdd">Lägg till</button>
+        </div>
+        <button class="btn primary" id="shopScan">Skanna i butiken</button>
+        <div id="shopScanOut" class="sscan" hidden></div>
+        <div id="shopList"></div>
+        <button class="btn" id="shopClear" hidden style="align-self:flex-start">Rensa avbockade</button>
+      </div>
     </div>
     <div id="matRecept">
       <div class="panel">
@@ -1291,16 +1334,18 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>show(b.datase
 const startHash=(location.hash||"").slice(1); if(VIEWS.includes(startHash)||startHash==="fraga") setTimeout(()=>show(startHash),0);
 
 /* ---------- Mat: recept ---------- */
-let matTab="recept";
+let matTab=["handla","recept","rest"].includes(store.get("kjad.matTab",""))?store.get("kjad.matTab",""):"handla";
 function matSub(t){
   matTab=t;
   document.querySelectorAll("#matTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sub===t));
-  $("matRecept").hidden=t!=="recept"; $("matRest").hidden=t!=="rest"; $("matFraga").hidden=t!=="fraga";
+  $("matRecept").hidden=t!=="recept"; $("matRest").hidden=t!=="rest"; $("matFraga").hidden=t!=="fraga"; $("matHandla").hidden=t!=="handla";
+  if(t!=="fraga") store.set("kjad.matTab",t);
+  if(t==="handla") renderShop();
   if(t==="recept") renderRecipes();
   if(t==="rest") renderRest();
 }
 document.querySelectorAll("#matTabs button").forEach(b=>b.onclick=()=>matSub(b.dataset.sub));
-function renderMat(){ if(matTab==="recept") renderRecipes(); if(matTab==="rest") renderRest(); }
+function renderMat(){ matSub(matTab); }
 
 let recipes=null, recipesPromise=null, recCat="alla";
 function loadRecipes(){
@@ -1371,6 +1416,14 @@ function renderRecipes(){
     +(hidden&&!showAll?'<p class="small muted" style="padding-top:10px">'+hidden+' recept passar inte och är dolda.</p>':"");
 }
 $("recShowAll").onchange=renderRecipes;
+// Ingredienserna med bytena redan gjorda
+$("recList").addEventListener("click",e=>{
+  const b=e.target.closest("[data-shop]"); if(!b) return;
+  const r=recipes.find(x=>x.id===b.dataset.shop); if(!r) return;
+  const m=matchRecipe(r,activeAllergens());
+  const items=m.rows.filter(row=>!(row.alt&&row.alt.utan)).map(row=>row.alt?row.alt.t:row.ing.t).filter(t=>!/^(salt|peppar|svartpeppar|vatten|salt och)/i.test(shopQuery(t)));
+  shopAdd(items); b.textContent="Tillagt i inköpslistan ✓"; b.disabled=true;
+});
 function whoLabel(){
   if(activeWho==="all") return "alla";
   const o=others.find(x=>x.id===activeWho);
@@ -1400,6 +1453,7 @@ function recHtml(m){
     +(m.swaps?' · '+m.swaps+(m.swaps===1?" byte":" byten"):"")+'</span></span><span class="rbadge '+m.status+'">'+REC_BADGE[m.status]+'</span></summary>'
     +'<div class="rbody"><p class="label">Ingredienser</p><ul class="ilist">'+items+'</ul>'
     +(notes.length?'<p class="rnote">'+esc(notes.join(" "))+'</p>':"")
+    +(m.status!=="no"?'<button class="btn" data-shop="'+esc(r.id)+'">Lägg ingredienserna i inköpslistan</button>':'')
     +'<p class="label">Gör så här</p><ol class="steps">'+r.steg.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ol></div></details>';
 }
 
@@ -1474,6 +1528,124 @@ function renderRest(){
   });
 }
 $("restSearch").addEventListener("input",e=>{restQuery=e.target.value;renderRest()});
+
+/* ---------- Mat: inköpslista ----------
+   Varje rad kan kopplas till en vara ur databasen som passar profilen, så att man
+   i butiken vet vilken vara man ska ta och slipper läsa förpackningen på plats. */
+let shop=store.get("kjad.shop",[]); if(!Array.isArray(shop)) shop=[];
+const saveShop=()=>store.set("kjad.shop",shop);
+const shopOpen=new Set();
+// "1,5 dl havredryck" → "havredryck", "1 gul lök, finhackad" → "lök"
+function shopQuery(t){
+  let q=String(t).toLowerCase().replace(/\(.*?\)/g," ").split(/,(?!\d)| till | att | för | eller /)[0];
+  q=q.replace(/^(ca|cirka|ev\.?|eventuellt)\s+/,"").replace(/^[\d.,½¼¾\/\s–-]+/,"")
+     .replace(/^(st|g|kg|hg|dl|cl|ml|l|msk|tsk|krm|förp|paket|burk|burkar|påse|påsar|klyfta|klyftor|skivor|skiva|kruka|knippe|tärning|tärningar|näve|nypa|liter|gram)\b\.?\s*/,"");
+  for(let i=0;i<3;i++) q=q.replace(/^(stor|stora|liten|små|gul|gula|röd|röda|färsk|färska|riven|rivna|hackad|hackade|kokt|kokta|torr|torrt|torra|fryst|frysta|mogen|mogna|neutral|mjölig|mjöliga|fast|fasta|ekologisk|ekologiska)\s+/,"");
+  return q.trim();
+}
+// Samma bedömning som Kolla, utan att visa något
+function quickVerdict(p){
+  const text=productText(p); if(!text) return {status:"unknown",text};
+  const name=[p.product_name_sv||p.product_name,p.brands].filter(Boolean).join(" – ");
+  const res=analyze(text,p._lang||null); addSafetyChecks(res,name,text);
+  const rc=recallFor(p.code);
+  if(rc) res.findings.unshift({a:{id:"_recall",name:"Återkallad vara"},kind:"red",words:[],msg:rc.title});
+  if(listOf(itemKey(p.code,name,text))==="avoid") res.findings.unshift({a:{id:"_avoid",name:"Din undvik-lista"},kind:"red",words:[],msg:""});
+  const status=res.findings.some(f=>f.kind==="red")?"red":res.findings.some(f=>f.kind==="amber")?"amber":"green";
+  return {status,res,text,why:[...new Set(res.findings.filter(f=>f.kind===status&&status!=="green").map(f=>f.a.name))]};
+}
+const keepProduct=p=>({code:p.code,product_name:p.product_name_sv||p.product_name||"",brands:p.brands||"",ingredients_text:p.ingredients_text_sv||p.ingredients_text||"",allergens_tags:p.allergens_tags||[],traces_tags:p.traces_tags||[],_lang:p.ingredients_text_sv?"sv":(p._lang||"")});
+const SHOP_TXT={green:"Passar",amber:"Var försiktig",red:"Passar inte",unknown:"Ingredienser saknas"};
+function shopAdd(texts){
+  for(const t of texts.map(x=>String(x).trim()).filter(Boolean).slice(0,60))
+    if(!shop.some(x=>!x.done&&(x.t.toLowerCase()===t.toLowerCase()||shopQuery(x.t)===shopQuery(t)))) shop.push({id:Math.random().toString(36).slice(2,9),t:t.slice(0,80),done:false,p:null});
+  saveShop(); renderShop();
+}
+let shopChecked=new Set();
+function renderShop(){
+  const act=activeAllergens();
+  $("shopFor").textContent=act.length?"Varorna kollas mot "+whoLabel()+": "+act.map(a=>a.name.toLowerCase()).join(", ")+"."
+    :"Välj allergier under Profil, så letar appen fram varor som passar.";
+  $("shopClear").hidden=!shop.some(x=>x.done);
+  const box=$("shopList");
+  if(!shop.length){box.innerHTML='<p class="small muted">Listan är tom. Skriv något ovan, eller lägg till ingredienserna från ett recept.</p>';return}
+  const order=[...shop.filter(x=>!x.done),...shop.filter(x=>x.done)];
+  box.innerHTML=order.map(x=>{
+    let pick="";
+    if(x.p){
+      const v=quickVerdict(x.p);
+      pick='<span class="spick"><span class="dot '+(v.status==="unknown"?"amber":v.status)+'"></span><span><b>'+esc(x.p.product_name)+'</b>'+(x.p.brands?' · '+esc(x.p.brands):'')
+        +(v.status!=="green"?'<span class="why">'+esc(SHOP_TXT[v.status]+(v.why&&v.why.length?": "+v.why.join(", "):""))+'</span>':'')
+        +(x.changed?'<span class="why" style="color:var(--warn)">Ingredienserna har ändrats sedan du valde varan.</span>':'')+'</span></span>';
+    }
+    return '<div class="sitem'+(x.done?' done':'')+'" data-id="'+x.id+'">'
+      +'<label class="srow"><input type="checkbox"'+(x.done?' checked':'')+' data-done="'+x.id+'"><span class="stxt">'+esc(x.t)+'</span></label>'
+      +pick
+      +(x.done?'':'<div class="sbtns"><button class="linkbtn" data-find="'+x.id+'">'+(x.p?"Byt vara":"Hitta varor som passar")+'</button><button class="linkbtn muted" data-rm="'+x.id+'" aria-label="Ta bort '+esc(x.t)+'">Ta bort</button></div>')
+      +'<div class="sfind" id="sf-'+x.id+'"'+(shopOpen.has(x.id)?'':' hidden')+'></div></div>';
+  }).join("");
+  box.querySelectorAll("[data-done]").forEach(c=>c.onchange=()=>{const x=shop.find(y=>y.id===c.dataset.done); if(x){x.done=c.checked;shopOpen.delete(x.id);saveShop();renderShop()}});
+  box.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{shop=shop.filter(y=>y.id!==b.dataset.rm);saveShop();renderShop()});
+  box.querySelectorAll("[data-find]").forEach(b=>b.onclick=()=>{const id=b.dataset.find; if(shopOpen.has(id)){shopOpen.delete(id);renderShop()} else {shopOpen.add(id);renderShop();shopFind(id)}});
+  for(const id of shopOpen) if($("sf-"+id)&&!$("sf-"+id).innerHTML) shopFind(id);
+  // Har varan ändrats i databasen sedan den valdes?
+  for(const x of shop) if(x.p&&x.p.code&&!shopChecked.has(x.id)){
+    shopChecked.add(x.id);
+    localProduct(x.p.code).then(p=>{
+      if(!p||!p.ingredients_text||p.ingredients_text===x.p.ingredients_text) return;
+      x.p=keepProduct(p); x.changed=true; saveShop(); renderShop();
+    }).catch(()=>{});
+  }
+}
+async function shopFind(id){
+  const x=shop.find(y=>y.id===id), el=$("sf-"+id); if(!x||!el) return;
+  const q=shopQuery(x.t);
+  el.innerHTML='<p class="small muted"><span class="spinner"></span> Letar bland svenska varor …</p>';
+  const idx=await loadLocalIndex();
+  if(!idx){el.innerHTML='<p class="small muted">Varudatabasen gick inte att ladda. Kontrollera anslutningen.</p>';return}
+  // Inga träffar? Prova utan "mjölkfri"/"glutenfritt" och sist bara det sista ordet
+  let hits=searchLocal(idx,q).filter(it=>it[3]);
+  const tries=[q.split(" ").filter(w=>!/fria?$|fritt$/.test(w)).join(" "),q.split(" ").pop()];
+  for(const t of tries) if(!hits.length&&t&&t!==q) hits=searchLocal(idx,t).filter(it=>it[3]);
+  hits=hits.slice(0,14);
+  if(!hits.length){el.innerHTML='<p class="small muted">Hittade inga varor för "'+esc(q)+'" i databasen. Ändra texten på raden, eller läs förpackningen i butiken.</p>';return}
+  const prods=(await Promise.all(hits.map(it=>localProduct(it[0]).catch(()=>null)))).filter(Boolean);
+  const rated=prods.map(p=>({p,v:quickVerdict(p)})).filter(r=>r.v.status!=="unknown");
+  const rank={green:0,amber:1,red:2}; rated.sort((a,b)=>rank[a.v.status]-rank[b.v.status]);
+  const ok=rated.filter(r=>r.v.status==="green").slice(0,5), care=rated.filter(r=>r.v.status==="amber").slice(0,2), bad=rated.filter(r=>r.v.status==="red").length;
+  const row=r=>'<li><span class="dot '+r.v.status+'"></span><span class="sname"><b>'+esc(r.p.product_name)+'</b>'+(r.p.brands?' · '+esc(r.p.brands):'')
+    +(r.v.status==="amber"?'<span class="why">'+esc(r.v.why.join(", "))+'</span>':'')+'</span><button class="btn" data-pick="'+esc(r.p.code)+'">Välj</button></li>';
+  el.innerHTML=(ok.length?'<p class="label">Passar dig</p><ul class="slist">'+ok.map(row).join("")+'</ul>':'<p class="small">Ingen av de varor vi hittade för "'+esc(q)+'" passar helt.</p>')
+    +(care.length?'<p class="label">Var försiktig</p><ul class="slist">'+care.map(row).join("")+'</ul>':'')
+    +(bad?'<p class="small muted">'+bad+(bad===1?" vara passar inte och visas inte.":" varor passar inte och visas inte.")+'</p>':'');
+  el.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
+    const r=rated.find(r=>r.p.code===b.dataset.pick); if(!r) return;
+    x.p=keepProduct(r.p); x.changed=false; shopChecked.add(x.id); shopOpen.delete(x.id); saveShop(); renderShop();
+  });
+}
+$("shopAdd").onclick=()=>{const v=$("shopInput").value; if(!v.trim()) return; shopAdd(v.split(/,|\n/)); $("shopInput").value=""; $("shopInput").focus()};
+$("shopInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("shopAdd").click()}});
+$("shopClear").onclick=()=>{shop=shop.filter(x=>!x.done);saveShop();renderShop()};
+// Skanna i butiken: snabbt besked, och bocka av raden om det är den valda varan
+$("shopScan").onclick=()=>startScan({qr:false,onCode:shopScanned,statusEl:$("shopScanOut"),text:"Rikta kameran mot streckkoden",fail:"Kameran gick inte att starta. Tillåt kameran för sidan och försök igen."});
+async function shopScanned(code){
+  const out=$("shopScanOut"); out.hidden=false; out.className="sscan"; out.innerHTML='<span class="spinner"></span> Kollar varan …';
+  out.scrollIntoView({behavior:"smooth",block:"center"});
+  let p=null; try{p=await getProduct(code)}catch(e){}
+  if(!p){out.innerHTML='<p>Varan finns inte i databasen. Läs förpackningen.</p>';return}
+  const v=quickVerdict(p), nm=[p.product_name_sv||p.product_name,p.brands].filter(Boolean).join(" · ");
+  const hit=shop.find(x=>!x.done&&x.p&&x.p.code===code);
+  if(hit&&v.status==="green"){hit.done=true;saveShop();renderShop()}
+  const st=v.status==="unknown"?"amber":v.status;
+  out.className="sscan "+st;
+  out.innerHTML='<b class="sbig">'+({green:"✓ Passar",amber:"! Var försiktig",red:"✕ Passar inte"})[st]+'</b><span>'+esc(nm)+'</span>'
+    +(v.why&&v.why.length?'<span class="small">'+esc(v.why.join(", "))+'</span>':'')
+    +(v.status==="unknown"?'<span class="small">Ingredienserna saknas i databasen. Läs förpackningen.</span>':'')
+    +(hit&&v.status==="green"?'<span class="small">Bockade av "'+esc(hit.t)+'".</span>':'')
+    +'<div class="row"><button class="btn primary" id="shopScanAgain">Skanna nästa</button><button class="btn" id="shopScanMore">Visa detaljer</button></div>';
+  $("shopScanAgain").onclick=()=>$("shopScan").click();
+  $("shopScanMore").onclick=()=>{useProduct(p);show("kolla")};
+}
 
 /* ---------- Kolla ett eget recept ---------- */
 // Allmänna byten för klistrade recept. a = vad bytet själv innehåller.

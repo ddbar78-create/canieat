@@ -7,7 +7,7 @@
   Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
 
 /app/*
-  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'sha256-DlZ4qMTqlOyBydo5qUzYdqot+06HLp9l0wRu3SKBmJQ='; worker-src 'self'; connect-src 'self' https://world.openfoodfacts.org https://se.openfoodfacts.org https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: blob: https://*.openfoodfacts.org; media-src 'self' blob:
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'sha256-wd0cIMc0XImJtuIJU7ez0SiFARNvBMJUkQ4/dQxXlyc='; worker-src 'self'; connect-src 'self' https://world.openfoodfacts.org https://se.openfoodfacts.org https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: blob: https://*.openfoodfacts.org; media-src 'self' blob:
 
 /
   Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'sha256-rK5fazlAUs6I4gj3TqpsomeERv/z+TI015akblLCXhE='; worker-src 'self'; connect-src 'self'; img-src 'self' data:
