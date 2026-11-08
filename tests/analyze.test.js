@@ -1,6 +1,11 @@
 // Regressionstest för allergenmatchningen. Kör: node tests/analyze.test.js
 const fs = require("fs");
 const html = fs.readFileSync(__dirname + "/../src/kan-jag-ata-det.html", "utf8");
+// Hela appens skript måste gå att tolka (fångar syntaxfel innan något pushas)
+for (const [i, part] of html.split("<script>").slice(1).entries()) {
+  const code = part.split("</script>")[0];
+  try { new Function(code); } catch (e) { console.log(`FEL: skript ${i + 1} går inte att tolka: ${e.message}`); process.exit(1); }
+}
 const src = html.split("<script>")[1].split("/* ---------- Extra säkerhetskontroller")[0];
 const makeAnalyze = prof => new Function(src.replace(/let profile = [^\n]+/, "let profile=" + JSON.stringify(prof) + ";")
        .replace(/let history[^\n]+/, "")

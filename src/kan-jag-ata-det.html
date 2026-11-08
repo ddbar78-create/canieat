@@ -1589,8 +1589,8 @@ async function syncShop(){
     shopShare.at=Date.now(); store.set("kjad.shopShare",shopShare);
     shopSyncText="Delad lista · uppdaterad "+new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
   }catch(e){ shopSyncText="Delad lista · kunde inte synka just nu, försöker igen"; }
-  if($("shopSync")) $("shopSync").textContent=shopSyncText;
   finally{ shopSyncing=false }
+  if($("shopSync")) $("shopSync").textContent=shopSyncText;
 }
 // Hämta ändringar från den andra telefonen medan Handla är öppen
 setInterval(()=>{ if(shopShare&&!document.hidden&&!$("matHandla").hidden&&!$("view-mat").hidden) syncShop() },15000);
