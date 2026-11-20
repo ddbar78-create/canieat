@@ -1954,7 +1954,9 @@ async function offGetAny(path){
   throw last;
 }
 async function offGet(url){
-  const r=await fetch(url,{headers:{"Accept":"application/json"}});
+  // Open Food Facts kan hänga när de har driftproblem; ge upp efter 8 sekunder och prova nästa adress
+  const ctl=new AbortController(), tm=setTimeout(()=>ctl.abort(),8000);
+  let r; try{ r=await fetch(url,{headers:{"Accept":"application/json"},signal:ctl.signal}) } finally{ clearTimeout(tm) }
   if(!r.ok) throw new Error("http "+r.status);
   return r.json();
 }
@@ -2089,15 +2091,29 @@ async function searchInner(q,online){
         return;
       }
     }
-    const d=await offGetAny("/cgi/search.pl?search_simple=1&action=process&json=1&page_size=12&lc=sv&cc=se&search_terms="+encodeURIComponent(q)+"&fields="+OFF_FIELDS);
+    let d=null;
+    try{ d=await offGetAny("/cgi/search.pl?search_simple=1&action=process&json=1&page_size=12&lc=sv&cc=se&search_terms="+encodeURIComponent(q)+"&fields="+OFF_FIELDS) }
+    catch(e){
+      // Open Food Facts svarar inte: visa träffar från appens egen svenska databas i stället
+      const idx=await loadLocalIndex(), hits=idx?searchLocal(idx,q):[];
+      if(hits.length){
+        st.textContent="Open Food Facts svarar inte just nu, så träffarna kommer från appens egen svenska databas ("+hits.length+(hits.length===25?"+":"")+" st). Välj produkten:";
+        renderHits(hits.map(it=>({code:it[0],product_name:it[1],brands:it[2],_hasIngr:it[3],_local:true})),q,false);
+        return;
+      }
+      throw e;
+    }
     const list=(d.products||[]).filter(p=>p.product_name||p.product_name_sv);
-    if(!list.length){st.hidden=true;showOffAdd("nohits");return}
+    if(!list.length){
+      const idx=await loadLocalIndex(), hits=idx?searchLocal(idx,q):[];
+      if(hits.length){st.textContent=hits.length+" träffar bland svenska varor. Välj produkten:";renderHits(hits.map(it=>({code:it[0],product_name:it[1],brands:it[2],_hasIngr:it[3],_local:true})),q,false);return}
+      st.hidden=true;showOffAdd("nohits");return}
     st.textContent=list.length+" träffar i Open Food Facts. Välj produkten:";
     renderHits(list,q,true);
   }catch(e){
     st.textContent=/^\d{8,14}$/.test(q)
-      ? "Databasen svarar inte just nu. Kontrollera att du är uppkopplad och försök igen om en stund."
-      : "Databasen tar inte emot fler namnsökningar just nu. Vänta en minut och försök igen. Streckkod fungerar under tiden: skanna eller skriv siffrorna.";
+      ? "Varan finns inte i appens egen databas, och Open Food Facts svarar inte just nu (felet ligger hos dem, inte i appen). Försök igen om en stund, eller läs förpackningen."
+      : "Open Food Facts svarar inte just nu och appens egen databas hittade inget. Prova ett annat sökord eller skanna streckkoden.";
   }
 }
 $("searchBtn").onclick=()=>searchProducts($("searchInput").value);
